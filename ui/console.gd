@@ -1,4 +1,4 @@
-@tool class_name CustomConsole extends ColorRect
+@tool class_name CustomConsole extends Control
 
 class FontFlags:
 	var bold := false
@@ -303,10 +303,10 @@ func _draw():
 		font_bold = null
 		font_italic = null
 		font_bold_italic = null
-	_draw_data.l = 8
-	_draw_data.t = 8-scroll
-	_draw_data.r = size.x - 8
-	_draw_data.b = size.y - 8
+	_draw_data.l = 0
+	_draw_data.t = -scroll
+	_draw_data.r = size.x
+	_draw_data.b = size.y
 	_draw_data.x = _draw_data.l
 	_draw_data.y = _draw_data.t
 	_draw_data.max_shown_y = 0.0
