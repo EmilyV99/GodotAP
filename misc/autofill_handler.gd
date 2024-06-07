@@ -12,7 +12,7 @@ func autofill(msg: String, capacity := 5) -> Array[String]:
 	else:
 		for cmd in commands.keys():
 			if cmd.begins_with(msg.to_lower()):
-				ret.append(cmd)
+				ret.append(cmd+" ")
 	if capacity > 0 and ret.size() > capacity:
 		ret.resize(capacity)
 	return ret

@@ -21,6 +21,8 @@ Archipelago="*res://autoloads/archipelago.gd"
 
 [display]
 
+window/size/viewport_width=100
+window/size/viewport_height=100
 window/subwindows/embed_subwindows=false
 
 [rendering]

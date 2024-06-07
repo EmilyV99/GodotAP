@@ -31,6 +31,23 @@ var showing_cursor := false :
 			queue_redraw()
 var _tab_completions: Array[String] = []
 
+var _history: Array[String] = []
+var _hist_indx := 0
+func history_step(by: int) -> void:
+	if by == 0 or (_hist_indx >= _history.size() if by > 0 else _hist_indx <= 0):
+		return
+	_hist_indx = clamp(_hist_indx+by, 0, _history.size())
+	if _hist_indx < _history.size():
+		retype(_history[_hist_indx])
+	else:
+		retype("")
+func history_add(s: String) -> void:
+	if _history.is_empty() or s != _history.back():
+		_history.append(s)
+	_hist_indx = _history.size()
+func history_clear() -> void:
+	_history.clear()
+	_hist_indx = 0
 var text_pos := 0 :
 	set(val):
 		text_pos = val
@@ -59,6 +76,10 @@ func type(s: String) -> void:
 	var t := text.substr(0,low_pos) + s
 	text = t + text.substr(high_pos)
 	text_pos = t.length()
+	clear_select()
+func retype(s: String) -> void:
+	text = s
+	text_pos = text.length()
 	clear_select()
 
 func _ready():
@@ -142,11 +163,18 @@ func _gui_input(event):
 				KEY_RIGHT:
 					if text_pos < text.length():
 						text_pos += 1
+				KEY_UP:
+					history_step(-1)
+					updated_text = true
+				KEY_DOWN:
+					history_step(1)
+					updated_text = true
 				KEY_HOME:
 					text_pos = 0
 				KEY_END:
 					text_pos = text.length()
 				KEY_ENTER, KEY_KP_ENTER:
+					history_add(text)
 					send_text.emit(text)
 					text = ""
 					text_pos = 0
@@ -154,9 +182,7 @@ func _gui_input(event):
 					updated_text = true
 				KEY_TAB:
 					if _tab_completions:
-						text = _tab_completions[0]
-						text_pos = text.length()
-						clear_select()
+						auto_complete(_tab_completions[0])
 						updated_text = true
 				KEY_ESCAPE:
 					clear_select()

@@ -69,6 +69,7 @@ enum APStatus {
 	DISCONNECTING,
 }
 signal status_updated
+var queue_reconnect := false
 var status: APStatus = APStatus.DISCONNECTED :
 	set(val):
 		if status != val:
@@ -76,8 +77,17 @@ var status: APStatus = APStatus.DISCONNECTED :
 			status_updated.emit()
 		if status == APStatus.DISCONNECTED:
 			conn = null
+			if queue_reconnect:
+				queue_reconnect = false
+				ap_reconnect()
+
+var connecting_part: CustomConsole.TextPart
 
 func ap_reconnect() -> void:
+	if status != APStatus.DISCONNECTED:
+		ap_disconnect()
+		queue_reconnect = true
+		return
 	var attempts := 1
 	var wss := true
 	var url: String
@@ -91,9 +101,13 @@ func ap_reconnect() -> void:
 			if wss: attempts += 1
 		else: break
 	AP.log("Connected to '%s'!" % url)
+	if output_console:
+		connecting_part = output_console.add_text("Connecting...\n","%s:%s %s" % [ip,port,slot],COLOR_UI_MSG)
 	status = APStatus.CONNECTING
 
 func ap_connect(room_ip: String, room_port: String, slot_name: String, room_pwd := "") -> void:
+	if status != APStatus.DISCONNECTED:
+		ap_disconnect() # Do it here so the ip/port/slot are correct in the disconnect message
 	AP.open_logger()
 	ip = room_ip
 	port = room_port
@@ -103,9 +117,16 @@ func ap_connect(room_ip: String, room_port: String, slot_name: String, room_pwd 
 	ap_reconnect()
 
 func ap_disconnect() -> void:
+	if status == APStatus.DISCONNECTED or status == APStatus.DISCONNECTING:
+		return
 	status = APStatus.DISCONNECTING
 	socket.close()
 	AP.close_logger()
+	if output_console:
+		var part := output_console.add_text("Disconnecting...\n","%s:%s %s" % [ip,port,slot],COLOR_UI_MSG)
+		while status != APStatus.DISCONNECTED:
+			await status_updated
+		part.text = "Disconnected from AP.\n"
 #endregion CONNECTION
 
 static var logging_file = null
@@ -160,6 +181,8 @@ func handle_command(json: Dictionary) -> void:
 	match command:
 		"RoomInfo":
 			status = APStatus.CONNECTED
+			if output_console and connecting_part:
+				connecting_part.text = "Authenticating...\n"
 			conn = ConnectionInfo.new()
 			conn.serv_version = Version.from(json["version"])
 			conn.gen_version = Version.from(json["generator_version"])
@@ -172,7 +195,11 @@ func handle_command(json: Dictionary) -> void:
 			args["items_handling"] = AP_ITEM_HANDLING
 			send_command("Connect",args)
 		"ConnectionRefused":
-			AP.log("Connection errors: %s" % str(json["errors"]))
+			var err_str := str(json["errors"])
+			if output_console and connecting_part:
+				connecting_part.text = "Connection Refused!\n"
+				connecting_part.tooltip += "\nERROR(S): "+err_str
+			AP.log("Connection errors: %s" % err_str)
 			ap_disconnect()
 		"Connected":
 			conn.player_id = json["slot"]
@@ -186,8 +213,8 @@ func handle_command(json: Dictionary) -> void:
 			AP.log(conn)
 			
 			for loc in json["missing_locations"]:
-				if not _removed_locs.has(loc):
-					_removed_locs[loc] = false
+				if not _removed_locs.has(loc as int):
+					_removed_locs[loc as int] = false
 					#Force this locations to be accessible?
 			
 			var server_checked = {}
@@ -195,9 +222,11 @@ func handle_command(json: Dictionary) -> void:
 				_remove_loc(loc)
 				server_checked[loc] = true
 			
+			var to_collect: Array[int] = []
 			for loc in _removed_locs.keys():
 				if _removed_locs[loc] and not loc in server_checked:
-					collect_location(loc)
+					to_collect.append(loc)
+			collect_locations(to_collect)
 			
 			# Deathlink stuff?
 			# If deathlink stuff, possibly ConnectUpdate to add DeathLink tag?
@@ -205,6 +234,8 @@ func handle_command(json: Dictionary) -> void:
 			send_datapack_request()
 			
 			status = APStatus.PLAYING
+			if output_console and connecting_part:
+				connecting_part.text = "Connected Successfully!\n"
 			
 			printout_recieved_items = true
 			await get_tree().create_timer(3).timeout
@@ -441,12 +472,17 @@ func collect_location(loc_id: int) -> void:
 	printout_recieved_items = false
 	send_command("LocationChecks", {"locations":[loc_id]})
 	_remove_loc(loc_id)
+func collect_locations(locs: Array[int]) -> void:
+	printout_recieved_items = false
+	send_command("LocationChecks", {"locations":locs})
+	for loc_id in locs:
+		_remove_loc(loc_id)
 #endregion LOCATIONS
 func _process(_delta):
 	poll()
 
 func _ready():  #TODO REMOVE TESTING
-	ap_connect("archipelago.gg","54785","EmilySM")
+	ap_connect("archipelago.gg","50874","EmilySM")
 
 func _exit_tree():
 	if status != APStatus.DISCONNECTED:
@@ -589,30 +625,41 @@ static func out_location(console: CustomConsole, id: int, data: DataCache):
 	var ttip = ""
 	console.add_text(data.get_loc_name(id), ttip, COLOR_LOCATION)
 
+var output_console_window: ConsoleWindow = null
 var output_console: CustomConsole = null
 func _open_console() -> void:
 	if output_console: return
-	var console_scene: Node = load("res://ui/console.tscn").instantiate()
-	console_scene.title = "Archipelago Console"
-	add_child(console_scene)
-	await console_scene.ready
-	output_console = console_scene.console
+	output_console_window = load("res://ui/console.tscn").instantiate()
+	output_console_window.title = "Archipelago Console"
+	add_child(output_console_window)
+	await output_console_window.ready
+	output_console = output_console_window.console
 	output_console.send_text.connect(console_message)
 	output_console.tree_exiting.connect(_close_console)
-	console_scene.typing_bar.autofill = autofill
+	output_console_window.typing_bar.autofill = autofill
 func _close_console() -> void:
 	if output_console:
 		output_console.close()
 		output_console = null
 
 class ConsoleCommand:
-	var text: String
-	var call_proc: Callable #[String->void]
-	var autofill_proc: Variant # Callable[String->Array[String]] | bool
-	func _init(name: String, caller: Callable, autofill_call: Variant = true):
-		text = name
+	var text: String = ""
+	var help_text: String = ""
+	var call_proc: Variant = null # Callable[String->void] | null
+	var autofill_proc: Variant = true # Callable[String->Array[String]] | bool
+	func _init(txt: String):
+		text = txt
+	func set_call(caller: Callable) -> ConsoleCommand:
 		call_proc = caller
-		autofill_proc = autofill_call
+		return self
+	func set_autofill(caller: Variant) -> ConsoleCommand:
+		assert(caller is bool or caller is Callable)
+		autofill_proc = caller
+		return self
+	func set_help(helptxt: String) -> ConsoleCommand:
+		help_text = helptxt
+		return self
+	
 var console_commands: Array[ConsoleCommand] = []
 func console_message(msg: String) -> void:
 	if msg.is_empty(): return
@@ -634,55 +681,61 @@ func console_message(msg: String) -> void:
 var autofill: AutofillHandler = AutofillHandler.new()
 func _init():
 	_open_console()
-	register_command(ConsoleCommand.new("/help",func(_msg: String):
-		output_console.add_text("/help\n    Displays this message\n"
-			+ "!help\n    Displays server-based command help\n"
-			+ "/cls\n    Clears the console\n", "", COLOR_UI_MSG)))
-	register_command(ConsoleCommand.new("!help",func(_msg: String):
-		pass))
-	register_command(ConsoleCommand.new("/cls",func(_msg: String):
-		output_console.clear()))
-	register_command(ConsoleCommand.new("/db_send",
-		func(msg: String):
-			var command_args = msg.split(" ", true, 1)
-			if command_args.size() > 1:
-				var data = AP.get_datacache(AP_GAME_NAME)
-				for loc in _removed_locs:
-					var loc_name := data.get_loc_name(loc)
-					if loc_name.strip_edges().to_lower() == command_args[1].strip_edges().to_lower():
-						if _removed_locs[loc]:
-							output_console.add_text("Location already sent!\n", "", COLOR_UI_MSG)
-						else:
-							output_console.add_text("Sending location '%s'!\n" % loc_name, "", COLOR_UI_MSG)
-							collect_location(loc)
-						return
-				output_console.add_text("Location '%s' not found! Check spelling?\n" % command_args[1].strip_edges(), "", COLOR_UI_MSG)
-			else: output_console.add_text("Usage: '/db_send Some Location Name'\n", "", COLOR_UI_MSG),
-		func(msg: String) -> Array[String]:
-			var args = msg.split(" ", true, 1)
-			var data: DataCache = AP.get_datacache(AP_GAME_NAME)
-			var locs: Array[String] = []
-			locs.assign(data.location_name_to_id.keys())
-			var ind := 0
-			while ind < locs.size():
-				if _removed_locs.get(data.location_name_to_id[locs[ind]], false):
-					locs.pop_at(ind)
-				else: ind += 1
-			if args.size() > 1 and args[1]:
-				var arg_str = args[1].strip_edges().to_lower()
-				if arg_str.begins_with("\""):
-					arg_str = arg_str.substr(1)
-				if arg_str.ends_with("\""):
-					arg_str = arg_str.substr(0,arg_str.length()-1)
-				var q := 0
-				while q < locs.size():
-					if not locs[q].strip_edges().to_lower().begins_with(arg_str):
-						locs.pop_at(q)
-					else:
-						q += 1
-			for q in locs.size():
-				locs[q] = "%s %s" % [args[0],locs[q]]
-			return locs))
+	register_command(ConsoleCommand.new("/help").set_help("Displays this message").set_call(
+		func(_msg: String):
+			var s := ""
+			for cmd in console_commands:
+				if cmd.help_text:
+					s += "%s\n    %s\n" % [cmd.text,cmd.help_text.replace("\n","\n    ")]
+			output_console.add_text(s, "", COLOR_UI_MSG)))
+	register_command(ConsoleCommand.new("/cls")
+		.set_help("Clears the console")
+		.set_call(func(_msg: String): output_console.clear()))
+	register_command(ConsoleCommand.new("/clr_hist")
+		.set_help("Clears the command history")
+		.set_call(func(_msg: String): output_console_window.typing_bar.history_clear()))
+	register_command(ConsoleCommand.new("/reconnect")
+		.set_help("Refreshes the connection to the Archipelago server")
+		.set_call(func(_msg: String): ap_reconnect()))
+	register_command(ConsoleCommand.new("!hint_location").set_autofill(_autofill_locs))
+	register_command(ConsoleCommand.new("!hint").set_autofill(_autofill_items))
+	register_command(ConsoleCommand.new("!help").set_help("Displays server-based command help"))
+	register_command(ConsoleCommand.new("!remaining"))
+	register_command(ConsoleCommand.new("!missing"))
+	register_command(ConsoleCommand.new("!checked"))
+	register_command(ConsoleCommand.new("!collect"))
+	register_command(ConsoleCommand.new("!release"))
+	register_command(ConsoleCommand.new("!players"))
+	if OS.is_debug_build():
+		register_command(ConsoleCommand.new("/db_send")
+			.set_help("Cheat-Collects the given location")
+			.set_call(func(msg: String):
+				var command_args = msg.split(" ", true, 1)
+				if command_args.size() > 1 and command_args[1]:
+					var data = AP.get_datacache(AP_GAME_NAME)
+					for loc in _removed_locs:
+						var loc_name := data.get_loc_name(loc)
+						if loc_name.strip_edges().to_lower() == command_args[1].strip_edges().to_lower():
+							if _removed_locs[loc]:
+								output_console.add_text("Location already sent!\n", "", COLOR_UI_MSG)
+							else:
+								output_console.add_text("Sending location '%s'!\n" % loc_name, "", COLOR_UI_MSG)
+								collect_location(loc)
+							return
+					output_console.add_text("Location '%s' not found! Check spelling?\n" % command_args[1].strip_edges(), "", COLOR_UI_MSG)
+				else: output_console.add_text("Usage: '/db_send Some Location Name'\n", "", COLOR_UI_MSG))
+			.set_autofill(_autofill_locs))
+		register_command(ConsoleCommand.new("/connect")
+			.set_call(func(msg: String):
+				var command_args = msg.split(" ", true, 3)
+				if command_args.size() == 3:
+					command_args.append("")
+				if command_args.size() != 4:
+					output_console.add_text("Usage: '/connect ip_address:port \"Slot Name\" [\"Password\"]'\n", "", COLOR_UI_MSG)
+				else:
+					var ipport = command_args[1].split(":",1)
+					ap_connect(ipport[0],ipport[1],command_args[2],command_args[3])))
+	
 func register_command(cmd: ConsoleCommand) -> void:
 	console_commands.append(cmd)
 	autofill.commands[cmd.text] = cmd.autofill_proc
@@ -707,3 +760,51 @@ static func get_item_classification(flags: int) -> String:
 						s += ","
 					s += get_item_classification(1<<q)
 			return s
+
+func _cmd_nil(_msg: String): pass
+func _autofill_locs(msg: String) -> Array[String]:
+	var args = msg.split(" ", true, 1)
+	var data: DataCache = AP.get_datacache(AP_GAME_NAME)
+	var locs: Array[String] = []
+	locs.assign(data.location_name_to_id.keys())
+	var ind := 0
+	while ind < locs.size():
+		var id: int = data.location_name_to_id[locs[ind]]
+		if _removed_locs.get(id, true):
+			locs.pop_at(ind)
+		else: ind += 1
+	if args.size() > 1 and args[1]:
+		var arg_str = args[1].strip_edges().to_lower()
+		if arg_str.begins_with("\""):
+			arg_str = arg_str.substr(1)
+		if arg_str.ends_with("\""):
+			arg_str = arg_str.substr(0,arg_str.length()-1)
+		var q := 0
+		while q < locs.size():
+			if not locs[q].strip_edges().to_lower().begins_with(arg_str):
+				locs.pop_at(q)
+			else:
+				q += 1
+	for q in locs.size():
+		locs[q] = "%s %s" % [args[0],locs[q]]
+	return locs
+func _autofill_items(msg: String) -> Array[String]:
+	var args = msg.split(" ", true, 1)
+	var data: DataCache = AP.get_datacache(AP_GAME_NAME)
+	var itms: Array[String] = []
+	itms.assign(data.item_name_to_id.keys())
+	if args.size() > 1 and args[1]:
+		var arg_str = args[1].strip_edges().to_lower()
+		if arg_str.begins_with("\""):
+			arg_str = arg_str.substr(1)
+		if arg_str.ends_with("\""):
+			arg_str = arg_str.substr(0,arg_str.length()-1)
+		var q := 0
+		while q < itms.size():
+			if not itms[q].strip_edges().to_lower().begins_with(arg_str):
+				itms.pop_at(q)
+			else:
+				q += 1
+	for q in itms.size():
+		itms[q] = "%s %s" % [args[0],itms[q]]
+	return itms
