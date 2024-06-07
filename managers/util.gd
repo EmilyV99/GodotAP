@@ -1,0 +1,131 @@
+class_name Util
+
+const GAMMA = 0.0001
+static func get_mag(v: Vector2) -> float:
+	return sqrt(abs(v.x)**2 + abs(v.y)**2)
+
+static func current_scene(tree: SceneTree) -> Node:
+	if Engine.is_editor_hint():
+		return tree.edited_scene_root
+	else:
+		return tree.current_scene
+
+static func for_every_node(tree: SceneTree, proc: Callable) -> Node:
+	return for_all_nodes(current_scene(tree), proc)
+static func for_all_nodes(node: Node, proc: Callable) -> Node:
+	if proc.call(node):
+		return node
+	if node != null:
+		for child in node.get_children():
+			var ret = for_all_nodes(child, proc)
+			if ret: return ret
+	return null
+
+static var logging_file = null
+static func open_logger() -> void:
+	logging_file = FileAccess.open("user://logs/log.log",FileAccess.WRITE)
+static func close_logger() -> void:
+	if logging_file:
+		logging_file.close()
+		logging_file = null
+static func log(s: Variant) -> void:
+	if logging_file:
+		logging_file.store_line(str(s))
+		if OS.is_debug_build(): logging_file.flush()
+	print("%s" % str(s))
+static func dblog(s: Variant) -> void:
+	if not OS.is_debug_build(): return
+	Util.log(s)
+
+static func freeze_popup(tree: SceneTree, title: String, text: String, cancel := true) -> AcceptDialog:
+	return freeze_sub_popup(tree.root, title, text, cancel)
+static func freeze_sub_popup(node: Node, title: String, text: String, cancel := true) -> AcceptDialog:
+	var popup = AcceptDialog.new()
+	node.add_child(popup)
+	var tree: SceneTree = node.get_tree()
+	popup.title = title
+	popup.dialog_text = text
+	popup.keep_title_visible = true
+	popup.extend_to_title = true
+	popup.transient = true
+	popup.popup_window = false
+	popup.process_mode = Node.PROCESS_MODE_ALWAYS
+	tree.paused = true
+	var unfreeze: Callable = func():
+		tree.paused = false
+	popup.confirmed.connect(unfreeze)
+	popup.canceled.connect(unfreeze)
+	popup.confirmed.connect(popup.queue_free)
+	popup.canceled.connect(popup.queue_free)
+	if cancel:
+		popup.add_cancel_button("Cancel")
+	popup.min_size = Vector2i(200,0)
+	return popup
+
+static func standard_popup(tree: SceneTree, title: String, text: String, cancel := true) -> AcceptDialog:
+	return standard_sub_popup(tree.root, title, text, cancel)
+static func standard_sub_popup(node: Node, title: String, text: String, cancel := true) -> AcceptDialog:
+	var popup = AcceptDialog.new()
+	node.add_child(popup)
+	popup.title = title
+	popup.dialog_text = text
+	popup.keep_title_visible = true
+	popup.extend_to_title = true
+	popup.transient = true
+	popup.popup_window = false
+	popup.process_mode = Node.PROCESS_MODE_ALWAYS
+	popup.confirmed.connect(popup.queue_free)
+	popup.canceled.connect(popup.queue_free)
+	if cancel:
+		popup.add_cancel_button("Cancel")
+	popup.min_size = Vector2i(200,0)
+	return popup
+
+static func on_closed(popup: Window):
+	if popup is AcceptDialog:
+		popup.confirmed.connect(func(): popup.close_requested.emit())
+		popup.canceled.connect(func(): popup.close_requested.emit())
+	await popup.close_requested
+
+static func load_new_scene(tree: SceneTree, path: String) -> void:
+	load_scene(tree, load(path))
+static func load_scene(tree: SceneTree, scene: PackedScene) -> void:
+	tree.change_scene_to_packed(scene)
+
+static func is_zero_vec(vec: Vector2) -> bool:
+	return abs(vec.x) < GAMMA and abs(vec.y) < GAMMA
+
+
+static func unsigned_to_signed(unsigned: int, bits: int):
+	return (unsigned + (1 << (bits-1))) % (1 << bits) - (1 << (bits-1))
+static func unsigned_to_signed_8(unsigned: int):
+	return unsigned_to_signed(unsigned, 8)
+static func unsigned_to_signed_16(unsigned: int):
+	return unsigned_to_signed(unsigned, 16)
+static func unsigned_to_signed_32(unsigned: int):
+	return unsigned_to_signed(unsigned, 32)
+
+static func bit_count(val: int) -> int:
+	var ret = 0
+	for v in 64:
+		if val & (1<<v): ret += 1
+	return ret
+
+static func approx_eq(v1: float, v2: float) -> bool:
+	return abs(v1-v2) < GAMMA
+static func approx_eq_vec(v1: Vector2, v2: Vector2) -> bool:
+	var diff = abs(v1-v2)
+	return diff.x < GAMMA and diff.y < GAMMA
+
+static func move_toward_directional(v1: Vector2, v2: Vector2) -> Vector2:
+	var ret = Vector2.ZERO
+	if sign(v1.x) == sign(v2.x) and abs(v1.x) > abs(v2.x):
+		ret.x = v1.x
+	else: ret.x = move_toward(v1.x, v2.x, abs(v2.x)*.75)
+	if sign(v1.y) == sign(v2.y) and abs(v1.y) > abs(v2.y):
+		ret.y = v1.y
+	else: ret.y = move_toward(v1.y, v2.y, abs(v2.y)*.75)
+	return ret
+
+static func gray(v: float, a: float) -> Color:
+	return Color(v,v,v,a)

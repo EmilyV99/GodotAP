@@ -1,0 +1,41 @@
+[gd_scene load_steps=4 format=3 uid="uid://cgq7n1figlpu3"]
+
+[ext_resource type="Script" path="res://ui/console_window.gd" id="1_61s7u"]
+[ext_resource type="Script" path="res://ui/console.gd" id="1_hvqhv"]
+
+[sub_resource type="SystemFont" id="SystemFont_r1gni"]
+font_names = PackedStringArray("Constantia")
+
+[node name="Console" type="Window"]
+initial_position = 2
+size = Vector2i(800, 300)
+min_size = Vector2i(300, 100)
+script = ExtResource("1_61s7u")
+
+[node name="Container" type="MarginContainer" parent="."]
+custom_minimum_size = Vector2(800, 300)
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Console" type="ColorRect" parent="Container"]
+layout_mode = 2
+color = Color(0, 0, 0, 1)
+script = ExtResource("1_hvqhv")
+font = SubResource("SystemFont_r1gni")
+
+[node name="TooltipBG" type="ColorRect" parent="Container/Console"]
+visible = false
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+color = Color(0.150075, 0.150075, 0.150075, 1)
+
+[node name="Tooltip" type="Label" parent="Container/Console/TooltipBG"]
+layout_mode = 0
+offset_right = 1.0
+offset_bottom = 23.0
+autowrap_mode = 2
+
+[connection signal="close_requested" from="." to="." method="_on_close_requested"]
+[connection signal="size_changed" from="." to="Container" method="_on_console_size_changed"]
