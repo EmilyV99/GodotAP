@@ -23,6 +23,8 @@ class FontFlags:
 		SPACING = val
 		queue_redraw()
 
+signal send_text(msg: String)
+
 var font_bold: SystemFont :
 	get:
 		if font_bold: return font_bold
@@ -121,6 +123,12 @@ class TextPart extends ConsolePart:
 		while true:
 			if text_pos >= text.length():
 				break
+			if text[text_pos] == "\n":
+				data.x = data.l
+				data.y += c.get_line_height()
+				while text_pos < text.length() and not text[text_pos].lstrip("\n"):
+					text_pos += 1
+				continue
 			trim_pos = text.find("\n", text_pos)
 			if trim_pos < 0: trim_pos = text.length()
 			var subtext := text.substr(text_pos,trim_pos-text_pos)
@@ -135,7 +143,7 @@ class TextPart extends ConsolePart:
 			if data.x >= data.r or trim_pos <= text_pos: # no space! next line!
 				data.x = data.l
 				data.y += c.get_line_height()
-				while text_pos < text.length() and not text[text_pos].lstrip(" \t\n"):
+				while text_pos < text.length() and not text[text_pos].lstrip("\n"):
 					text_pos += 1
 				continue
 			subtext = text.substr(text_pos,trim_pos-text_pos)
@@ -249,6 +257,7 @@ var parts: Array[ConsolePart] = []
 var hovered_part: ConsolePart = null
 var hovered_hitbox: Rect2
 var scroll: float = 0
+var is_max_scroll := true
 var has_mouse := false
 
 func _init():
@@ -274,7 +283,7 @@ func _process(_delta):
 
 func refocus_part():
 	var pos := get_viewport().get_mouse_position()
-	pos.y += scroll
+	pos.y -= 10 # Feels a little off?
 	var new_hover: ConsolePart = null
 	var hov_hb: Rect2
 	if has_mouse:
@@ -317,15 +326,23 @@ func _draw():
 		part.draw(self, _draw_data)
 	if hovered_part:
 		hovered_part.draw_hover(self, _draw_data)
-	if scroll > _draw_data.max_scroll():
+	var max_scroll = _draw_data.max_scroll()
+	if scroll > max_scroll:
+		scroll = max_scroll
+		call_deferred("queue_redraw")
+	elif scroll < max_scroll and is_max_scroll:
 		scroll = _draw_data.max_scroll()
 		call_deferred("queue_redraw")
+	if Util.approx_eq(scroll,_draw_data.max_scroll()):
+		is_max_scroll = true
 
 func scroll_by(amount: float) -> void:
-	amount *= SCROLL_MULT
+	scroll_by_abs(amount * SCROLL_MULT)
+func scroll_by_abs(amount: float) -> void:
 	var old_scroll := scroll
 	scroll += amount
 	scroll = clampf(scroll, 0, _draw_data.max_scroll())
+	is_max_scroll = Util.approx_eq(scroll,_draw_data.max_scroll())
 	if not Util.approx_eq(scroll,old_scroll):
 		queue_redraw()
 func _gui_input(event):
@@ -336,6 +353,21 @@ func _gui_input(event):
 			scroll_by(-fac)
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			scroll_by(fac)
+	elif event is InputEventKey:
+		if event.pressed:
+			match event.keycode:
+				KEY_HOME:
+					scroll_by_abs(-scroll)
+				KEY_END:
+					scroll_by_abs(_draw_data.max_scroll())
+				KEY_UP:
+					scroll_by_abs(-get_line_height())
+				KEY_DOWN:
+					scroll_by_abs(get_line_height())
+				KEY_PAGEUP:
+					scroll_by_abs(-size.y)
+				KEY_PAGEDOWN:
+					scroll_by_abs(size.y)
 
 func close() -> void:
 	if Engine.is_editor_hint(): return
@@ -344,3 +376,11 @@ func close() -> void:
 		p = p.get_parent()
 	if p:
 		p.close_requested.emit()
+
+func send_msg(msg: String):
+	send_text.emit(msg)
+	scroll_by_abs(_draw_data.max_scroll())
+
+func clear() -> void:
+	parts.clear()
+	queue_redraw()

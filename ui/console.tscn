@@ -23,8 +23,8 @@ offset_right = 800.0
 offset_bottom = 260.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
-focus_next = NodePath("../TypingBar")
-focus_previous = NodePath("../TypingBar")
+focus_next = NodePath("Console")
+focus_previous = NodePath("Console")
 focus_mode = 1
 theme_override_constants/margin_left = 8
 theme_override_constants/margin_top = 8
@@ -33,6 +33,9 @@ theme_override_constants/margin_bottom = 8
 
 [node name="Console" type="Control" parent="ConsoleMargin"]
 layout_mode = 2
+focus_next = NodePath("../../TypingBar")
+focus_previous = NodePath("../../TypingBar")
+focus_mode = 2
 mouse_filter = 1
 script = ExtResource("1_hvqhv")
 font = ExtResource("3_qc5eo")
@@ -55,8 +58,8 @@ autowrap_mode = 2
 offset_top = 260.0
 offset_right = 800.0
 offset_bottom = 300.0
-focus_next = NodePath("../ConsoleMargin")
-focus_previous = NodePath("../ConsoleMargin")
+focus_next = NodePath("../ConsoleMargin/Console")
+focus_previous = NodePath("../ConsoleMargin/Console")
 focus_mode = 2
 color = Color(0.145266, 0.145266, 0.145266, 1)
 script = ExtResource("3_37wlj")
@@ -64,3 +67,4 @@ font = ExtResource("3_qc5eo")
 
 [connection signal="close_requested" from="." to="." method="_on_close_requested"]
 [connection signal="size_changed" from="." to="ConsoleMargin" method="_on_console_size_changed"]
+[connection signal="send_text" from="TypingBar" to="ConsoleMargin/Console" method="send_msg"]

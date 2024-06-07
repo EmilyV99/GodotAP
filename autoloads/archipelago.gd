@@ -9,6 +9,8 @@ const COLOR_ITEM_PROG: Color = Color8(175,153,239)
 const COLOR_ITEM: Color = Color8(1,234,234)
 const COLOR_ITEM_TRAP: Color = Color.RED
 const COLOR_LOCATION: Color = Color8(1,252,126)
+const COLOR_SELF: Color = Color.GOLDENROD
+const COLOR_UI_MSG: Color = Color(.7,.7,.3)
 
 enum ItemHandling {
 	NONE = 0,
@@ -184,8 +186,9 @@ func handle_command(json: Dictionary) -> void:
 				conn.slots.append(NetworkSlot.from(slot_info[key]))
 			AP.log(conn)
 			
-			#for loc in json["missing_locations"]:
-				#if not _removed_locs.has(loc):
+			for loc in json["missing_locations"]:
+				if not _removed_locs.has(loc):
+					_removed_locs[loc] = false
 					#Force this locations to be accessible?
 			
 			var server_checked = {}
@@ -194,7 +197,7 @@ func handle_command(json: Dictionary) -> void:
 				server_checked[loc] = true
 			
 			for loc in _removed_locs.keys():
-				if not loc in server_checked:
+				if _removed_locs[loc] and not loc in server_checked:
 					collect_location(loc)
 			
 			# Deathlink stuff?
@@ -421,11 +424,11 @@ func recieve_item(index: int, item: NetworkItem) -> void:
 signal _remove_location(loc_id: int)
 var _removed_locs: Dictionary = {}
 func _remove_loc(loc_id: int) -> void:
-	if not _removed_locs.has(loc_id):
+	if not _removed_locs.get(loc_id, false):
 		_removed_locs[loc_id] = true
 		_remove_location.emit(loc_id)
 func _on_removed_id(loc_id: int, proc: Callable) -> void:
-	if _removed_locs.has(loc_id):
+	if _removed_locs.get(loc_id, false):
 		proc.call()
 	else:
 		_remove_location.connect(func(id:int):
@@ -443,7 +446,7 @@ func _process(_delta):
 	poll()
 
 func _ready():  #TODO REMOVE TESTING
-	ap_connect("archipelago.gg","63471","EmilySM")
+	ap_connect("archipelago.gg","54785","EmilySM")
 
 func _exit_tree():
 	if status != APStatus.DISCONNECTED:
@@ -595,12 +598,52 @@ func _open_console() -> void:
 	add_child(console_scene)
 	await console_scene.ready
 	output_console = console_scene.console
+	output_console.send_text.connect(console_message)
 	output_console.tree_exiting.connect(_close_console)
 func _close_console() -> void:
 	if output_console:
 		output_console.close()
 		output_console = null
 
+func console_message(msg: String) -> void:
+	if msg.is_empty(): return
+	if msg[0] != "/": #Plain message
+		send_command("Say", {"text":msg})
+	else:
+		var command_args = msg.split(" ", true, 1)
+		print(command_args)
+		var raw_args = msg.split(" ")
+		var args: Array[String] = []
+		var open_quote := false
+		for s in raw_args:
+			if open_quote:
+				args[-1] += " " + s
+			else: args.append(s)
+			if s.count("\"") % 2:
+				open_quote = not open_quote
+		match command_args[0].to_lower():
+			"/help":
+				output_console.add_text("/help\n    Displays this message\n"
+					+ "!help\n    Displays server-based command help\n"
+					+ "/cls\n    Clears the console\n", "", COLOR_UI_MSG)
+			"/cls":
+				output_console.clear()
+			"/db_send":
+				if command_args.size() > 1:
+					var data = AP.get_datacache(AP_GAME_NAME)
+					for loc in _removed_locs:
+						var loc_name := data.get_loc_name(loc)
+						if loc_name.strip_edges().to_lower() == command_args[1].strip_edges().to_lower():
+							if _removed_locs[loc]:
+								output_console.add_text("Location already sent!\n", "", COLOR_UI_MSG)
+							else:
+								output_console.add_text("Sending location '%s'!\n" % loc_name, "", COLOR_UI_MSG)
+								collect_location(loc)
+							return
+					output_console.add_text("Location '%s' not found! Check spelling?\n" % command_args[1].strip_edges(), "", COLOR_UI_MSG)
+				else: output_console.add_text("Usage: '/db_send Some Location Name'", "", COLOR_UI_MSG)
+			_:
+				output_console.add_text("Unknown command '%s'\n" % command_args[0], "", COLOR_UI_MSG)
 #endregion CONSOLE
 
 func _init():
