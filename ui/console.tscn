@@ -18,9 +18,9 @@ color = Color(0, 0, 0, 1)
 
 [node name="ConsoleMargin" type="MarginContainer" parent="."]
 clip_contents = true
-custom_minimum_size = Vector2(800, 260)
+custom_minimum_size = Vector2(800, 271)
 offset_right = 800.0
-offset_bottom = 260.0
+offset_bottom = 271.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 focus_next = NodePath("Console")
@@ -55,11 +55,9 @@ offset_bottom = 23.0
 autowrap_mode = 2
 
 [node name="TypingBar" type="ColorRect" parent="."]
-offset_top = 260.0
+offset_top = 271.0
 offset_right = 800.0
 offset_bottom = 300.0
-focus_next = NodePath("../ConsoleMargin/Console")
-focus_previous = NodePath("../ConsoleMargin/Console")
 focus_mode = 2
 color = Color(0.145266, 0.145266, 0.145266, 1)
 script = ExtResource("3_37wlj")

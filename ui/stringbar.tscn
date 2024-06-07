@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://cm123kfw5gslb"]
+
+[ext_resource type="Script" path="res://ui/autofill_bar.gd" id="1_fwo2d"]
+[ext_resource type="SystemFont" uid="uid://73rjoc23d4ub" path="res://ui/console_font.tres" id="2_xunq5"]
+
+[node name="StringBar" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -439.0
+offset_bottom = -282.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_fwo2d")
+font = ExtResource("2_xunq5")

@@ -1,5 +1,6 @@
 class_name Util
 
+const MOUSE_OFFSET := Vector2(0,-2)
 const GAMMA = 0.0001
 static func get_mag(v: Vector2) -> float:
 	return sqrt(abs(v.x)**2 + abs(v.y)**2)
@@ -129,3 +130,15 @@ static func move_toward_directional(v1: Vector2, v2: Vector2) -> Vector2:
 
 static func gray(v: float, a: float) -> Color:
 	return Color(v,v,v,a)
+
+static func split_args(msg: String) -> Array[String]:
+	var raw_args = msg.split(" ")
+	var args: Array[String] = []
+	var open_quote := false
+	for s in raw_args:
+		if open_quote:
+			args[-1] += " " + s
+		else: args.append(s)
+		if s.count("\"") % 2:
+			open_quote = not open_quote
+	return args

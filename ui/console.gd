@@ -282,8 +282,7 @@ func _process(_delta):
 	refocus_part()
 
 func refocus_part():
-	var pos := get_viewport().get_mouse_position()
-	pos.y -= 10 # Feels a little off?
+	var pos := get_viewport().get_mouse_position() + Util.MOUSE_OFFSET
 	var new_hover: ConsolePart = null
 	var hov_hb: Rect2
 	if has_mouse:

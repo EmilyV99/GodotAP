@@ -73,7 +73,6 @@ var status: APStatus = APStatus.DISCONNECTED :
 	set(val):
 		if status != val:
 			status = val
-			print(status)
 			status_updated.emit()
 		if status == APStatus.DISCONNECTED:
 			conn = null
@@ -294,19 +293,17 @@ func handle_command(json: Dictionary) -> void:
 class DataCache:
 	var item_name_to_id: Dictionary = {}
 	var location_name_to_id: Dictionary = {}
-	var item_id_to_name: Dictionary = {}
-	var location_id_to_name: Dictionary = {}
 	var checksum: String = ""
 	
 	static func from(data: Dictionary) -> DataCache:
 		var c = DataCache.new()
 		c.item_name_to_id = data.get("item_name_to_id",c.item_name_to_id)
-		c.location_name_to_id = data.get("location_name_to_id",c.location_name_to_id)
-		c.checksum = data.get("checksum",c.checksum)
 		for k in c.item_name_to_id.keys():
-			c.item_id_to_name[int(c.item_name_to_id[k])] = k
+			c.item_name_to_id[k] = c.item_name_to_id[k] as int
+		c.location_name_to_id = data.get("location_name_to_id",c.location_name_to_id)
 		for k in c.location_name_to_id.keys():
-			c.location_id_to_name[int(c.location_name_to_id[k])] = k
+			c.location_name_to_id[k] = c.location_name_to_id[k] as int
+		c.checksum = data.get("checksum",c.checksum)
 		return c
 	static func from_file(file: FileAccess) -> DataCache:
 		if not file: return null
@@ -323,9 +320,11 @@ class DataCache:
 		assert(id > -1)
 		return id
 	func get_item_name(id:int) -> String:
-		return item_id_to_name.get(id, str(id))
+		var v = item_name_to_id.find_key(id)
+		return v if v else str(id)
 	func get_loc_name(id:int) -> String:
-		return location_id_to_name.get(id, str(id))
+		var v = location_name_to_id.find_key(id)
+		return v if v else str(id)
 const READABLE_DATAPACK_FILES = true
 const datapack_cached_fields = ["item_name_to_id","location_name_to_id","checksum"]
 var datapack_cache: Dictionary
@@ -439,6 +438,7 @@ func on_removed(loc_name: String, proc: Callable) -> void:
 
 ## Call when a location is collected and needs to be sent to the server.
 func collect_location(loc_id: int) -> void:
+	printout_recieved_items = false
 	send_command("LocationChecks", {"locations":[loc_id]})
 	_remove_loc(loc_id)
 #endregion LOCATIONS
@@ -454,7 +454,6 @@ func _exit_tree():
 
 func _notification(what):
 	if what == NOTIFICATION_PREDELETE:
-		print(logging_file)
 		AP.close_logger()
 
 #region DATACLASSES
@@ -600,55 +599,93 @@ func _open_console() -> void:
 	output_console = console_scene.console
 	output_console.send_text.connect(console_message)
 	output_console.tree_exiting.connect(_close_console)
+	console_scene.typing_bar.autofill = autofill
 func _close_console() -> void:
 	if output_console:
 		output_console.close()
 		output_console = null
 
+class ConsoleCommand:
+	var text: String
+	var call_proc: Callable #[String->void]
+	var autofill_proc: Variant # Callable[String->Array[String]] | bool
+	func _init(name: String, caller: Callable, autofill_call: Variant = true):
+		text = name
+		call_proc = caller
+		autofill_proc = autofill_call
+var console_commands: Array[ConsoleCommand] = []
 func console_message(msg: String) -> void:
 	if msg.is_empty(): return
 	if msg[0] != "/": #Plain message
 		send_command("Say", {"text":msg})
 	else:
-		var command_args = msg.split(" ", true, 1)
-		print(command_args)
-		var raw_args = msg.split(" ")
-		var args: Array[String] = []
-		var open_quote := false
-		for s in raw_args:
-			if open_quote:
-				args[-1] += " " + s
-			else: args.append(s)
-			if s.count("\"") % 2:
-				open_quote = not open_quote
-		match command_args[0].to_lower():
-			"/help":
-				output_console.add_text("/help\n    Displays this message\n"
-					+ "!help\n    Displays server-based command help\n"
-					+ "/cls\n    Clears the console\n", "", COLOR_UI_MSG)
-			"/cls":
-				output_console.clear()
-			"/db_send":
-				if command_args.size() > 1:
-					var data = AP.get_datacache(AP_GAME_NAME)
-					for loc in _removed_locs:
-						var loc_name := data.get_loc_name(loc)
-						if loc_name.strip_edges().to_lower() == command_args[1].strip_edges().to_lower():
-							if _removed_locs[loc]:
-								output_console.add_text("Location already sent!\n", "", COLOR_UI_MSG)
-							else:
-								output_console.add_text("Sending location '%s'!\n" % loc_name, "", COLOR_UI_MSG)
-								collect_location(loc)
-							return
-					output_console.add_text("Location '%s' not found! Check spelling?\n" % command_args[1].strip_edges(), "", COLOR_UI_MSG)
-				else: output_console.add_text("Usage: '/db_send Some Location Name'", "", COLOR_UI_MSG)
-			_:
-				output_console.add_text("Unknown command '%s'\n" % command_args[0], "", COLOR_UI_MSG)
+		var cmd = msg.split(" ", true, 1)[0].to_lower()
+		var cmd_lower = cmd.to_lower()
+		var found := false
+		for command in console_commands:
+			if command.text == cmd_lower:
+				command.call_proc.call(msg)
+				found = true
+				break
+		if not found:
+			output_console.add_text("Unknown command '%s'\n" % cmd, "", COLOR_UI_MSG)
 #endregion CONSOLE
 
+var autofill: AutofillHandler = AutofillHandler.new()
 func _init():
 	_open_console()
-
+	register_command(ConsoleCommand.new("/help",func(_msg: String):
+		output_console.add_text("/help\n    Displays this message\n"
+			+ "!help\n    Displays server-based command help\n"
+			+ "/cls\n    Clears the console\n", "", COLOR_UI_MSG)))
+	register_command(ConsoleCommand.new("!help",func(_msg: String):
+		pass))
+	register_command(ConsoleCommand.new("/cls",func(_msg: String):
+		output_console.clear()))
+	register_command(ConsoleCommand.new("/db_send",
+		func(msg: String):
+			var command_args = msg.split(" ", true, 1)
+			if command_args.size() > 1:
+				var data = AP.get_datacache(AP_GAME_NAME)
+				for loc in _removed_locs:
+					var loc_name := data.get_loc_name(loc)
+					if loc_name.strip_edges().to_lower() == command_args[1].strip_edges().to_lower():
+						if _removed_locs[loc]:
+							output_console.add_text("Location already sent!\n", "", COLOR_UI_MSG)
+						else:
+							output_console.add_text("Sending location '%s'!\n" % loc_name, "", COLOR_UI_MSG)
+							collect_location(loc)
+						return
+				output_console.add_text("Location '%s' not found! Check spelling?\n" % command_args[1].strip_edges(), "", COLOR_UI_MSG)
+			else: output_console.add_text("Usage: '/db_send Some Location Name'\n", "", COLOR_UI_MSG),
+		func(msg: String) -> Array[String]:
+			var args = msg.split(" ", true, 1)
+			var data: DataCache = AP.get_datacache(AP_GAME_NAME)
+			var locs: Array[String] = []
+			locs.assign(data.location_name_to_id.keys())
+			var ind := 0
+			while ind < locs.size():
+				if _removed_locs.get(data.location_name_to_id[locs[ind]], false):
+					locs.pop_at(ind)
+				else: ind += 1
+			if args.size() > 1 and args[1]:
+				var arg_str = args[1].strip_edges().to_lower()
+				if arg_str.begins_with("\""):
+					arg_str = arg_str.substr(1)
+				if arg_str.ends_with("\""):
+					arg_str = arg_str.substr(0,arg_str.length()-1)
+				var q := 0
+				while q < locs.size():
+					if not locs[q].strip_edges().to_lower().begins_with(arg_str):
+						locs.pop_at(q)
+					else:
+						q += 1
+			for q in locs.size():
+				locs[q] = "%s %s" % [args[0],locs[q]]
+			return locs))
+func register_command(cmd: ConsoleCommand) -> void:
+	console_commands.append(cmd)
+	autofill.commands[cmd.text] = cmd.autofill_proc
 const ICLASS_PROG := 0b001
 const ICLASS_USEFUL := 0b010
 const ICLASS_TRAP := 0b100
