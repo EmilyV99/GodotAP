@@ -8,6 +8,8 @@ func read(file: FileAccess) -> bool:
 		return false
 	if not creds.read(file):
 		return false
+	if file.get_error():
+		return false
 	return true
 
 func write(file: FileAccess) -> bool:

@@ -35,6 +35,8 @@ func read(file: FileAccess) -> bool:
 	team_id = file.get_32()
 	slot_name = file.get_line()
 	seed_name = file.get_line()
+	if file.get_error():
+		return false
 	return true
 func write(file: FileAccess) -> bool:
 	file.store_8(1 if valid else 0)

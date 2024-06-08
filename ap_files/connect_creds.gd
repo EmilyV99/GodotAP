@@ -10,6 +10,8 @@ func read(file: FileAccess) -> bool:
 	port = file.get_line()
 	slot = file.get_line()
 	pwd = file.get_line()
+	if file.get_error():
+		return false
 	return true
 func write(file: FileAccess) -> bool:
 	file.store_line(ip)

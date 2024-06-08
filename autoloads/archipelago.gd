@@ -212,7 +212,6 @@ func handle_command(json: Dictionary) -> void:
 			
 			send_datapack_request()
 			
-			Saves.save()
 			status = APStatus.PLAYING
 			if output_console and connecting_part:
 				connecting_part.text = "Connected Successfully!\n"
@@ -433,7 +432,7 @@ func location_checked(loc_id: int, def := false) -> bool:
 func _process(_delta):
 	poll()
 
-func _ready():  #TODO REMOVE TESTING
+func ap_reconnect_to_save() -> void:
 	if creds.slot.is_empty() or creds.port.length() != 5:
 		if output_console:
 			var s = "Connection details required! "
@@ -446,7 +445,7 @@ func _ready():  #TODO REMOVE TESTING
 			if cmd:
 				cmd.output_usage(output_console)
 	else:
-		ap_reconnect()#ap_connect("archipelago.gg","64621","EmilySM")
+		ap_reconnect()
 
 func _exit_tree():
 	if status != APStatus.DISCONNECTED:
@@ -533,9 +532,7 @@ func _init():
 		.add_help("", "Clears the command history")
 		.set_call(func(_cmd: ConsoleCommand, _msg: String): output_console_window.typing_bar.history_clear()))
 	register_command(ConsoleCommand.new("/connect")
-#region New Code Region
 		.add_help("port", "Connects to a new port, with the same ip/slot/password.")
-#endregion
 		.add_help("ip:port", "Connects to a new ip+port, with the same slot/password.")
 		.add_help("ip:port slot [pwd]", "Connects to a new ip+port, with a new slot and [optional] password.")
 		.set_call(func(cmd: ConsoleCommand, msg: String):
@@ -555,6 +552,9 @@ func _init():
 	register_command(ConsoleCommand.new("/reconnect")
 		.add_help("", "Refreshes the connection to the Archipelago server")
 		.set_call(func(_cmd: ConsoleCommand, _msg: String): ap_reconnect()))
+	register_command(ConsoleCommand.new("/disconnect")
+		.add_help("", "Kills the connection to the Archipelago server")
+		.set_call(func(_cmd: ConsoleCommand, _msg: String): ap_disconnect()))
 	register_command(ConsoleCommand.new("!hint_location").set_autofill(_autofill_locs))
 	register_command(ConsoleCommand.new("!hint").set_autofill(_autofill_items))
 	register_command(ConsoleCommand.new("!help").add_help("", "Displays server-based command help"))
@@ -565,7 +565,7 @@ func _init():
 	register_command(ConsoleCommand.new("!release"))
 	register_command(ConsoleCommand.new("!players"))
 	if OS.is_debug_build():
-		register_command(ConsoleCommand.new("/db_send")
+		register_command(ConsoleCommand.new("/send")
 			.add_help("", "Cheat-Collects the given location")
 			.set_autofill(_autofill_locs)
 			.set_call(func(cmd: ConsoleCommand, msg: String):
@@ -583,17 +583,50 @@ func _init():
 							return
 					output_console.add_text("Location '%s' not found! Check spelling?\n" % command_args[1].strip_edges(), "", COLOR_UI_MSG)
 				else: cmd.output_usage(output_console)))
-		register_command(ConsoleCommand.new("/db_lock_info")
+		register_command(ConsoleCommand.new("/lock_info")
 			.add_help("", "Prints the connection lock info")
 			.set_call(func(_cmd: ConsoleCommand, _msg: String):
 				if aplock:
 					output_console.add_text("%s\n" % str(aplock), "", COLOR_UI_MSG)))
-		register_command(ConsoleCommand.new("/db_unlock_connection")
+		register_command(ConsoleCommand.new("/unlock_connection")
 			.add_help("", "Unlocks the connection lock, so that any valid slot can be connected to (instead of only the slot previously connected to)")
 			.set_call(func(_cmd: ConsoleCommand, _msg: String):
 				if aplock:
 					aplock.unlock()))
-	
+		register_command(ConsoleCommand.new("/save")
+			.add_help("[num]", "Saves the save file, optionally to a different-numbered slot. num >= 0.")
+			.set_call(func(cmd: ConsoleCommand, msg: String):
+				var command_args = msg.split(" ", true, 2)
+				if command_args.size() == 1:
+					Saves.save()
+				elif command_args.size() != 2 or not command_args[1].is_valid_int() or int(command_args[1]) < 0:
+					cmd.output_usage(output_console)
+				else:
+					Saves.write_save(int(command_args[1]))))
+		register_command(ConsoleCommand.new("/delsave")
+			.add_help("num", "Deletes the specified save file. num >= 0.")
+			.set_call(func(cmd: ConsoleCommand, msg: String):
+				var command_args = msg.split(" ", true, 2)
+				if command_args.size() != 2 or not command_args[1].is_valid_int() or int(command_args[1]) < 0:
+					cmd.output_usage(output_console)
+				else:
+					Saves.delete_save(int(command_args[1]))))
+		register_command(ConsoleCommand.new("/loadsave")
+			.add_help("num", "Loads the specified save file. num >= 0.")
+			.set_call(func(cmd: ConsoleCommand, msg: String):
+				var command_args = msg.split(" ", true, 2)
+				if command_args.size() != 2 or not command_args[1].is_valid_int() or int(command_args[1]) < 0:
+					cmd.output_usage(output_console)
+				else:
+					var is_conn: bool = status != APStatus.DISCONNECTED
+					if is_conn:
+						ap_disconnect()
+						while status != APStatus.DISCONNECTED:
+							await status_updated
+					Saves.read_save(int(command_args[1]))
+					if is_conn:
+						ap_reconnect_to_save()))
+		
 func register_command(cmd: ConsoleCommand) -> void:
 	console_commands.append(cmd)
 	_name_to_cmd[cmd.text] = cmd
