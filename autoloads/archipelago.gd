@@ -21,12 +21,13 @@ enum ItemHandling {
 	ALL = 7,
 }
 
-var ip: String = "archipelago.gg"
-var port: String = ""
-var slot: String = ""
-var pwd: String = ""
+var creds: APCredentials :
+	get:
+		return Saves.open_save.creds
+var aplock: APLock :
+	get:
+		return Saves.open_save.aplock
 
-var aplock: APLock = null
 var socket := WebSocketPeer.new()
 
 #region CONNECTION
@@ -63,7 +64,7 @@ func ap_reconnect() -> void:
 	var wss := true
 	var url: String
 	while true:
-		url = "%s://%s:%s" % ["wss" if wss else "ws",ip,port]
+		url = "%s://%s:%s" % ["wss" if wss else "ws",creds.ip,creds.port]
 		socket.close()
 		var err := socket.connect_to_url(url)
 		if err:
@@ -73,17 +74,17 @@ func ap_reconnect() -> void:
 		else: break
 	AP.log("Connected to '%s'!" % url)
 	if output_console:
-		connecting_part = output_console.add_text("Connecting...\n","%s:%s %s" % [ip,port,slot],COLOR_UI_MSG)
+		connecting_part = output_console.add_text("Connecting...\n","%s:%s %s" % [creds.ip,creds.port,creds.slot],COLOR_UI_MSG)
 	status = APStatus.CONNECTING
 
 func ap_connect(room_ip: String, room_port: String, slot_name: String, room_pwd := "") -> void:
 	if status != APStatus.DISCONNECTED:
 		ap_disconnect() # Do it here so the ip/port/slot are correct in the disconnect message
 	AP.open_logger()
-	ip = room_ip
-	port = room_port
-	slot = slot_name
-	pwd = room_pwd
+	creds.ip = room_ip
+	creds.port = room_port
+	creds.slot = slot_name
+	creds.pwd = room_pwd
 	ap_reconnect()
 
 func ap_disconnect() -> void:
@@ -93,7 +94,7 @@ func ap_disconnect() -> void:
 	socket.close()
 	AP.close_logger()
 	if output_console:
-		var part := output_console.add_text("Disconnecting...\n","%s:%s %s" % [ip,port,slot],COLOR_UI_MSG)
+		var part := output_console.add_text("Disconnecting...\n","%s:%s %s" % [creds.ip,creds.port,creds.slot],COLOR_UI_MSG)
 		while status != APStatus.DISCONNECTED:
 			await status_updated
 		part.text = "Disconnected from AP.\n"
@@ -158,7 +159,7 @@ func handle_command(json: Dictionary) -> void:
 			conn.gen_version = Version.from(json["generator_version"])
 			conn.seed_name = json["seed_name"]
 			handle_datapackage_checksums(json["datapackage_checksums"])
-			var args: Dictionary = {"name":slot,"password":pwd,"uuid":conn.uid,
+			var args: Dictionary = {"name":creds.slot,"password":creds.pwd,"uuid":conn.uid,
 				"version":Version.val(0,4,6)._as_ap_dict(),"slot_data":true}
 			args["game"] = AP_GAME_NAME
 			args["tags"] = AP_GAME_TAGS
@@ -181,7 +182,6 @@ func handle_command(json: Dictionary) -> void:
 			for key in slot_info:
 				conn.slots.append(NetworkSlot.from(slot_info[key]))
 			
-			print(aplock)
 			if aplock:
 				var lock_err := aplock.lock(conn)
 				if lock_err:
@@ -212,6 +212,7 @@ func handle_command(json: Dictionary) -> void:
 			
 			send_datapack_request()
 			
+			Saves.save()
 			status = APStatus.PLAYING
 			if output_console and connecting_part:
 				connecting_part.text = "Connected Successfully!\n"
@@ -433,7 +434,19 @@ func _process(_delta):
 	poll()
 
 func _ready():  #TODO REMOVE TESTING
-	ap_connect("archipelago.gg","64621","EmilySM")
+	if creds.slot.is_empty() or creds.port.length() != 5:
+		if output_console:
+			var s = "Connection details required! "
+			if aplock.valid:
+				s += "Please reconnect to the room previously used by this save file!\n"
+			else:
+				s += "Connect to a room when ready.\n"
+			output_console.add_text(s, "", COLOR_UI_MSG)
+			var cmd = get_console_cmd("/connect")
+			if cmd:
+				cmd.output_usage(output_console)
+	else:
+		ap_reconnect()#ap_connect("archipelago.gg","64621","EmilySM")
 
 func _exit_tree():
 	if status != APStatus.DISCONNECTED:
@@ -483,6 +496,10 @@ func _close_console() -> void:
 		output_console = null
 
 var console_commands: Array[ConsoleCommand] = []
+var _name_to_cmd: Dictionary = {}
+func get_console_cmd(cmdname: String) -> ConsoleCommand:
+	return _name_to_cmd.get(cmdname)
+
 func console_message(msg: String) -> void:
 	if msg.is_empty(): return
 	if msg[0] != "/": #Plain message
@@ -516,14 +533,16 @@ func _init():
 		.add_help("", "Clears the command history")
 		.set_call(func(_cmd: ConsoleCommand, _msg: String): output_console_window.typing_bar.history_clear()))
 	register_command(ConsoleCommand.new("/connect")
+#region New Code Region
 		.add_help("port", "Connects to a new port, with the same ip/slot/password.")
+#endregion
 		.add_help("ip:port", "Connects to a new ip+port, with the same slot/password.")
 		.add_help("ip:port slot [pwd]", "Connects to a new ip+port, with a new slot and [optional] password.")
 		.set_call(func(cmd: ConsoleCommand, msg: String):
 			var command_args = msg.split(" ", true, 3)
 			if command_args.size() == 2:
-				command_args.append(slot)
-				command_args.append(pwd)
+				command_args.append(creds.slot)
+				command_args.append(creds.pwd)
 			elif command_args.size() == 3:
 				command_args.append("")
 			if command_args.size() != 4:
@@ -531,7 +550,7 @@ func _init():
 			else:
 				var ipport = command_args[1].split(":",1)
 				if ipport.size() == 1 and ipport[0].length() == 5:
-					ipport = [ip,ipport[0]]
+					ipport = [creds.ip,ipport[0]]
 				ap_connect(ipport[0],ipport[1],command_args[2],command_args[3])))
 	register_command(ConsoleCommand.new("/reconnect")
 		.add_help("", "Refreshes the connection to the Archipelago server")
@@ -577,6 +596,7 @@ func _init():
 	
 func register_command(cmd: ConsoleCommand) -> void:
 	console_commands.append(cmd)
+	_name_to_cmd[cmd.text] = cmd
 	autofill.commands[cmd.text] = cmd.autofill_proc
 const ICLASS_PROG := 0b001
 const ICLASS_USEFUL := 0b010

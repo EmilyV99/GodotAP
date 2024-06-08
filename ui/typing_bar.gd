@@ -223,7 +223,7 @@ func _gui_input(event):
 
 func update() -> void:
 	if autofill:
-		_tab_completions.assign(autofill.autofill(text))
+		_tab_completions.assign(autofill.autofill(text, 10))
 		if _tab_completions and _tab_completions[0] == text:
 			_tab_completions.clear()
 		autofill_rect.set_strings(_tab_completions)

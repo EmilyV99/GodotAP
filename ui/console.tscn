@@ -7,20 +7,20 @@
 
 [node name="Console" type="Window"]
 initial_position = 2
-size = Vector2i(800, 300)
+size = Vector2i(800, 500)
 min_size = Vector2i(300, 100)
 script = ExtResource("1_61s7u")
 
 [node name="BG" type="ColorRect" parent="."]
 offset_right = 1600.0
-offset_bottom = 600.0
+offset_bottom = 1000.0
 color = Color(0, 0, 0, 1)
 
 [node name="ConsoleMargin" type="MarginContainer" parent="."]
 clip_contents = true
-custom_minimum_size = Vector2(800, 271)
+custom_minimum_size = Vector2(800, 471)
 offset_right = 800.0
-offset_bottom = 271.0
+offset_bottom = 471.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 focus_next = NodePath("Console")
@@ -55,9 +55,9 @@ offset_bottom = 23.0
 autowrap_mode = 2
 
 [node name="TypingBar" type="ColorRect" parent="."]
-offset_top = 271.0
+offset_top = 471.0
 offset_right = 800.0
-offset_bottom = 300.0
+offset_bottom = 500.0
 focus_mode = 2
 color = Color(0.145266, 0.145266, 0.145266, 1)
 script = ExtResource("3_37wlj")
