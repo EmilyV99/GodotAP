@@ -3,7 +3,8 @@ class_name AP extends Node
 const AP_GAME_NAME := "Super Metroid"
 const AP_GAME_TAGS: Array[String] = []
 const AP_ITEM_HANDLING := ItemHandling.ALL
-const AP_LOG_COMMUNICATION := true
+const AP_LOG_COMMUNICATION := false
+const AP_LOG_RECIEVED := false
 const COLOR_PLAYER: Color = Color8(238,0,238)
 const COLOR_ITEM_PROG: Color = Color8(175,153,239)
 const COLOR_ITEM: Color = Color8(1,234,234)
@@ -24,41 +25,11 @@ var ip: String = "archipelago.gg"
 var port: String = ""
 var slot: String = ""
 var pwd: String = ""
-var death_alias: String = ""
-var uid: int
 
+var aplock: APLock = null
 var socket := WebSocketPeer.new()
 
 #region CONNECTION
-class ConnectionInfo:
-	var serv_version: Version
-	var gen_version: Version
-	var seed_name: String
-	
-	var player_id: int
-	var team_id: int
-	var slot_data: Dictionary
-	
-	var players: Array[NetworkPlayer]
-	var slots: Array[NetworkSlot]
-	
-	func _to_string():
-		return "AP_CONN(SERV_%s, GEN_%s, SEED:%s, PLYR %d, TEAM %d, SLOT_DATA %s)" % [serv_version,gen_version,seed_name,player_id,team_id,slot_data]
-	
-	func get_player(id: int) -> NetworkPlayer:
-		return players[id-1]
-	func get_slot(id: int) -> NetworkSlot:
-		return slots[id-1]
-	func get_player_name(plyr_id: int, alias := true) -> String:
-		var name = get_player(plyr_id).get_name(alias)
-		if not name: name = "Player %d" % plyr_id
-		return name
-	func get_game_for_player(plyr_id: int) -> String:
-		return slots[plyr_id-1].game
-	func get_gamedata_for_player(plyr_id: int) -> DataCache:
-		return AP.get_datacache(get_game_for_player(plyr_id))
-	
-
 var conn: ConnectionInfo
 
 enum APStatus {
@@ -113,7 +84,6 @@ func ap_connect(room_ip: String, room_port: String, slot_name: String, room_pwd 
 	port = room_port
 	slot = slot_name
 	pwd = room_pwd
-	death_alias = ""
 	ap_reconnect()
 
 func ap_disconnect() -> void:
@@ -188,7 +158,7 @@ func handle_command(json: Dictionary) -> void:
 			conn.gen_version = Version.from(json["generator_version"])
 			conn.seed_name = json["seed_name"]
 			handle_datapackage_checksums(json["datapackage_checksums"])
-			var args: Dictionary = {"name":slot,"password":pwd,"uuid":uid,
+			var args: Dictionary = {"name":slot,"password":pwd,"uuid":conn.uid,
 				"version":Version.val(0,4,6)._as_ap_dict(),"slot_data":true}
 			args["game"] = AP_GAME_NAME
 			args["tags"] = AP_GAME_TAGS
@@ -210,11 +180,20 @@ func handle_command(json: Dictionary) -> void:
 			var slot_info = json["slot_info"]
 			for key in slot_info:
 				conn.slots.append(NetworkSlot.from(slot_info[key]))
-			AP.log(conn)
+			
+			print(aplock)
+			if aplock:
+				var lock_err := aplock.lock(conn)
+				if lock_err:
+					connecting_part.text = "Connection Mismatch! Wrong slot for this save!\n"
+					for s in lock_err:
+						connecting_part.tooltip += "\n%s" % s
+					ap_disconnect()
+					return
 			
 			for loc in json["missing_locations"]:
-				if not _removed_locs.has(loc as int):
-					_removed_locs[loc as int] = false
+				if not location_exists(loc):
+					conn.checked_locations[loc as int] = false
 					#Force this locations to be accessible?
 			
 			var server_checked = {}
@@ -223,8 +202,8 @@ func handle_command(json: Dictionary) -> void:
 				server_checked[loc] = true
 			
 			var to_collect: Array[int] = []
-			for loc in _removed_locs.keys():
-				if _removed_locs[loc] and not loc in server_checked:
+			for loc in conn.checked_locations.keys():
+				if conn.checked_locations[loc] and not loc in server_checked:
 					to_collect.append(loc)
 			collect_locations(to_collect)
 			
@@ -321,41 +300,6 @@ func handle_command(json: Dictionary) -> void:
 			AP.log("[UNHANDLED PACKET TYPE] %s" % str(json))
 
 #region DATAPACKS
-class DataCache:
-	var item_name_to_id: Dictionary = {}
-	var location_name_to_id: Dictionary = {}
-	var checksum: String = ""
-	
-	static func from(data: Dictionary) -> DataCache:
-		var c = DataCache.new()
-		c.item_name_to_id = data.get("item_name_to_id",c.item_name_to_id)
-		for k in c.item_name_to_id.keys():
-			c.item_name_to_id[k] = c.item_name_to_id[k] as int
-		c.location_name_to_id = data.get("location_name_to_id",c.location_name_to_id)
-		for k in c.location_name_to_id.keys():
-			c.location_name_to_id[k] = c.location_name_to_id[k] as int
-		c.checksum = data.get("checksum",c.checksum)
-		return c
-	static func from_file(file: FileAccess) -> DataCache:
-		if not file: return null
-		var dict = JSON.parse_string(file.get_as_text())
-		if dict is Dictionary:
-			return from(dict)
-		return null
-	func get_item_id(name:String) -> int:
-		var id = item_name_to_id.get(name,-1)
-		assert(id > -1)
-		return id
-	func get_loc_id(name:String) -> int:
-		var id = location_name_to_id.get(name,-1)
-		assert(id > -1)
-		return id
-	func get_item_name(id:int) -> String:
-		var v = item_name_to_id.find_key(id)
-		return v if v else str(id)
-	func get_loc_name(id:int) -> String:
-		var v = location_name_to_id.find_key(id)
-		return v if v else str(id)
 const READABLE_DATAPACK_FILES = true
 const datapack_cached_fields = ["item_name_to_id","location_name_to_id","checksum"]
 var datapack_cache: Dictionary
@@ -413,10 +357,9 @@ static func get_datacache(game: String) -> DataCache:
 #endregion DATAPACKS
 
 #region ITEMS
-var _recieved_item_index := -1
 func recieve_item(index: int, item: NetworkItem) -> void:
 	assert(item.dest_player_id == conn.player_id)
-	if index <= _recieved_item_index:
+	if index <= conn.recieved_index:
 		return # Already recieved, skip
 	var data := AP.get_datacache(AP_GAME_NAME)
 	var msg := ""
@@ -444,21 +387,23 @@ func recieve_item(index: int, item: NetworkItem) -> void:
 		msg = "%s found your %s at their %s!" % [conn.get_player_name(item.src_player_id), data.get_item_name(item.id), src_data.get_loc_name(item.loc_id)]
 	
 	#TODO actually handle recieving?
-	AP.log(msg)
 	
-	_recieved_item_index = index
+	if AP_LOG_RECIEVED:
+		AP.log(msg)
+	
+	conn.recieved_index = index
 #endregion ITEMS
 
 #region LOCATIONS
 ## Emitted when a location should be cleared/deleted from the world, as it has been "already collected"
 signal _remove_location(loc_id: int)
-var _removed_locs: Dictionary = {}
+
 func _remove_loc(loc_id: int) -> void:
-	if not _removed_locs.get(loc_id, false):
-		_removed_locs[loc_id] = true
+	if conn and not conn.checked_locations.get(loc_id, false):
+		conn.checked_locations[loc_id] = true
 		_remove_location.emit(loc_id)
 func _on_removed_id(loc_id: int, proc: Callable) -> void:
-	if _removed_locs.get(loc_id, false):
+	if conn.checked_locations.get(loc_id, false):
 		proc.call()
 	else:
 		_remove_location.connect(func(id:int):
@@ -472,17 +417,23 @@ func collect_location(loc_id: int) -> void:
 	printout_recieved_items = false
 	send_command("LocationChecks", {"locations":[loc_id]})
 	_remove_loc(loc_id)
+## Call when multiple locations are collected and need to be sent to the server at once.
 func collect_locations(locs: Array[int]) -> void:
 	printout_recieved_items = false
 	send_command("LocationChecks", {"locations":locs})
 	for loc_id in locs:
 		_remove_loc(loc_id)
+
+func location_exists(loc_id: int) -> bool:
+	return conn.checked_locations.has(loc_id)
+func location_checked(loc_id: int, def := false) -> bool:
+	return conn.checked_locations.get(loc_id, def)
 #endregion LOCATIONS
 func _process(_delta):
 	poll()
 
 func _ready():  #TODO REMOVE TESTING
-	ap_connect("archipelago.gg","50874","EmilySM")
+	ap_connect("archipelago.gg","64621","EmilySM")
 
 func _exit_tree():
 	if status != APStatus.DISCONNECTED:
@@ -491,117 +442,6 @@ func _exit_tree():
 func _notification(what):
 	if what == NOTIFICATION_PREDELETE:
 		AP.close_logger()
-
-#region DATACLASSES
-class Version:
-	var major := 0
-	var minor := 0
-	var build := 0
-	
-	static func from(json: Dictionary) -> Version:
-		if json["class"] != "Version":
-			return null
-		var v := Version.new()
-		v.major = json["major"]
-		v.minor = json["minor"]
-		v.build = json["build"]
-		return v
-	static func val(v1:int, v2:int, v3:int):
-		var v = Version.new()
-		v.major = v1
-		v.minor = v2
-		v.build = v3
-		return v
-	
-	func _to_string():
-		return "VER(%d.%d.%d)" % [major,minor,build]
-	
-	func compare(other: Version) -> int:
-		if major != other.major:
-			return major - other.major
-		if minor != other.minor:
-			return minor - other.minor
-		return build - other.build
-	
-	func _as_ap_dict() -> Dictionary:
-		return {"major":major,"minor":minor,"build":build,"class":"Version"}
-class NetworkItem:
-	var id: int
-	var loc_id: int
-	var src_player_id: int
-	var dest_player_id: int
-	var flags: int
-	
-	func get_classification() -> String:
-		return AP.get_item_classification(flags)
-	static func from(json: Dictionary, conn_info: ConnectionInfo, recv: bool) -> NetworkItem:
-		if json["class"] != "NetworkItem":
-			return null
-		var v := NetworkItem.new()
-		v.id = json["item"]
-		v.loc_id = json["location"]
-		v.src_player_id = json["player"] if recv else conn_info.player_id
-		v.dest_player_id = conn_info.player_id if recv else json["player"]
-		v.flags = json["flags"]
-		return v
-	
-	func _to_string():
-		return "ITEM(%d at %d,player %d->%d,flags %d)" % [id,loc_id,src_player_id,dest_player_id,flags]
-	func output(console: CustomConsole, data: DataCache) -> void:
-		AP.out_item(console, id, flags, data)
-class NetworkPlayer:
-	var team: int
-	var slot: int
-	var alias := ""
-	var name : String
-	
-	var conn: ConnectionInfo
-	func get_slot() -> NetworkSlot:
-		return conn.slots[slot]
-	func get_name(use_alias := true) -> String:
-		var ret := ""
-		if use_alias: ret = alias
-		if not ret: ret = name
-		return ret
-	
-	static func from(json: Dictionary, conn_info: ConnectionInfo) -> NetworkPlayer:
-		if json["class"] != "NetworkPlayer":
-			return null
-		var v := NetworkPlayer.new()
-		v.team = json["team"]
-		v.slot = json["slot"]
-		v.name = json["name"]
-		if json.has("alias"):
-			v.alias = json["alias"]
-			if v.alias == v.name:
-				v.alias = ""
-		v.conn = conn_info
-		return v
-	
-	func _to_string():
-		return "PLAYER(%s[%s],team %d,slot %d)" % [name,alias,team,slot]
-	func output(console: CustomConsole) -> void:
-		AP.out_player(console, slot, conn)
-class NetworkSlot:
-	var name : String
-	var game: String
-	var type: int #spectator = 0x00, player = 0x01, group = 0x02
-	var group_members: Array[int] = []
-	
-	static func from(json: Dictionary) -> NetworkSlot:
-		if json["class"] != "NetworkSlot":
-			return null
-		var v := NetworkSlot.new()
-		v.name = json["name"]
-		v.game = json["game"]
-		v.type = json["type"]
-		v.group_members.assign(json["group_members"])
-		return v
-	
-	func _to_string():
-		return "SLOT(%s[%s],type %d,members %s)" % [name,game,type,group_members]
-
-#endregion DATACLASSES
 
 #region CONSOLE
 
@@ -642,24 +482,6 @@ func _close_console() -> void:
 		output_console.close()
 		output_console = null
 
-class ConsoleCommand:
-	var text: String = ""
-	var help_text: String = ""
-	var call_proc: Variant = null # Callable[String->void] | null
-	var autofill_proc: Variant = true # Callable[String->Array[String]] | bool
-	func _init(txt: String):
-		text = txt
-	func set_call(caller: Callable) -> ConsoleCommand:
-		call_proc = caller
-		return self
-	func set_autofill(caller: Variant) -> ConsoleCommand:
-		assert(caller is bool or caller is Callable)
-		autofill_proc = caller
-		return self
-	func set_help(helptxt: String) -> ConsoleCommand:
-		help_text = helptxt
-		return self
-	
 var console_commands: Array[ConsoleCommand] = []
 func console_message(msg: String) -> void:
 	if msg.is_empty(): return
@@ -671,7 +493,7 @@ func console_message(msg: String) -> void:
 		var found := false
 		for command in console_commands:
 			if command.text == cmd_lower:
-				command.call_proc.call(msg)
+				command.call_proc.call(command, msg)
 				found = true
 				break
 		if not found:
@@ -681,25 +503,42 @@ func console_message(msg: String) -> void:
 var autofill: AutofillHandler = AutofillHandler.new()
 func _init():
 	_open_console()
-	register_command(ConsoleCommand.new("/help").set_help("Displays this message").set_call(
-		func(_msg: String):
+	register_command(ConsoleCommand.new("/help").add_help("", "Displays this message")
+		.set_call(func(_cmd: ConsoleCommand, _msg: String):
 			var s := ""
 			for cmd in console_commands:
-				if cmd.help_text:
-					s += "%s\n    %s\n" % [cmd.text,cmd.help_text.replace("\n","\n    ")]
+				s += cmd.get_helptext()
 			output_console.add_text(s, "", COLOR_UI_MSG)))
 	register_command(ConsoleCommand.new("/cls")
-		.set_help("Clears the console")
-		.set_call(func(_msg: String): output_console.clear()))
+		.add_help("", "Clears the console")
+		.set_call(func(_cmd: ConsoleCommand, _msg: String): output_console.clear()))
 	register_command(ConsoleCommand.new("/clr_hist")
-		.set_help("Clears the command history")
-		.set_call(func(_msg: String): output_console_window.typing_bar.history_clear()))
+		.add_help("", "Clears the command history")
+		.set_call(func(_cmd: ConsoleCommand, _msg: String): output_console_window.typing_bar.history_clear()))
+	register_command(ConsoleCommand.new("/connect")
+		.add_help("port", "Connects to a new port, with the same ip/slot/password.")
+		.add_help("ip:port", "Connects to a new ip+port, with the same slot/password.")
+		.add_help("ip:port slot [pwd]", "Connects to a new ip+port, with a new slot and [optional] password.")
+		.set_call(func(cmd: ConsoleCommand, msg: String):
+			var command_args = msg.split(" ", true, 3)
+			if command_args.size() == 2:
+				command_args.append(slot)
+				command_args.append(pwd)
+			elif command_args.size() == 3:
+				command_args.append("")
+			if command_args.size() != 4:
+				cmd.output_usage(output_console)
+			else:
+				var ipport = command_args[1].split(":",1)
+				if ipport.size() == 1 and ipport[0].length() == 5:
+					ipport = [ip,ipport[0]]
+				ap_connect(ipport[0],ipport[1],command_args[2],command_args[3])))
 	register_command(ConsoleCommand.new("/reconnect")
-		.set_help("Refreshes the connection to the Archipelago server")
-		.set_call(func(_msg: String): ap_reconnect()))
+		.add_help("", "Refreshes the connection to the Archipelago server")
+		.set_call(func(_cmd: ConsoleCommand, _msg: String): ap_reconnect()))
 	register_command(ConsoleCommand.new("!hint_location").set_autofill(_autofill_locs))
 	register_command(ConsoleCommand.new("!hint").set_autofill(_autofill_items))
-	register_command(ConsoleCommand.new("!help").set_help("Displays server-based command help"))
+	register_command(ConsoleCommand.new("!help").add_help("", "Displays server-based command help"))
 	register_command(ConsoleCommand.new("!remaining"))
 	register_command(ConsoleCommand.new("!missing"))
 	register_command(ConsoleCommand.new("!checked"))
@@ -708,33 +547,33 @@ func _init():
 	register_command(ConsoleCommand.new("!players"))
 	if OS.is_debug_build():
 		register_command(ConsoleCommand.new("/db_send")
-			.set_help("Cheat-Collects the given location")
-			.set_call(func(msg: String):
+			.add_help("", "Cheat-Collects the given location")
+			.set_autofill(_autofill_locs)
+			.set_call(func(cmd: ConsoleCommand, msg: String):
 				var command_args = msg.split(" ", true, 1)
 				if command_args.size() > 1 and command_args[1]:
 					var data = AP.get_datacache(AP_GAME_NAME)
-					for loc in _removed_locs:
+					for loc in conn.checked_locations.keys():
 						var loc_name := data.get_loc_name(loc)
 						if loc_name.strip_edges().to_lower() == command_args[1].strip_edges().to_lower():
-							if _removed_locs[loc]:
+							if conn.checked_locations[loc]:
 								output_console.add_text("Location already sent!\n", "", COLOR_UI_MSG)
 							else:
 								output_console.add_text("Sending location '%s'!\n" % loc_name, "", COLOR_UI_MSG)
 								collect_location(loc)
 							return
 					output_console.add_text("Location '%s' not found! Check spelling?\n" % command_args[1].strip_edges(), "", COLOR_UI_MSG)
-				else: output_console.add_text("Usage: '/db_send Some Location Name'\n", "", COLOR_UI_MSG))
-			.set_autofill(_autofill_locs))
-		register_command(ConsoleCommand.new("/connect")
-			.set_call(func(msg: String):
-				var command_args = msg.split(" ", true, 3)
-				if command_args.size() == 3:
-					command_args.append("")
-				if command_args.size() != 4:
-					output_console.add_text("Usage: '/connect ip_address:port \"Slot Name\" [\"Password\"]'\n", "", COLOR_UI_MSG)
-				else:
-					var ipport = command_args[1].split(":",1)
-					ap_connect(ipport[0],ipport[1],command_args[2],command_args[3])))
+				else: cmd.output_usage(output_console)))
+		register_command(ConsoleCommand.new("/db_lock_info")
+			.add_help("", "Prints the connection lock info")
+			.set_call(func(_cmd: ConsoleCommand, _msg: String):
+				if aplock:
+					output_console.add_text("%s\n" % str(aplock), "", COLOR_UI_MSG)))
+		register_command(ConsoleCommand.new("/db_unlock_connection")
+			.add_help("", "Unlocks the connection lock, so that any valid slot can be connected to (instead of only the slot previously connected to)")
+			.set_call(func(_cmd: ConsoleCommand, _msg: String):
+				if aplock:
+					aplock.unlock()))
 	
 func register_command(cmd: ConsoleCommand) -> void:
 	console_commands.append(cmd)
@@ -770,7 +609,7 @@ func _autofill_locs(msg: String) -> Array[String]:
 	var ind := 0
 	while ind < locs.size():
 		var id: int = data.location_name_to_id[locs[ind]]
-		if _removed_locs.get(id, true):
+		if location_checked(id, true):
 			locs.pop_at(ind)
 		else: ind += 1
 	if args.size() > 1 and args[1]:
@@ -785,6 +624,7 @@ func _autofill_locs(msg: String) -> Array[String]:
 				locs.pop_at(q)
 			else:
 				q += 1
+	print(locs)
 	for q in locs.size():
 		locs[q] = "%s %s" % [args[0],locs[q]]
 	return locs
