@@ -1,0 +1,95 @@
+[gd_scene load_steps=8 format=3 uid="uid://cgq7n1figlpu3"]
+
+[ext_resource type="Script" path="res://ui/console_window.gd" id="1_61s7u"]
+[ext_resource type="Script" path="res://ui/base_console.gd" id="1_hvqhv"]
+[ext_resource type="Script" path="res://ui/console_tab.gd" id="2_6f1h8"]
+[ext_resource type="Script" path="res://ui/typing_bar.gd" id="3_37wlj"]
+[ext_resource type="SystemFont" uid="uid://73rjoc23d4ub" path="res://ui/console_font.tres" id="3_qc5eo"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_rud5c"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5222u"]
+bg_color = Color(0.231518, 0.231518, 0.231518, 1)
+
+[node name="Console" type="Window"]
+initial_position = 2
+size = Vector2i(800, 500)
+min_size = Vector2i(300, 100)
+script = ExtResource("1_61s7u")
+
+[node name="Cont" type="MarginContainer" parent="."]
+custom_minimum_size = Vector2(800, 500)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 800.0
+offset_bottom = 500.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="BG" type="ColorRect" parent="Cont"]
+layout_mode = 2
+color = Color(0, 0, 0, 1)
+
+[node name="Tabs" type="TabContainer" parent="Cont"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_rud5c")
+theme_override_styles/tabbar_background = SubResource("StyleBoxFlat_5222u")
+tabs_visible = false
+tab_focus_mode = 0
+
+[node name="Console" type="VBoxContainer" parent="Cont/Tabs"]
+layout_mode = 2
+theme_override_constants/separation = 0
+alignment = 1
+script = ExtResource("2_6f1h8")
+
+[node name="ConsoleMargin" type="MarginContainer" parent="Cont/Tabs/Console"]
+clip_contents = true
+custom_minimum_size = Vector2(800, 471)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+focus_next = NodePath("Console")
+focus_previous = NodePath("Console")
+focus_mode = 1
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="Console" type="Control" parent="Cont/Tabs/Console/ConsoleMargin"]
+layout_mode = 2
+focus_next = NodePath("../../TypingBar")
+focus_previous = NodePath("../../TypingBar")
+focus_mode = 2
+mouse_filter = 1
+script = ExtResource("1_hvqhv")
+font = ExtResource("3_qc5eo")
+
+[node name="TooltipBG" type="ColorRect" parent="Cont/Tabs/Console/ConsoleMargin/Console"]
+visible = false
+layout_mode = 2
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+color = Color(0.150075, 0.150075, 0.150075, 1)
+
+[node name="Tooltip" type="Label" parent="Cont/Tabs/Console/ConsoleMargin/Console/TooltipBG"]
+layout_mode = 0
+offset_right = 1.0
+offset_bottom = 23.0
+autowrap_mode = 2
+
+[node name="TypingBar" type="ColorRect" parent="Cont/Tabs/Console"]
+layout_mode = 2
+focus_next = NodePath(".")
+focus_previous = NodePath(".")
+focus_mode = 2
+color = Color(0.145266, 0.145266, 0.145266, 1)
+script = ExtResource("3_37wlj")
+font = ExtResource("3_qc5eo")
+
+[connection signal="close_requested" from="." to="." method="_on_close_requested"]
+[connection signal="size_changed" from="." to="Cont/Tabs/Console/ConsoleMargin" method="_on_console_size_changed"]
+[connection signal="send_text" from="Cont/Tabs/Console/TypingBar" to="Cont/Tabs/Console/ConsoleMargin/Console" method="send_msg"]

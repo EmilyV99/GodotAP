@@ -1,4 +1,4 @@
-@tool class_name CustomConsole extends Control
+@tool class_name BaseConsole extends Control
 
 class FontFlags:
 	var bold := false
@@ -109,7 +109,7 @@ class ConsoleDrawData:
 	func max_scroll() -> float:
 		var s := max_shown_y - b
 		return 0.0 if s <= 0 else s
-	func newline(c: CustomConsole, count := 1):
+	func newline(c: BaseConsole, count := 1):
 		var at_start := Util.approx_eq(x, l)
 		x = l
 		if count > 0:
@@ -119,9 +119,9 @@ class ConsoleDrawData:
 		y += c.get_line_height() * count
 	
 class ConsolePart:
-	func draw(_c: CustomConsole, _data: ConsoleDrawData) -> void:
+	func draw(_c: BaseConsole, _data: ConsoleDrawData) -> void:
 		pass
-	func draw_hover(_c: CustomConsole, _data: ConsoleDrawData) -> void:
+	func draw_hover(_c: BaseConsole, _data: ConsoleDrawData) -> void:
 		pass
 	func needs_hover() -> bool:
 		return false
@@ -140,7 +140,7 @@ class TextPart extends ConsolePart:
 			_font_flags.bold = bold
 			_font_flags.italic = italic
 			return _font_flags
-	func draw(c: CustomConsole, data: ConsoleDrawData) -> void:
+	func draw(c: BaseConsole, data: ConsoleDrawData) -> void:
 		var text_pos = 0
 		var trim_pos: int
 		hitboxes.clear()
@@ -184,7 +184,7 @@ class TextPart extends ConsolePart:
 				# Trimmed whitespace, need to force the line down though
 				data.x = data.r
 			text_pos = trim_pos
-	func _ttip_calc_size(c: CustomConsole, data: ConsoleDrawData, clip := false) -> void:
+	func _ttip_calc_size(c: BaseConsole, data: ConsoleDrawData, clip := false) -> void:
 		if clip:
 			c.tooltip_label.size = Vector2(data.w,c.tooltip_label.size.y)
 			var h: int = 0 if c.tooltip_label.get_line_count() else c.tooltip_label.get_line_height()
@@ -209,7 +209,7 @@ class TextPart extends ConsolePart:
 		c.tooltip_bg.size.x += 2*HMARGIN
 		c.tooltip_bg.size.y += 2*VMARGIN
 		#endregion Add border
-	func draw_hover(c: CustomConsole, data: ConsoleDrawData) -> void:
+	func draw_hover(c: BaseConsole, data: ConsoleDrawData) -> void:
 		if not tooltip: return
 		#TODO Draw tooltip (Use an actual Label or something?)
 		c.tooltip_bg.visible = true
@@ -238,13 +238,13 @@ class TextPart extends ConsolePart:
 		return hitboxes
 class LineBreakPart extends ConsolePart:
 	var break_count: int = 1
-	func draw(c: CustomConsole, data: ConsoleDrawData) -> void:
+	func draw(c: BaseConsole, data: ConsoleDrawData) -> void:
 		data.newline(c, break_count)
 class SpacingPart extends ConsolePart:
 	var spacing := Vector2.ZERO
 	var reset_line := true
 	var from_reset_y := false
-	func draw(c: CustomConsole, data: ConsoleDrawData) -> void:
+	func draw(c: BaseConsole, data: ConsoleDrawData) -> void:
 		if reset_line and not Util.approx_eq(data.x, data.l):
 			data.newline(c)
 		if from_reset_y:
@@ -260,7 +260,9 @@ class SpacingPart extends ConsolePart:
 				data.y += spacing.y
 class IndentPart extends ConsolePart:
 	var indent: float = 0.0
-	func draw(_c: CustomConsole, data: ConsoleDrawData) -> void:
+#region New Code Region
+	func draw(_c: BaseConsole, data: ConsoleDrawData) -> void:
+#endregion
 		if Util.approx_eq(data.x, data.l):
 			data.x += indent
 		data.l += indent
@@ -303,6 +305,14 @@ func add_indent(indent: float) -> IndentPart:
 	parts.append(part)
 	#no redraw needed for pure spacing
 	return part
+
+func ensure_newline(): # Returns SpacingPart | null
+	if not parts.is_empty():
+		var last_part = parts.back()
+		if last_part is SpacingPart:
+			if last_part.reset_line or last_part.from_reset_y:
+				return #already ensured
+	return add_header_spacing(0)
 
 var parts: Array[ConsolePart] = []
 var hovered_part: ConsolePart = null

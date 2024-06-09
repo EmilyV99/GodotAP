@@ -9,22 +9,23 @@ var debug_hidden := true :
 		if not OS.is_debug_build(): return
 		if debug_hidden == val: return
 		debug_hidden = val
-		refresh_db_commands()
 		debug_toggled.emit()
 var default_procs: Array[Callable] ## [(CommandManager,String)->void]
 
-var console: CustomConsole = null
+var console: BaseConsole = null
 
+func debug_disabled() -> bool:
+	return debug_hidden
 func autofill(msg: String, capacity := 5) -> Array[String]:
 	if msg.is_empty(): return []
 	var split_msg := msg.split(" ",true,1)
 	var cmd: ConsoleCommand = _commands_by_name.get(split_msg[0])
 	var ret: Array[String] = []
-	if cmd and not cmd.disabled and cmd.autofill_proc:
-		ret = cmd.autofill_proc.call(msg)
+	if cmd and not cmd.is_disabled() and cmd.autofill_proc:
+		ret.assign(cmd.autofill_proc.call(msg))
 	elif split_msg.size() < 2:
 		for iter_cmd in _commands:
-			if iter_cmd.disabled: continue
+			if iter_cmd.is_disabled(): continue
 			if debug_hidden and iter_cmd.is_debug(): continue
 			if iter_cmd.text.begins_with(msg.to_lower()):
 				ret.append(iter_cmd.text+" ")
@@ -37,7 +38,7 @@ func register_command(cmd: ConsoleCommand) -> void:
 	_commands.append(cmd)
 	_commands_by_name[cmd.text] = cmd
 	if cmd.is_debug() and debug_hidden and not cmd.text == "/debug":
-		cmd.disabled = true
+		cmd.disabled_procs.append(debug_disabled)
 func register_default(proc: Callable) -> void:
 	default_procs.append(proc)
 
@@ -45,7 +46,7 @@ func call_cmd(msg: String) -> void:
 	if msg.is_empty(): return
 	var cmd := get_command(msg.split(" ", true, 1)[0])
 	if cmd and cmd.call_proc:
-		if cmd.disabled:
+		if cmd.is_disabled():
 			console.add_line("Command '%s' is disabled!" % cmd.text, "", console.COLOR_UI_MSG)
 		else:
 			cmd.call_proc.call(self, cmd, msg)
@@ -60,7 +61,7 @@ func get_command(cmdname: String) -> ConsoleCommand:
 	return _commands_by_name.get(cmdname.to_lower())
 
 static func _cmd_is_enabled(cmd: ConsoleCommand) -> bool:
-	return not cmd.disabled
+	return not cmd.is_disabled()
 static func _cmd_is_debug(cmd: ConsoleCommand) -> bool:
 	return cmd.is_debug()
 
@@ -68,12 +69,6 @@ func get_enabled_commands() -> Array[ConsoleCommand]:
 	return _commands.filter(CommandManager._cmd_is_enabled)
 func get_debug_commands() -> Array[ConsoleCommand]:
 	return _commands.filter(CommandManager._cmd_is_debug)
-
-func refresh_db_commands() -> void:
-	if not OS.is_debug_build(): return
-	for cmd in get_debug_commands():
-		cmd.disabled = debug_hidden
-	get_command("/debug").disabled = false
 
 func setup_basic_commands() -> void:
 	register_command(ConsoleCommand.new("/help")

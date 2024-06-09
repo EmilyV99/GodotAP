@@ -21,5 +21,5 @@ static func from(json: Dictionary, conn_info: ConnectionInfo, recv: bool) -> Net
 
 func _to_string():
 	return "ITEM(%d at %d,player %d->%d,flags %d)" % [id,loc_id,src_player_id,dest_player_id,flags]
-func output(console: CustomConsole, data: DataCache) -> void:
+func output(console: BaseConsole, data: DataCache) -> void:
 	AP.out_item(console, id, flags, data)

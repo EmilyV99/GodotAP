@@ -10,9 +10,12 @@
 var cmd_manager: CommandManager = null
 var autofill_rect: StringBar
 
-const VMARGIN: float = 4
+const VMARGIN: float = 6
 const HMARGIN: float = 6
 const AUTOFILL_HMARGIN: float = 30
+
+func calc_height() -> float:
+	return font.get_height(font_size) + (2*VMARGIN)
 
 signal send_text(msg: String)
 
@@ -83,7 +86,6 @@ func retype(s: String) -> void:
 	clear_select()
 
 func _ready():
-	size.y = font.get_height(font_size)+2*VMARGIN
 	if not Engine.is_editor_hint():
 		# Connect focus
 		focus_entered.connect(_focus)
@@ -107,11 +109,13 @@ func _process(_delta):
 	update_mouse()
 
 func _draw():
-	if _tab_completions:
+	if _tab_completions and had_focus:
 		draw_string(font, Vector2(HMARGIN,VMARGIN+font.get_ascent(font_size)), _tab_completions[0], HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, color_autofill)
 		if _tab_completions.size() > 1:
 			autofill_rect.position.x = AUTOFILL_HMARGIN
-			autofill_rect.size.x = get_parent().size.x - 2*AUTOFILL_HMARGIN
+			autofill_rect.position.y = 0
+			autofill_rect.size.x = size.x - 2*AUTOFILL_HMARGIN
+			autofill_rect.size.y = 0
 			autofill_rect.queue_redraw()
 	var h = font.get_height(font_size)
 	var pre_w := font.get_string_size(text.substr(0, low_pos), HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
@@ -223,8 +227,11 @@ func _gui_input(event):
 
 func update() -> void:
 	if cmd_manager:
-		_tab_completions.assign(cmd_manager.autofill(text, 10))
-		if _tab_completions and _tab_completions[0] == text:
+		if had_focus:
+			_tab_completions.assign(cmd_manager.autofill(text, 10))
+			if _tab_completions and _tab_completions[0] == text:
+				_tab_completions.clear()
+		else:
 			_tab_completions.clear()
 		autofill_rect.set_strings(_tab_completions)
 func update_mouse() -> void:
@@ -247,9 +254,11 @@ func _focus():
 	if Engine.is_editor_hint(): return
 	if not had_focus:
 		had_focus = true
+		update()
 		queue_redraw()
 func _unfocus():
 	if Engine.is_editor_hint(): return
 	if had_focus:
 		had_focus = false
+		update()
 		queue_redraw()

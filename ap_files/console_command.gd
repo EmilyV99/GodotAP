@@ -10,7 +10,7 @@ var text: String = ""
 var help_text: Array[CmdHelpText] = []
 var call_proc: Variant = null # Callable(ConsoleCommand,String)->void | null
 var autofill_proc: Variant = null # Callable(String)->Array[String] | null
-var disabled: bool = false
+var disabled_procs: Array[Callable] = [] # [Callable()->bool]
 var _debug: bool = false
 
 #region Constructor and builder-pattern funcs
@@ -30,6 +30,9 @@ func add_help(args: String, helptxt: String) -> ConsoleCommand:
 	ht.text = helptxt
 	help_text.append(ht)
 	return self
+func add_disable(proc: Callable) -> ConsoleCommand:
+	disabled_procs.append(proc)
+	return self
 func debug(state := true) -> ConsoleCommand:
 	_debug = state
 	return self
@@ -43,20 +46,22 @@ func get_helptext() -> String:
 	for ht in help_text:
 		s += "%s %s\n    %s\n" % [text,ht.args,ht.text.replace("\n","\n    ")]
 	return s
-func output_helptext(console: CustomConsole) -> void:
+func output_helptext(console: BaseConsole) -> void:
 	for ht in help_text:
 		console.add_line("%s %s" % [text,ht.args], "", console.COLOR_UI_MSG)
 		console.add_indent(HELPTEXT_INDENT)
 		console.add_line(ht.text, "", console.COLOR_UI_MSG)
 		console.add_indent(-HELPTEXT_INDENT)
-func output_usage(console: CustomConsole) -> void:
+func output_usage(console: BaseConsole) -> void:
 	console.add_text("Usage:\n%s" % get_helptext(), "", console.COLOR_UI_MSG)
 
-static func cmd_is_enabled(cmd: ConsoleCommand):
-	return not cmd.disabled
+func is_disabled() -> bool:
+	for proc in disabled_procs:
+		if proc.call(): return true
+	return false
 
 func _to_string():
 	var s = "COMMAND(" + text
-	if disabled: s += ",dis"
+	if is_disabled(): s += ",dis"
 	if is_debug(): s += ",db"
 	return s+")"

@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://c2s3ladoh75jw"]
+
+[ext_resource type="PackedScene" uid="uid://cgq7n1figlpu3" path="res://ui/base_console.tscn" id="1_1macv"]
+
+[node name="Console" instance=ExtResource("1_1macv")]
+
+[node name="Cont" parent="." index="0"]
+offset_right = 800.0
+offset_bottom = 500.0

@@ -1,10 +1,10 @@
 class_name AP extends Node
 
 const AP_GAME_NAME := ""
-const AP_GAME_TAGS: Array[String] = ["TextOnly"]
+var AP_GAME_TAGS: Array[String] = ["TextOnly"]
 const AP_ITEM_HANDLING := ItemHandling.ALL
-
 const AP_PRINT_ITEMS_ON_CONNECT := false
+const AP_HIDE_NONLOCAL_ITEMSENDS := true ## Hide item send messages that don't involve the client
 
 #region LOGGING (godot console, not richtext console)
 const AP_LOG_COMMUNICATION := false
@@ -54,7 +54,10 @@ var status: APStatus = APStatus.DISCONNECTED :
 				queue_reconnect = false
 				ap_reconnect()
 
-var connecting_part: CustomConsole.TextPart
+func is_not_connected() -> bool:
+	return status != APStatus.PLAYING
+
+var connecting_part: BaseConsole.TextPart
 
 func ap_reconnect() -> void:
 	if status != APStatus.DISCONNECTED:
@@ -223,61 +226,103 @@ func handle_command(json: Dictionary) -> void:
 				printout_recieved_items = false
 		"PrintJSON":
 			var s: String = ""
-			for elem in json["data"]:
-				var txt: String = elem["text"]
-				s += txt
-				if output_console:
-					match elem.get("type", "text"):
-						"player_name":
-							output_console.add_text(txt, "Arbitrary Player Name", COLOR_PLAYER)
-						"item_name":
-							output_console.add_text(txt, "Arbitrary Item Name", COLOR_ITEM)
-						"location_name":
-							output_console.add_text(txt, "Arbitrary Location Name", COLOR_LOCATION)
-						"entrance_name":
-							output_console.add_text(txt, "Arbitrary Entrance Name", COLOR_LOCATION)
-						"player_id":
-							var plyr_id = int(txt)
-							conn.get_player(plyr_id).output(output_console)
-						"item_id":
-							var item_id = int(txt)
-							var plyr_id = int(elem["player"])
-							var data := conn.get_gamedata_for_player(plyr_id)
-							var flags := int(elem["flags"])
-							AP.out_item(output_console, item_id, flags, data)
-						"location_id":
-							var loc_id = int(txt)
-							var plyr_id = int(elem["player"])
-							var data := conn.get_gamedata_for_player(plyr_id)
-							AP.out_location(output_console, loc_id, data)
-						"text":
-							output_console.add_text(txt)
-						"color":
-							var part := output_console.add_text(txt)
-							var col_str: String = elem["color"]
-							if col_str.ends_with("_bg"): # no handling for bg colors, just convert to fg
-								col_str = col_str.substr(0,col_str.length()-3)
-							match col_str:
-								"red":
-									part.color = Color.RED
-								"green":
-									part.color = Color.GREEN
-								"yellow":
-									part.color = Color.YELLOW
-								"blue":
-									part.color = Color.BLUE
-								"magenta":
-									part.color = Color.MAGENTA
-								"cyan":
-									part.color = Color.CYAN
-								"white":
-									part.color = Color.WHITE
-								"bold":
-									part.bold = true
-								"underline":
-									part.underline = true
 			if output_console:
-				output_console.add_linebreak()
+				var output_data := false
+				var pre_space := false
+				var post_space := false
+				match json.get("type"):
+					"Chat":
+						var msg = json.get("message","")
+						var name_part := AP.out_player(output_console, json["slot"], conn)
+						name_part.text += ": "
+						if not msg.is_empty():
+							output_console.add_text(msg)
+							s += name_part.text + msg
+					"CommandResult", "AdminCommandResult", "Goal", "Release", "Collect", "Tutorial":
+						pre_space = true
+						post_space = true
+						output_data = true
+					"Countdown":
+						if int(json["countdown"]) == 0:
+							post_space = true
+						output_data = true
+					"ItemSend", "ItemCheat":
+						if not AP_HIDE_NONLOCAL_ITEMSENDS:
+							output_data = true
+						elif int(json["receiving"]) == conn.player_id:
+							output_data = true
+						else:
+							var ni := NetworkItem.from(json["item"], conn, true)
+							if ni.src_player_id == conn.player_id:
+								output_data = true
+					"Hint":
+						if int(json["receiving"]) == conn.player_id:
+							output_data = true
+						else:
+							var ni := NetworkItem.from(json["item"], conn, true)
+							if ni.src_player_id == conn.player_id:
+								output_data = true
+					_:
+						output_data = true
+				if pre_space and output_data:
+					output_console.add_header_spacing()
+				if output_data:
+					for elem in json["data"]:
+						var txt: String = elem["text"]
+						s += txt
+						match elem.get("type", "text"):
+							"player_name":
+								output_console.add_text(txt, "Arbitrary Player Name", COLOR_PLAYER)
+							"item_name":
+								output_console.add_text(txt, "Arbitrary Item Name", COLOR_ITEM)
+							"location_name":
+								output_console.add_text(txt, "Arbitrary Location Name", COLOR_LOCATION)
+							"entrance_name":
+								output_console.add_text(txt, "Arbitrary Entrance Name", COLOR_LOCATION)
+							"player_id":
+								var plyr_id = int(txt)
+								conn.get_player(plyr_id).output(output_console)
+							"item_id":
+								var item_id = int(txt)
+								var plyr_id = int(elem["player"])
+								var data := conn.get_gamedata_for_player(plyr_id)
+								var flags := int(elem["flags"])
+								AP.out_item(output_console, item_id, flags, data)
+							"location_id":
+								var loc_id = int(txt)
+								var plyr_id = int(elem["player"])
+								var data := conn.get_gamedata_for_player(plyr_id)
+								AP.out_location(output_console, loc_id, data)
+							"text":
+								output_console.add_text(txt)
+							"color":
+								var part := output_console.add_text(txt)
+								var col_str: String = elem["color"]
+								if col_str.ends_with("_bg"): # no handling for bg colors, just convert to fg
+									col_str = col_str.substr(0,col_str.length()-3)
+								match col_str:
+									"red":
+										part.color = Color.RED
+									"green":
+										part.color = Color.GREEN
+									"yellow":
+										part.color = Color.YELLOW
+									"blue":
+										part.color = Color.BLUE
+									"magenta":
+										part.color = Color.MAGENTA
+									"cyan":
+										part.color = Color.CYAN
+									"white":
+										part.color = Color.WHITE
+									"bold":
+										part.bold = true
+									"underline":
+										part.underline = true
+				if post_space and output_data:
+					output_console.add_header_spacing()
+			if output_console:
+				output_console.ensure_newline()
 			AP.log("[PRINT] %s" % s)
 		"DataPackage":
 			var packs = json["data"]["games"]
@@ -298,7 +343,14 @@ func handle_command(json: Dictionary) -> void:
 			for item in items:
 				recieve_item(idx, item)
 				idx += 1
-		_: #TODO "LocationInfo","RoomUpdate","Bounced","Retrieved","SetReply","InvalidPacket"
+		"RoomUpdate":
+			for loc in json.get("checked_locations", []):
+				_remove_loc(loc)
+			if json.has("players"):
+				conn.players.clear()
+				for plyr in json["players"]:
+					conn.players.append(NetworkPlayer.from(plyr, conn))
+		_: #TODO "LocationInfo","Bounced","Retrieved","SetReply","InvalidPacket"
 			AP.log("[UNHANDLED PACKET TYPE] %s" % str(json))
 
 #region DATAPACKS
@@ -416,11 +468,13 @@ func on_removed(loc_name: String, proc: Callable) -> void:
 
 ## Call when a location is collected and needs to be sent to the server.
 func collect_location(loc_id: int) -> void:
+	if is_tracker_textclient: return
 	printout_recieved_items = false
 	send_command("LocationChecks", {"locations":[loc_id]})
 	_remove_loc(loc_id)
 ## Call when multiple locations are collected and need to be sent to the server at once.
 func collect_locations(locs: Array[int]) -> void:
+	if is_tracker_textclient: return
 	printout_recieved_items = false
 	send_command("LocationChecks", {"locations":locs})
 	for loc_id in locs:
@@ -459,7 +513,7 @@ func _notification(what):
 
 #region CONSOLE
 
-static func out_item(console: CustomConsole, id: int, flags: int, data: DataCache):
+static func out_item(console: BaseConsole, id: int, flags: int, data: DataCache) -> BaseConsole.TextPart:
 	if not console: return
 	var ttip = "Type: %s" % AP.get_item_classification(flags)
 	var color := COLOR_ITEM
@@ -467,25 +521,25 @@ static func out_item(console: CustomConsole, id: int, flags: int, data: DataCach
 		color = COLOR_ITEM_PROG
 	elif flags&ICLASS_TRAP:
 		color = COLOR_ITEM_TRAP
-	console.add_text(data.get_item_name(id), ttip, color)
-static func out_player(console: CustomConsole, id: int, conn_info: ConnectionInfo):
+	return console.add_text(data.get_item_name(id), ttip, color)
+static func out_player(console: BaseConsole, id: int, conn_info: ConnectionInfo) -> BaseConsole.TextPart:
 	if not console: return
 	var player := conn_info.get_player(id)
 	var ttip = "Game: %s" % conn_info.get_slot(id).game
 	if not player.alias.is_empty():
 		ttip += "\nName: %s" % player.name
-	console.add_text(conn_info.get_player_name(id), ttip, COLOR_PLAYER)
-static func out_location(console: CustomConsole, id: int, data: DataCache):
+	return console.add_text(conn_info.get_player_name(id), ttip, COLOR_PLAYER)
+static func out_location(console: BaseConsole, id: int, data: DataCache) -> BaseConsole.TextPart:
 	var ttip = ""
-	console.add_text(data.get_loc_name(id), ttip, COLOR_LOCATION)
+	return console.add_text(data.get_loc_name(id), ttip, COLOR_LOCATION)
 
 var output_console_window: ConsoleWindow = null
-var output_console: CustomConsole :
+var output_console: BaseConsole :
 	get: return cmd_manager.console
 	set(val): cmd_manager.console = val
 func _open_console() -> void:
 	if output_console: return
-	output_console_window = load("res://ui/console.tscn").instantiate()
+	output_console_window = load("res://ui/ap_console.tscn").instantiate()
 	output_console_window.title = "Archipelago Console"
 	add_child(output_console_window)
 	await output_console_window.ready
@@ -502,19 +556,19 @@ func _close_console() -> void:
 
 var cmd_manager: CommandManager = CommandManager.new()
 func _init():
+	_update_tags()
 	_open_console()
 	cmd_manager.register_default(func(mgr: CommandManager, msg: String):
 		if msg[0] == "/":
 			mgr.console.add_line("Unknown command '%s' - use '/help' to see commands" % msg.split(" ", true, 1)[0], "", mgr.console.COLOR_UI_MSG)
 		else:
-			if status != APStatus.PLAYING:
-				mgr.console.add_line("Not connected to Archipelago! Please '/connect' first!", "", mgr.console.COLOR_UI_MSG)
-			else: send_command("Say", {"text":msg}))
+			if ensure_connected(mgr.console):
+				send_command("Say", {"text":msg}))
 	cmd_manager.register_command(ConsoleCommand.new("/connect")
 		.add_help("port", "Connects to a new port, with the same ip/slot/password.")
 		.add_help("ip:port", "Connects to a new ip+port, with the same slot/password.")
 		.add_help("ip:port slot [pwd]", "Connects to a new ip+port, with a new slot and [optional] password.")
-		.set_call(func(_mgr: CommandManager, cmd: ConsoleCommand, msg: String):
+		.set_call(func(mgr: CommandManager, cmd: ConsoleCommand, msg: String):
 			var command_args = msg.split(" ", true, 3)
 			if command_args.size() == 2:
 				command_args.append(creds.slot)
@@ -522,9 +576,11 @@ func _init():
 			elif command_args.size() == 3:
 				command_args.append("")
 			if command_args.size() != 4:
-				cmd.output_usage(output_console)
+				cmd.output_usage(mgr.console)
 			else:
 				var ipport = command_args[1].split(":",1)
+				if ipport.is_empty():
+					cmd.output_usage(mgr.console)
 				if ipport.size() == 1 and ipport[0].length() == 5:
 					ipport = [creds.ip,ipport[0]]
 				ap_connect(ipport[0],ipport[1],command_args[2],command_args[3])))
@@ -536,24 +592,35 @@ func _init():
 		.set_call(func(_mgr: CommandManager, _cmd: ConsoleCommand, _msg: String): ap_disconnect()))
 	#region Autofill for some AP commands
 	cmd_manager.register_command(ConsoleCommand.new("!hint_location")
-		.set_autofill(_autofill_locs))
+		.set_autofill(_autofill_locs)
+		.add_disable(is_not_connected))
 	cmd_manager.register_command(ConsoleCommand.new("!hint")
-		.set_autofill(_autofill_items))
+		.set_autofill(_autofill_items)
+		.add_disable(is_not_connected))
 	cmd_manager.register_command(ConsoleCommand.new("!help")
-		.add_help("", "Displays server-based command help"))
-	cmd_manager.register_command(ConsoleCommand.new("!remaining"))
-	cmd_manager.register_command(ConsoleCommand.new("!missing"))
-	cmd_manager.register_command(ConsoleCommand.new("!checked"))
-	cmd_manager.register_command(ConsoleCommand.new("!collect"))
-	cmd_manager.register_command(ConsoleCommand.new("!release"))
-	cmd_manager.register_command(ConsoleCommand.new("!players"))
+		.add_help("", "Displays server-based command help")
+		.add_disable(is_not_connected))
+	cmd_manager.register_command(ConsoleCommand.new("!remaining")
+		.add_disable(is_not_connected))
+	cmd_manager.register_command(ConsoleCommand.new("!missing")
+		.add_disable(is_not_connected))
+	cmd_manager.register_command(ConsoleCommand.new("!checked")
+		.add_disable(is_not_connected))
+	cmd_manager.register_command(ConsoleCommand.new("!collect")
+		.add_disable(is_not_connected))
+	cmd_manager.register_command(ConsoleCommand.new("!release")
+		.add_disable(is_not_connected))
+	cmd_manager.register_command(ConsoleCommand.new("!players")
+		.add_disable(is_not_connected))
 	#endregion Autofill for some AP commands
 	cmd_manager.setup_basic_commands()
 	if OS.is_debug_build():
 		cmd_manager.register_command(ConsoleCommand.new("/send").debug()
 			.add_help("", "Cheat-Collects the given location")
+			.add_disable(func(): return is_tracker_textclient)
 			.set_autofill(_autofill_locs)
-			.set_call(func(_mgr: CommandManager, cmd: ConsoleCommand, msg: String):
+			.set_call(func(mgr: CommandManager, cmd: ConsoleCommand, msg: String):
+				if not ensure_connected(mgr.console): return
 				var command_args = msg.split(" ", true, 1)
 				if command_args.size() > 1 and command_args[1]:
 					var data = conn.get_gamedata_for_player(conn.player_id)
@@ -561,23 +628,66 @@ func _init():
 						var loc_name := data.get_loc_name(loc)
 						if loc_name.strip_edges().to_lower() == command_args[1].strip_edges().to_lower():
 							if conn.checked_locations[loc]:
-								output_console.add_line("Location already sent!", "", output_console.COLOR_UI_MSG)
+								mgr.console.add_line("Location already sent!", "", mgr.console.COLOR_UI_MSG)
 							else:
-								output_console.add_line("Sending location '%s'!" % loc_name, "", output_console.COLOR_UI_MSG)
+								mgr.console.add_line("Sending location '%s'!" % loc_name, "", mgr.console.COLOR_UI_MSG)
 								collect_location(loc)
 							return
-					output_console.add_line("Location '%s' not found! Check spelling?" % command_args[1].strip_edges(), "", output_console.COLOR_UI_MSG)
-				else: cmd.output_usage(output_console)))
+					mgr.console.add_line("Location '%s' not found! Check spelling?" % command_args[1].strip_edges(), "", mgr.console.COLOR_UI_MSG)
+				else: cmd.output_usage(mgr.console)))
 		cmd_manager.register_command(ConsoleCommand.new("/lock_info").debug()
 			.add_help("", "Prints the connection lock info")
-			.set_call(func(_mgr: CommandManager, _cmd: ConsoleCommand, _msg: String):
-				if aplock:
-					output_console.add_line("%s" % str(aplock), "", output_console.COLOR_UI_MSG)))
+			.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, _msg: String):
+				mgr.console.add_line("%s" % (str(aplock) if aplock else "No Lock Active"), "", mgr.console.COLOR_UI_MSG)))
 		cmd_manager.register_command(ConsoleCommand.new("/unlock_connection").debug()
 			.add_help("", "Unlocks the connection lock, so that any valid slot can be connected to (instead of only the slot previously connected to)")
 			.set_call(func(_mgr: CommandManager, _cmd: ConsoleCommand, _msg: String):
 				if aplock:
 					aplock.unlock()))
+		cmd_manager.register_command(ConsoleCommand.new("/set_tag").debug()
+			.add_help("tag [bool]", "Sets a tag for the current connection")
+			.set_autofill(func(msg: String):
+				var args = msg.split(" ", 2)
+				var arg_count := args.size()
+				while args.size() < 3: args.append("")
+				var ret: Array[String] = []
+				var opts: Array[String] = []
+				if arg_count < 3:
+					opts.assign(["TextOnly","HintGame","Tracker","DeathLink"])
+					var matched := false
+					for opt in opts:
+						if args[1] == opt:
+							matched = true
+							break
+						if opt.to_lower().begins_with(args[1].to_lower()):
+							ret.append("%s %s" % [args[0],opt])
+					if not matched:
+						return ret
+					ret.clear()
+				opts.assign(["true","false"])
+				for opt in opts:
+					if arg_count < 3 or opt.to_lower().begins_with(args[2].to_lower()):
+						ret.append("%s %s %s" % [args[0],args[1],opt])
+				return ret)
+			.set_call(func(mgr: CommandManager, cmd: ConsoleCommand, msg: String):
+				var args = msg.split(" ", true, 2)
+				var state := true
+				var tag: String = args[1].strip_edges() if args.size() > 1 else ""
+				if tag.is_empty():
+					cmd.output_usage(mgr.console)
+					return
+				if args.size() > 2:
+					var s = args[2].to_lower()
+					if s == "false": state = false
+					elif s != "true":
+						cmd.output_usage(mgr.console)
+						return
+				set_tag(tag, state)
+				mgr.console.add_line("Set tag '%s' to %s" % [args[1],state], "", mgr.console.COLOR_UI_MSG)))
+		cmd_manager.register_command(ConsoleCommand.new("/tags").debug()
+			.add_help("", "Prints out your connection tags")
+			.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, _msg: String):
+				mgr.console.add_line(str(AP_GAME_TAGS), "", mgr.console.COLOR_UI_MSG)))
 		cmd_manager.setup_debug_commands()
 const ICLASS_PROG := 0b001
 const ICLASS_USEFUL := 0b010
@@ -603,6 +713,7 @@ static func get_item_classification(flags: int) -> String:
 
 func _cmd_nil(_msg: String): pass
 func _autofill_locs(msg: String) -> Array[String]:
+	if not conn: return []
 	var args = msg.split(" ", true, 1)
 	var data: DataCache = conn.get_gamedata_for_player(conn.player_id)
 	var locs: Array[String] = []
@@ -629,6 +740,7 @@ func _autofill_locs(msg: String) -> Array[String]:
 		locs[q] = "%s %s" % [args[0],locs[q]]
 	return locs
 func _autofill_items(msg: String) -> Array[String]:
+	if not conn: return []
 	var args = msg.split(" ", true, 1)
 	var data: DataCache = conn.get_gamedata_for_player(conn.player_id)
 	var itms: Array[String] = []
@@ -648,3 +760,35 @@ func _autofill_items(msg: String) -> Array[String]:
 	for q in itms.size():
 		itms[q] = "%s %s" % [args[0],itms[q]]
 	return itms
+
+var is_tracker_textclient := false
+func _update_tags() -> void:
+	if status == APStatus.PLAYING:
+		send_command("ConnectUpdate", {"tags":AP_GAME_TAGS})
+	is_tracker_textclient = false
+	for tag in AP_GAME_TAGS:
+		if tag == "TextOnly" or tag == "Tracker":
+			is_tracker_textclient = true
+			break
+func set_tag(tag: String, state := true) -> void:
+	if tag.is_empty(): return
+	for q in AP_GAME_TAGS.size():
+		var t := AP_GAME_TAGS[q]
+		if t == tag:
+			if not state:
+				AP_GAME_TAGS.pop_at(q)
+				_update_tags()
+			return
+	if state:
+		AP_GAME_TAGS.append(tag)
+		_update_tags()
+func set_tags(tags: Array[String]) -> void:
+	if AP_GAME_TAGS != tags:
+		AP_GAME_TAGS.assign(tags)
+		_update_tags()
+
+func ensure_connected(console: BaseConsole) -> bool:
+	if status == APStatus.PLAYING:
+		return true
+	console.add_line("Not connected to Archipelago! Please '/connect' first!", "", console.COLOR_UI_MSG)
+	return false
