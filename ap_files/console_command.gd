@@ -1,5 +1,7 @@
 class_name ConsoleCommand
 
+const HELPTEXT_INDENT = 20
+
 class CmdHelpText:
 	var args: String = ""
 	var text: String = ""
@@ -41,6 +43,12 @@ func get_helptext() -> String:
 	for ht in help_text:
 		s += "%s %s\n    %s\n" % [text,ht.args,ht.text.replace("\n","\n    ")]
 	return s
+func output_helptext(console: CustomConsole) -> void:
+	for ht in help_text:
+		console.add_line("%s %s" % [text,ht.args], "", console.COLOR_UI_MSG)
+		console.add_indent(HELPTEXT_INDENT)
+		console.add_line(ht.text, "", console.COLOR_UI_MSG)
+		console.add_indent(-HELPTEXT_INDENT)
 func output_usage(console: CustomConsole) -> void:
 	console.add_text("Usage:\n%s" % get_helptext(), "", console.COLOR_UI_MSG)
 

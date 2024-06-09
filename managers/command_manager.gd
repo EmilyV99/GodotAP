@@ -52,7 +52,7 @@ func call_cmd(msg: String) -> void:
 	else:
 		for proc in default_procs:
 			proc.call(self, msg)
-	
+
 
 func get_commands() -> Array[ConsoleCommand]: # don't mutate the return
 	return _commands
@@ -79,12 +79,11 @@ func setup_basic_commands() -> void:
 	register_command(ConsoleCommand.new("/help")
 		.add_help("", "Displays this message")
 		.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, _msg: String):
-			var s := "Command Help:\n"
+			mgr.console.add_header_spacing()
+			mgr.console.add_line("Command Help:", "", mgr.console.COLOR_UI_MSG)
 			for cmd in mgr.get_commands().filter(func(cmd):
 				return not (cmd.disabled or cmd.is_debug())):
-				s += cmd.get_helptext()
-			mgr.console.add_header_spacing()
-			mgr.console.add_text(s, "", mgr.console.COLOR_UI_MSG)
+				cmd.output_helptext(mgr.console)
 			mgr.console.add_header_spacing()))
 	register_command(ConsoleCommand.new("/cls")
 		.add_help("", "Clears the console")
@@ -99,12 +98,11 @@ func setup_debug_commands() -> void:
 	register_command(ConsoleCommand.new("/db_help").debug()
 		.add_help("", "Displays this message")
 		.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, _msg: String):
-			var s := "Debug Help:\n"
+			mgr.console.add_header_spacing()
+			mgr.console.add_line("Debug Help:", "", mgr.console.COLOR_UI_MSG)
 			for cmd in mgr.get_commands().filter(func(cmd):
 				return not cmd.disabled and cmd.is_debug()):
-					s += cmd.get_helptext()
-			mgr.console.add_header_spacing()
-			mgr.console.add_text(s, "", mgr.console.COLOR_UI_MSG)
+				cmd.output_helptext(mgr.console)
 			mgr.console.add_header_spacing()))
 	register_command(ConsoleCommand.new("/debug").debug()
 		.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, _msg: String):

@@ -258,6 +258,13 @@ class SpacingPart extends ConsolePart:
 			data.x += spacing.x
 			if not Util.approx_eq(data.y, data.t):
 				data.y += spacing.y
+class IndentPart extends ConsolePart:
+	var indent: float = 0.0
+	func draw(_c: CustomConsole, data: ConsoleDrawData) -> void:
+		if Util.approx_eq(data.x, data.l):
+			data.x += indent
+		data.l += indent
+
 
 func add_text(text: String, ttip := "", col := Color.TRANSPARENT) -> TextPart:
 	var part := TextPart.new()
@@ -290,8 +297,12 @@ func add_header_spacing(vspace: float = -0.5) -> SpacingPart:
 	if vspace < 0: vspace = get_line_height() * abs(vspace)
 	return add_spacing(Vector2(0,vspace), false, true)
 
-func add_indent_spacing(hspace: float) -> SpacingPart:
-	return add_spacing(Vector2(hspace,0), true)
+func add_indent(indent: float) -> IndentPart:
+	var part = IndentPart.new()
+	part.indent = indent
+	parts.append(part)
+	#no redraw needed for pure spacing
+	return part
 
 var parts: Array[ConsolePart] = []
 var hovered_part: ConsolePart = null
