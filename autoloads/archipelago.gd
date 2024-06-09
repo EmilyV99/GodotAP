@@ -1,16 +1,22 @@
 class_name AP extends Node
 
-const AP_GAME_NAME := "Super Metroid"
-const AP_GAME_TAGS: Array[String] = []
+const AP_GAME_NAME := ""
+const AP_GAME_TAGS: Array[String] = ["TextOnly"]
 const AP_ITEM_HANDLING := ItemHandling.ALL
+
+const AP_PRINT_ITEMS_ON_CONNECT := false
+
+#region LOGGING (godot console, not richtext console)
 const AP_LOG_COMMUNICATION := false
 const AP_LOG_RECIEVED := false
+#endregion
+#region COLORS
 const COLOR_PLAYER: Color = Color8(238,0,238)
 const COLOR_ITEM_PROG: Color = Color8(175,153,239)
 const COLOR_ITEM: Color = Color8(1,234,234)
 const COLOR_ITEM_TRAP: Color = Color.RED
 const COLOR_LOCATION: Color = Color8(1,252,126)
-const COLOR_SELF: Color = Color.GOLDENROD
+#endregion COLORS
 
 enum ItemHandling {
 	NONE = 0,
@@ -20,12 +26,8 @@ enum ItemHandling {
 	ALL = 7,
 }
 
-var creds: APCredentials :
-	get:
-		return Saves.open_save.creds
-var aplock: APLock :
-	get:
-		return Saves.open_save.aplock
+var creds: APCredentials = APCredentials.new()
+var aplock: APLock = null
 
 var socket := WebSocketPeer.new()
 
@@ -215,9 +217,10 @@ func handle_command(json: Dictionary) -> void:
 			if output_console and connecting_part:
 				connecting_part.text = "Connected Successfully!\n"
 			
-			printout_recieved_items = true
-			await get_tree().create_timer(3).timeout
-			printout_recieved_items = false
+			if AP_PRINT_ITEMS_ON_CONNECT:
+				printout_recieved_items = true
+				await get_tree().create_timer(3).timeout
+				printout_recieved_items = false
 		"PrintJSON":
 			var s: String = ""
 			for elem in json["data"]:
@@ -360,7 +363,7 @@ func recieve_item(index: int, item: NetworkItem) -> void:
 	assert(item.dest_player_id == conn.player_id)
 	if index <= conn.recieved_index:
 		return # Already recieved, skip
-	var data := AP.get_datacache(AP_GAME_NAME)
+	var data := conn.get_gamedata_for_player(conn.player_id)
 	var msg := ""
 	if item.dest_player_id == item.src_player_id:
 		if output_console and printout_recieved_items:
@@ -409,7 +412,7 @@ func _on_removed_id(loc_id: int, proc: Callable) -> void:
 			if id == loc_id:
 				proc.call())
 func on_removed(loc_name: String, proc: Callable) -> void:
-	_on_removed_id(AP.get_datacache(AP_GAME_NAME).get_loc_id(loc_name), proc)
+	_on_removed_id(conn.get_gamedata_for_player(conn.player_id).get_loc_id(loc_name), proc)
 
 ## Call when a location is collected and needs to be sent to the server.
 func collect_location(loc_id: int) -> void:
@@ -435,7 +438,7 @@ func ap_reconnect_to_save() -> void:
 	if creds.slot.is_empty() or creds.port.length() != 5:
 		if output_console:
 			var s = "Connection details required! "
-			if aplock.valid:
+			if aplock and aplock.valid:
 				s += "Please reconnect to the room previously used by this save file!"
 			else:
 				s += "Connect to a room when ready."
@@ -511,7 +514,7 @@ func _init():
 		.add_help("port", "Connects to a new port, with the same ip/slot/password.")
 		.add_help("ip:port", "Connects to a new ip+port, with the same slot/password.")
 		.add_help("ip:port slot [pwd]", "Connects to a new ip+port, with a new slot and [optional] password.")
-		.set_call(func(cmd: ConsoleCommand, msg: String):
+		.set_call(func(_mgr: CommandManager, cmd: ConsoleCommand, msg: String):
 			var command_args = msg.split(" ", true, 3)
 			if command_args.size() == 2:
 				command_args.append(creds.slot)
@@ -527,10 +530,10 @@ func _init():
 				ap_connect(ipport[0],ipport[1],command_args[2],command_args[3])))
 	cmd_manager.register_command(ConsoleCommand.new("/reconnect")
 		.add_help("", "Refreshes the connection to the Archipelago server")
-		.set_call(func(_cmd: ConsoleCommand, _msg: String): ap_reconnect()))
+		.set_call(func(_mgr: CommandManager, _cmd: ConsoleCommand, _msg: String): ap_reconnect()))
 	cmd_manager.register_command(ConsoleCommand.new("/disconnect")
 		.add_help("", "Kills the connection to the Archipelago server")
-		.set_call(func(_cmd: ConsoleCommand, _msg: String): ap_disconnect()))
+		.set_call(func(_mgr: CommandManager, _cmd: ConsoleCommand, _msg: String): ap_disconnect()))
 	#region Autofill for some AP commands
 	cmd_manager.register_command(ConsoleCommand.new("!hint_location")
 		.set_autofill(_autofill_locs))
@@ -550,10 +553,10 @@ func _init():
 		cmd_manager.register_command(ConsoleCommand.new("/send").debug()
 			.add_help("", "Cheat-Collects the given location")
 			.set_autofill(_autofill_locs)
-			.set_call(func(cmd: ConsoleCommand, msg: String):
+			.set_call(func(_mgr: CommandManager, cmd: ConsoleCommand, msg: String):
 				var command_args = msg.split(" ", true, 1)
 				if command_args.size() > 1 and command_args[1]:
-					var data = AP.get_datacache(AP_GAME_NAME)
+					var data = conn.get_gamedata_for_player(conn.player_id)
 					for loc in conn.checked_locations.keys():
 						var loc_name := data.get_loc_name(loc)
 						if loc_name.strip_edges().to_lower() == command_args[1].strip_edges().to_lower():
@@ -567,47 +570,14 @@ func _init():
 				else: cmd.output_usage(output_console)))
 		cmd_manager.register_command(ConsoleCommand.new("/lock_info").debug()
 			.add_help("", "Prints the connection lock info")
-			.set_call(func(_cmd: ConsoleCommand, _msg: String):
+			.set_call(func(_mgr: CommandManager, _cmd: ConsoleCommand, _msg: String):
 				if aplock:
 					output_console.add_line("%s" % str(aplock), "", output_console.COLOR_UI_MSG)))
 		cmd_manager.register_command(ConsoleCommand.new("/unlock_connection").debug()
 			.add_help("", "Unlocks the connection lock, so that any valid slot can be connected to (instead of only the slot previously connected to)")
-			.set_call(func(_cmd: ConsoleCommand, _msg: String):
+			.set_call(func(_mgr: CommandManager, _cmd: ConsoleCommand, _msg: String):
 				if aplock:
 					aplock.unlock()))
-		cmd_manager.register_command(ConsoleCommand.new("/save").debug()
-			.add_help("[num]", "Saves the save file, optionally to a different-numbered slot. num >= 0.")
-			.set_call(func(cmd: ConsoleCommand, msg: String):
-				var command_args = msg.split(" ", true, 2)
-				if command_args.size() == 1:
-					Saves.save()
-				elif command_args.size() != 2 or not command_args[1].is_valid_int() or int(command_args[1]) < 0:
-					cmd.output_usage(output_console)
-				else:
-					Saves.write_save(int(command_args[1]))))
-		cmd_manager.register_command(ConsoleCommand.new("/delsave").debug()
-			.add_help("num", "Deletes the specified save file. num >= 0.")
-			.set_call(func(cmd: ConsoleCommand, msg: String):
-				var command_args = msg.split(" ", true, 2)
-				if command_args.size() != 2 or not command_args[1].is_valid_int() or int(command_args[1]) < 0:
-					cmd.output_usage(output_console)
-				else:
-					Saves.delete_save(int(command_args[1]))))
-		cmd_manager.register_command(ConsoleCommand.new("/loadsave").debug()
-			.add_help("num", "Loads the specified save file. num >= 0.")
-			.set_call(func(_mgr: CommandManager, cmd: ConsoleCommand, msg: String):
-				var command_args = msg.split(" ", true, 2)
-				if command_args.size() != 2 or not command_args[1].is_valid_int() or int(command_args[1]) < 0:
-					cmd.output_usage(output_console)
-				else:
-					var is_conn: bool = status != APStatus.DISCONNECTED
-					if is_conn:
-						ap_disconnect()
-						while status != APStatus.DISCONNECTED:
-							await status_updated
-					Saves.read_save(int(command_args[1]))
-					if is_conn:
-						ap_reconnect_to_save()))
 		cmd_manager.setup_debug_commands()
 const ICLASS_PROG := 0b001
 const ICLASS_USEFUL := 0b010
@@ -634,7 +604,7 @@ static func get_item_classification(flags: int) -> String:
 func _cmd_nil(_msg: String): pass
 func _autofill_locs(msg: String) -> Array[String]:
 	var args = msg.split(" ", true, 1)
-	var data: DataCache = AP.get_datacache(AP_GAME_NAME)
+	var data: DataCache = conn.get_gamedata_for_player(conn.player_id)
 	var locs: Array[String] = []
 	locs.assign(data.location_name_to_id.keys())
 	var ind := 0
@@ -660,7 +630,7 @@ func _autofill_locs(msg: String) -> Array[String]:
 	return locs
 func _autofill_items(msg: String) -> Array[String]:
 	var args = msg.split(" ", true, 1)
-	var data: DataCache = AP.get_datacache(AP_GAME_NAME)
+	var data: DataCache = conn.get_gamedata_for_player(conn.player_id)
 	var itms: Array[String] = []
 	itms.assign(data.item_name_to_id.keys())
 	if args.size() > 1 and args[1]:
