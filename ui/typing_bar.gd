@@ -163,10 +163,24 @@ func _gui_input(event):
 						updated_text = true
 				KEY_LEFT:
 					if text_pos:
-						text_pos -= 1
+						if event.ctrl_pressed:
+							var regex := RegEx.new()
+							regex.compile("[^A-Za-z0-9_]")
+							var state: bool = regex.search(text[text_pos-1]) != null
+							while text_pos and ((regex.search(text[text_pos-1]) != null) == state):
+								text_pos -= 1
+						else:
+							text_pos -= 1
 				KEY_RIGHT:
 					if text_pos < text.length():
-						text_pos += 1
+						if event.ctrl_pressed:
+							var regex := RegEx.new()
+							regex.compile("[^A-Za-z0-9_]")
+							var state: bool = regex.search(text[text_pos]) != null
+							while text_pos < text.length() and ((regex.search(text[text_pos]) != null) == state):
+								text_pos += 1
+						else:
+							text_pos += 1
 				KEY_UP:
 					history_step(-1)
 					updated_text = true
