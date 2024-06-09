@@ -62,7 +62,6 @@ focus_mode = 2
 color = Color(0.145266, 0.145266, 0.145266, 1)
 script = ExtResource("3_37wlj")
 font = ExtResource("3_qc5eo")
-color_highlight = null
 
 [connection signal="close_requested" from="." to="." method="_on_close_requested"]
 [connection signal="size_changed" from="." to="ConsoleMargin" method="_on_console_size_changed"]

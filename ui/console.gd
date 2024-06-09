@@ -22,6 +22,10 @@ class FontFlags:
 	set(val):
 		SPACING = val
 		queue_redraw()
+@export var COLOR_UI_MSG: Color = Color(.7,.7,.3)
+
+var window: ConsoleWindow :
+	get: return get_node("../../Console")
 
 signal send_text(msg: String)
 
@@ -45,7 +49,8 @@ var font_bold_italic: SystemFont :
 		font_bold_italic.font_weight *= 2
 		return font_bold_italic
 
-func get_font(flags: FontFlags) -> Font:
+func get_font(flags: FontFlags = null) -> Font:
+	if not flags: flags = FontFlags.new()
 	if flags.bold:
 		if flags.italic:
 			return font_bold_italic
@@ -53,16 +58,16 @@ func get_font(flags: FontFlags) -> Font:
 	elif flags.italic:
 		return font_italic
 	else: return font
-func get_font_height(flags: FontFlags) -> float:
+func get_font_height(flags: FontFlags = null) -> float:
 	return get_font(flags).get_height(font_size)
 func get_line_height() -> float:
 	var h := 0.0
 	for f in [font,font_bold,font_italic,font_bold_italic]:
 		h = maxf(h,f.get_height(font_size))
 	return SPACING+h
-func get_font_ascent(flags: FontFlags) -> float:
+func get_font_ascent(flags: FontFlags = null) -> float:
 	return get_font(flags).get_ascent(font_size)
-func get_string_size(text: String, flags: FontFlags) -> Vector2:
+func get_string_size(text: String, flags: FontFlags = null) -> Vector2:
 	return get_font(flags).get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
 
 @onready var tooltip_bg: ColorRect = $TooltipBG
@@ -72,21 +77,31 @@ class ConsoleDrawData:
 	var t: float
 	var r: float
 	var b: float
-	var x: float
+	
+	var x: float :
+		set(val):
+			x = val
+			if not Util.approx_eq(x, l):
+				reset_y = null
 	var y: float
+	
 	var w: float:
 		get:
 			return r-l
 	var h: float:
 		get:
 			return b-t
+	
 	var cx: float:
 		get:
 			return l + w/2
 	var cy: float:
 		get:
 			return t + h/2
+	
 	var max_shown_y: float = 0.0
+	var reset_y: Variant
+	
 	func show_y(ty: float) -> void:
 		ty -= t
 		if ty > max_shown_y:
@@ -94,6 +109,15 @@ class ConsoleDrawData:
 	func max_scroll() -> float:
 		var s := max_shown_y - b
 		return 0.0 if s <= 0 else s
+	func newline(c: CustomConsole, count := 1):
+		var at_start := Util.approx_eq(x, l)
+		x = l
+		if count > 0:
+			if at_start:
+				reset_y = y
+			else: reset_y = y + c.get_line_height()
+		y += c.get_line_height() * count
+	
 class ConsolePart:
 	func draw(_c: CustomConsole, _data: ConsoleDrawData) -> void:
 		pass
@@ -124,8 +148,7 @@ class TextPart extends ConsolePart:
 			if text_pos >= text.length():
 				break
 			if text[text_pos] == "\n":
-				data.x = data.l
-				data.y += c.get_line_height()
+				data.newline(c)
 				while text_pos < text.length() and not text[text_pos].lstrip("\n"):
 					text_pos += 1
 				continue
@@ -141,8 +164,7 @@ class TextPart extends ConsolePart:
 				subtext = text.substr(text_pos,trim_pos-text_pos)
 				str_sz = c.get_string_size(subtext, _font_flags)
 			if data.x >= data.r or trim_pos <= text_pos: # no space! next line!
-				data.x = data.l
-				data.y += c.get_line_height()
+				data.newline(c)
 				while text_pos < text.length() and not text[text_pos].lstrip("\n"):
 					text_pos += 1
 				continue
@@ -217,18 +239,25 @@ class TextPart extends ConsolePart:
 class LineBreakPart extends ConsolePart:
 	var break_count: int = 1
 	func draw(c: CustomConsole, data: ConsoleDrawData) -> void:
-		data.x = data.l
-		data.y += c.get_line_height() * break_count
+		data.newline(c, break_count)
 class SpacingPart extends ConsolePart:
 	var spacing := Vector2.ZERO
+	var reset_line := true
+	var from_reset_y := false
 	func draw(c: CustomConsole, data: ConsoleDrawData) -> void:
-		data.x += spacing.x
-		var ly := spacing.y
-		if data.x >= data.r:
-			data.x = data.l
-			var fh = c.get_line_height()
-			if ly < fh: ly = fh
-		data.y += ly
+		if reset_line and not Util.approx_eq(data.x, data.l):
+			data.newline(c)
+		if from_reset_y:
+			if data.reset_y == null:
+				data.newline(c)
+			var r_y: float = data.reset_y
+			data.x = data.l + spacing.x
+			if not Util.approx_eq(r_y, data.t):
+				data.y = max(data.y, r_y + spacing.y) # max to avoid reducing space
+		else:
+			data.x += spacing.x
+			if not Util.approx_eq(data.y, data.t):
+				data.y += spacing.y
 
 func add_text(text: String, ttip := "", col := Color.TRANSPARENT) -> TextPart:
 	var part := TextPart.new()
@@ -239,19 +268,30 @@ func add_text(text: String, ttip := "", col := Color.TRANSPARENT) -> TextPart:
 	queue_redraw()
 	return part
 
+func add_line(text: String, ttip := "", col := Color.TRANSPARENT) -> TextPart:
+	return add_text(text+"\n", ttip, col)
+
 func add_linebreak(count := 1) -> LineBreakPart:
 	var part = LineBreakPart.new()
 	part.break_count = count
 	parts.append(part)
 	#no redraw needed for pure spacing
 	return part
-
-func add_spacing(spacing: Vector2) -> SpacingPart:
+func add_spacing(spacing: Vector2, reset_line := true, from_reset_y := false) -> SpacingPart:
 	var part = SpacingPart.new()
 	part.spacing = spacing
+	part.reset_line = reset_line
+	part.from_reset_y = from_reset_y
 	parts.append(part)
 	#no redraw needed for pure spacing
 	return part
+
+func add_header_spacing(vspace: float = -0.5) -> SpacingPart:
+	if vspace < 0: vspace = get_line_height() * abs(vspace)
+	return add_spacing(Vector2(0,vspace), false, true)
+
+func add_indent_spacing(hspace: float) -> SpacingPart:
+	return add_spacing(Vector2(hspace,0), true)
 
 var parts: Array[ConsolePart] = []
 var hovered_part: ConsolePart = null
@@ -318,6 +358,7 @@ func _draw():
 	_draw_data.x = _draw_data.l
 	_draw_data.y = _draw_data.t
 	_draw_data.max_shown_y = 0.0
+	_draw_data.reset_y = _draw_data.t
 	tooltip_bg.visible = false
 	tooltip_label.text = ""
 	for part in parts:

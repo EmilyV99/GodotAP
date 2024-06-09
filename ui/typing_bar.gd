@@ -7,7 +7,7 @@
 @export var color_autofill: Color = Color(Color.DARK_GRAY,.5)
 @export var blink_rate: float = 0.5
 
-var autofill: AutofillHandler = null
+var cmd_manager: CommandManager = null
 var autofill_rect: StringBar
 
 const VMARGIN: float = 4
@@ -222,8 +222,8 @@ func _gui_input(event):
 				update()
 
 func update() -> void:
-	if autofill:
-		_tab_completions.assign(autofill.autofill(text, 10))
+	if cmd_manager:
+		_tab_completions.assign(cmd_manager.autofill(text, 10))
 		if _tab_completions and _tab_completions[0] == text:
 			_tab_completions.clear()
 		autofill_rect.set_strings(_tab_completions)

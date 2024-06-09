@@ -11,7 +11,6 @@ const COLOR_ITEM: Color = Color8(1,234,234)
 const COLOR_ITEM_TRAP: Color = Color.RED
 const COLOR_LOCATION: Color = Color8(1,252,126)
 const COLOR_SELF: Color = Color.GOLDENROD
-const COLOR_UI_MSG: Color = Color(.7,.7,.3)
 
 enum ItemHandling {
 	NONE = 0,
@@ -74,7 +73,7 @@ func ap_reconnect() -> void:
 		else: break
 	AP.log("Connected to '%s'!" % url)
 	if output_console:
-		connecting_part = output_console.add_text("Connecting...\n","%s:%s %s" % [creds.ip,creds.port,creds.slot],COLOR_UI_MSG)
+		connecting_part = output_console.add_line("Connecting...","%s:%s %s" % [creds.ip,creds.port,creds.slot],output_console.COLOR_UI_MSG)
 	status = APStatus.CONNECTING
 
 func ap_connect(room_ip: String, room_port: String, slot_name: String, room_pwd := "") -> void:
@@ -94,7 +93,7 @@ func ap_disconnect() -> void:
 	socket.close()
 	AP.close_logger()
 	if output_console:
-		var part := output_console.add_text("Disconnecting...\n","%s:%s %s" % [creds.ip,creds.port,creds.slot],COLOR_UI_MSG)
+		var part := output_console.add_line("Disconnecting...","%s:%s %s" % [creds.ip,creds.port,creds.slot],output_console.COLOR_UI_MSG)
 		while status != APStatus.DISCONNECTED:
 			await status_updated
 		part.text = "Disconnected from AP.\n"
@@ -370,7 +369,7 @@ func recieve_item(index: int, item: NetworkItem) -> void:
 			item.output(output_console, data)
 			output_console.add_text(" (")
 			AP.out_location(output_console, item.loc_id, data)
-			output_console.add_text(")\n")
+			output_console.add_line(")")
 		msg = "You found your %s at %s!" % [data.get_item_name(item.id),data.get_loc_name(item.loc_id)]
 		_remove_loc(item.loc_id)
 	else:
@@ -383,7 +382,7 @@ func recieve_item(index: int, item: NetworkItem) -> void:
 			AP.out_player(output_console, conn.player_id, conn)
 			output_console.add_text(" (")
 			AP.out_location(output_console, item.loc_id, src_data)
-			output_console.add_text(")\n")
+			output_console.add_line(")")
 		msg = "%s found your %s at their %s!" % [conn.get_player_name(item.src_player_id), data.get_item_name(item.id), src_data.get_loc_name(item.loc_id)]
 	
 	#TODO actually handle recieving?
@@ -437,11 +436,11 @@ func ap_reconnect_to_save() -> void:
 		if output_console:
 			var s = "Connection details required! "
 			if aplock.valid:
-				s += "Please reconnect to the room previously used by this save file!\n"
+				s += "Please reconnect to the room previously used by this save file!"
 			else:
-				s += "Connect to a room when ready.\n"
-			output_console.add_text(s, "", COLOR_UI_MSG)
-			var cmd = get_console_cmd("/connect")
+				s += "Connect to a room when ready."
+			output_console.add_line(s, "", output_console.COLOR_UI_MSG)
+			var cmd = cmd_manager.get_command("/connect")
 			if cmd:
 				cmd.output_usage(output_console)
 	else:
@@ -478,7 +477,9 @@ static func out_location(console: CustomConsole, id: int, data: DataCache):
 	console.add_text(data.get_loc_name(id), ttip, COLOR_LOCATION)
 
 var output_console_window: ConsoleWindow = null
-var output_console: CustomConsole = null
+var output_console: CustomConsole :
+	get: return cmd_manager.console
+	set(val): cmd_manager.console = val
 func _open_console() -> void:
 	if output_console: return
 	output_console_window = load("res://ui/console.tscn").instantiate()
@@ -486,52 +487,27 @@ func _open_console() -> void:
 	add_child(output_console_window)
 	await output_console_window.ready
 	output_console = output_console_window.console
-	output_console.send_text.connect(console_message)
+	output_console.send_text.connect(cmd_manager.call_cmd)
 	output_console.tree_exiting.connect(_close_console)
-	output_console_window.typing_bar.autofill = autofill
+	output_console_window.typing_bar.cmd_manager = cmd_manager
 func _close_console() -> void:
 	if output_console:
 		output_console.close()
 		output_console = null
 
-var console_commands: Array[ConsoleCommand] = []
-var _name_to_cmd: Dictionary = {}
-func get_console_cmd(cmdname: String) -> ConsoleCommand:
-	return _name_to_cmd.get(cmdname)
-
-func console_message(msg: String) -> void:
-	if msg.is_empty(): return
-	if msg[0] != "/": #Plain message
-		send_command("Say", {"text":msg})
-	else:
-		var cmd = msg.split(" ", true, 1)[0].to_lower()
-		var cmd_lower = cmd.to_lower()
-		var found := false
-		for command in console_commands:
-			if command.text == cmd_lower:
-				command.call_proc.call(command, msg)
-				found = true
-				break
-		if not found:
-			output_console.add_text("Unknown command '%s'\n" % cmd, "", COLOR_UI_MSG)
 #endregion CONSOLE
 
-var autofill: AutofillHandler = AutofillHandler.new()
+var cmd_manager: CommandManager = CommandManager.new()
 func _init():
 	_open_console()
-	register_command(ConsoleCommand.new("/help").add_help("", "Displays this message")
-		.set_call(func(_cmd: ConsoleCommand, _msg: String):
-			var s := ""
-			for cmd in console_commands:
-				s += cmd.get_helptext()
-			output_console.add_text(s, "", COLOR_UI_MSG)))
-	register_command(ConsoleCommand.new("/cls")
-		.add_help("", "Clears the console")
-		.set_call(func(_cmd: ConsoleCommand, _msg: String): output_console.clear()))
-	register_command(ConsoleCommand.new("/clr_hist")
-		.add_help("", "Clears the command history")
-		.set_call(func(_cmd: ConsoleCommand, _msg: String): output_console_window.typing_bar.history_clear()))
-	register_command(ConsoleCommand.new("/connect")
+	cmd_manager.register_default(func(mgr: CommandManager, msg: String):
+		if msg[0] == "/":
+			mgr.console.add_line("Unknown command '%s' - use '/help' to see commands" % msg.split(" ", true, 1)[0], "", mgr.console.COLOR_UI_MSG)
+		else:
+			if status != APStatus.PLAYING:
+				mgr.console.add_line("Not connected to Archipelago! Please '/connect' first!", "", mgr.console.COLOR_UI_MSG)
+			else: send_command("Say", {"text":msg}))
+	cmd_manager.register_command(ConsoleCommand.new("/connect")
 		.add_help("port", "Connects to a new port, with the same ip/slot/password.")
 		.add_help("ip:port", "Connects to a new ip+port, with the same slot/password.")
 		.add_help("ip:port slot [pwd]", "Connects to a new ip+port, with a new slot and [optional] password.")
@@ -549,23 +525,29 @@ func _init():
 				if ipport.size() == 1 and ipport[0].length() == 5:
 					ipport = [creds.ip,ipport[0]]
 				ap_connect(ipport[0],ipport[1],command_args[2],command_args[3])))
-	register_command(ConsoleCommand.new("/reconnect")
+	cmd_manager.register_command(ConsoleCommand.new("/reconnect")
 		.add_help("", "Refreshes the connection to the Archipelago server")
 		.set_call(func(_cmd: ConsoleCommand, _msg: String): ap_reconnect()))
-	register_command(ConsoleCommand.new("/disconnect")
+	cmd_manager.register_command(ConsoleCommand.new("/disconnect")
 		.add_help("", "Kills the connection to the Archipelago server")
 		.set_call(func(_cmd: ConsoleCommand, _msg: String): ap_disconnect()))
-	register_command(ConsoleCommand.new("!hint_location").set_autofill(_autofill_locs))
-	register_command(ConsoleCommand.new("!hint").set_autofill(_autofill_items))
-	register_command(ConsoleCommand.new("!help").add_help("", "Displays server-based command help"))
-	register_command(ConsoleCommand.new("!remaining"))
-	register_command(ConsoleCommand.new("!missing"))
-	register_command(ConsoleCommand.new("!checked"))
-	register_command(ConsoleCommand.new("!collect"))
-	register_command(ConsoleCommand.new("!release"))
-	register_command(ConsoleCommand.new("!players"))
+	#region Autofill for some AP commands
+	cmd_manager.register_command(ConsoleCommand.new("!hint_location")
+		.set_autofill(_autofill_locs))
+	cmd_manager.register_command(ConsoleCommand.new("!hint")
+		.set_autofill(_autofill_items))
+	cmd_manager.register_command(ConsoleCommand.new("!help")
+		.add_help("", "Displays server-based command help"))
+	cmd_manager.register_command(ConsoleCommand.new("!remaining"))
+	cmd_manager.register_command(ConsoleCommand.new("!missing"))
+	cmd_manager.register_command(ConsoleCommand.new("!checked"))
+	cmd_manager.register_command(ConsoleCommand.new("!collect"))
+	cmd_manager.register_command(ConsoleCommand.new("!release"))
+	cmd_manager.register_command(ConsoleCommand.new("!players"))
+	#endregion Autofill for some AP commands
+	cmd_manager.setup_basic_commands()
 	if OS.is_debug_build():
-		register_command(ConsoleCommand.new("/send")
+		cmd_manager.register_command(ConsoleCommand.new("/send").debug()
 			.add_help("", "Cheat-Collects the given location")
 			.set_autofill(_autofill_locs)
 			.set_call(func(cmd: ConsoleCommand, msg: String):
@@ -576,24 +558,24 @@ func _init():
 						var loc_name := data.get_loc_name(loc)
 						if loc_name.strip_edges().to_lower() == command_args[1].strip_edges().to_lower():
 							if conn.checked_locations[loc]:
-								output_console.add_text("Location already sent!\n", "", COLOR_UI_MSG)
+								output_console.add_line("Location already sent!", "", output_console.COLOR_UI_MSG)
 							else:
-								output_console.add_text("Sending location '%s'!\n" % loc_name, "", COLOR_UI_MSG)
+								output_console.add_line("Sending location '%s'!" % loc_name, "", output_console.COLOR_UI_MSG)
 								collect_location(loc)
 							return
-					output_console.add_text("Location '%s' not found! Check spelling?\n" % command_args[1].strip_edges(), "", COLOR_UI_MSG)
+					output_console.add_line("Location '%s' not found! Check spelling?" % command_args[1].strip_edges(), "", output_console.COLOR_UI_MSG)
 				else: cmd.output_usage(output_console)))
-		register_command(ConsoleCommand.new("/lock_info")
+		cmd_manager.register_command(ConsoleCommand.new("/lock_info").debug()
 			.add_help("", "Prints the connection lock info")
 			.set_call(func(_cmd: ConsoleCommand, _msg: String):
 				if aplock:
-					output_console.add_text("%s\n" % str(aplock), "", COLOR_UI_MSG)))
-		register_command(ConsoleCommand.new("/unlock_connection")
+					output_console.add_line("%s" % str(aplock), "", output_console.COLOR_UI_MSG)))
+		cmd_manager.register_command(ConsoleCommand.new("/unlock_connection").debug()
 			.add_help("", "Unlocks the connection lock, so that any valid slot can be connected to (instead of only the slot previously connected to)")
 			.set_call(func(_cmd: ConsoleCommand, _msg: String):
 				if aplock:
 					aplock.unlock()))
-		register_command(ConsoleCommand.new("/save")
+		cmd_manager.register_command(ConsoleCommand.new("/save").debug()
 			.add_help("[num]", "Saves the save file, optionally to a different-numbered slot. num >= 0.")
 			.set_call(func(cmd: ConsoleCommand, msg: String):
 				var command_args = msg.split(" ", true, 2)
@@ -603,7 +585,7 @@ func _init():
 					cmd.output_usage(output_console)
 				else:
 					Saves.write_save(int(command_args[1]))))
-		register_command(ConsoleCommand.new("/delsave")
+		cmd_manager.register_command(ConsoleCommand.new("/delsave").debug()
 			.add_help("num", "Deletes the specified save file. num >= 0.")
 			.set_call(func(cmd: ConsoleCommand, msg: String):
 				var command_args = msg.split(" ", true, 2)
@@ -611,9 +593,9 @@ func _init():
 					cmd.output_usage(output_console)
 				else:
 					Saves.delete_save(int(command_args[1]))))
-		register_command(ConsoleCommand.new("/loadsave")
+		cmd_manager.register_command(ConsoleCommand.new("/loadsave").debug()
 			.add_help("num", "Loads the specified save file. num >= 0.")
-			.set_call(func(cmd: ConsoleCommand, msg: String):
+			.set_call(func(_mgr: CommandManager, cmd: ConsoleCommand, msg: String):
 				var command_args = msg.split(" ", true, 2)
 				if command_args.size() != 2 or not command_args[1].is_valid_int() or int(command_args[1]) < 0:
 					cmd.output_usage(output_console)
@@ -626,11 +608,7 @@ func _init():
 					Saves.read_save(int(command_args[1]))
 					if is_conn:
 						ap_reconnect_to_save()))
-		
-func register_command(cmd: ConsoleCommand) -> void:
-	console_commands.append(cmd)
-	_name_to_cmd[cmd.text] = cmd
-	autofill.commands[cmd.text] = cmd.autofill_proc
+		cmd_manager.setup_debug_commands()
 const ICLASS_PROG := 0b001
 const ICLASS_USEFUL := 0b010
 const ICLASS_TRAP := 0b100
@@ -677,7 +655,6 @@ func _autofill_locs(msg: String) -> Array[String]:
 				locs.pop_at(q)
 			else:
 				q += 1
-	print(locs)
 	for q in locs.size():
 		locs[q] = "%s %s" % [args[0],locs[q]]
 	return locs
