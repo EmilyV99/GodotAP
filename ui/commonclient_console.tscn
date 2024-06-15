@@ -3,3 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://cgq7n1figlpu3" path="res://ui/base_console.tscn" id="1_aq3x3"]
 
 [node name="ConsoleContainer" instance=ExtResource("1_aq3x3")]
+
+[node name="Hints" type="VBoxContainer" parent="Tabs" index="2"]
+visible = false
+layout_mode = 2

@@ -1,8 +1,8 @@
 class_name ConsoleContainer extends MarginContainer
 
 @onready var tabs: TabContainer = $Tabs
-@onready var console: BaseConsole = $Tabs/Console/ConsoleMargin/Console
 @onready var console_tab: ConsoleTab = $Tabs/Console
+@onready var console: BaseConsole = console_tab.console
 @onready var typing_bar: TypingBar = console_tab.typing_bar
 
 

@@ -1,6 +1,7 @@
 class_name ConsoleTab extends VBoxContainer
 
-@onready var console_margin = $ConsoleMargin
+@onready var console_cont = $Cont
+@onready var console: BaseConsole = $Cont/ConsoleMargin/Console
 @onready var typing_bar = $TypingBar
 
 func _ready():
@@ -14,4 +15,4 @@ func update_cont_size():
 	console_size.y = console_size.y - bar_height
 	
 	fit_child_in_rect(typing_bar, Rect2(Vector2(0,console_size.y),Vector2(size.x,bar_height)))
-	fit_child_in_rect(console_margin, Rect2(Vector2.ZERO,console_size))
+	fit_child_in_rect(console_cont, Rect2(Vector2.ZERO,console_size))

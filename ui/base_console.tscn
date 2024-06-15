@@ -9,7 +9,7 @@
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_rud5c"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5222u"]
-bg_color = Color(0.231518, 0.231518, 0.231518, 1)
+bg_color = Color(0.231373, 0.231373, 0.231373, 1)
 
 [node name="ConsoleContainer" type="MarginContainer"]
 custom_minimum_size = Vector2(1366, 705)
@@ -25,7 +25,7 @@ script = ExtResource("1_gj1xe")
 
 [node name="BG" type="ColorRect" parent="."]
 layout_mode = 2
-color = Color(0, 0, 0, 1)
+color = Color(0.231373, 0.231373, 0.231373, 1)
 
 [node name="Tabs" type="TabContainer" parent="."]
 layout_mode = 2
@@ -38,7 +38,18 @@ tab_focus_mode = 0
 layout_mode = 2
 script = ExtResource("2_6f1h8")
 
-[node name="ConsoleMargin" type="MarginContainer" parent="Tabs/Console"]
+[node name="Cont" type="MarginContainer" parent="Tabs/Console"]
+layout_mode = 2
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
+
+[node name="BG" type="ColorRect" parent="Tabs/Console/Cont"]
+layout_mode = 2
+color = Color(0, 0, 0, 1)
+
+[node name="ConsoleMargin" type="MarginContainer" parent="Tabs/Console/Cont"]
 clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -51,16 +62,16 @@ theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
-[node name="Console" type="Control" parent="Tabs/Console/ConsoleMargin"]
+[node name="Console" type="Control" parent="Tabs/Console/Cont/ConsoleMargin"]
 layout_mode = 2
-focus_next = NodePath("../../TypingBar")
-focus_previous = NodePath("../../TypingBar")
+focus_next = NodePath("../../../TypingBar")
+focus_previous = NodePath("../../../TypingBar")
 focus_mode = 2
 mouse_filter = 1
 script = ExtResource("1_hvqhv")
 font = ExtResource("3_qc5eo")
 
-[node name="TooltipBG" type="ColorRect" parent="Tabs/Console/ConsoleMargin/Console"]
+[node name="TooltipBG" type="ColorRect" parent="Tabs/Console/Cont/ConsoleMargin/Console"]
 visible = false
 layout_mode = 2
 offset_right = 40.0
@@ -68,7 +79,7 @@ offset_bottom = 40.0
 mouse_filter = 2
 color = Color(0.150075, 0.150075, 0.150075, 1)
 
-[node name="Tooltip" type="Label" parent="Tabs/Console/ConsoleMargin/Console/TooltipBG"]
+[node name="Tooltip" type="Label" parent="Tabs/Console/Cont/ConsoleMargin/Console/TooltipBG"]
 layout_mode = 0
 offset_right = 1.0
 offset_bottom = 23.0
@@ -83,4 +94,4 @@ color = Color(0.145266, 0.145266, 0.145266, 1)
 script = ExtResource("3_37wlj")
 font = ExtResource("3_qc5eo")
 
-[connection signal="send_text" from="Tabs/Console/TypingBar" to="Tabs/Console/ConsoleMargin/Console" method="send_msg"]
+[connection signal="send_text" from="Tabs/Console/TypingBar" to="Tabs/Console/Cont/ConsoleMargin/Console" method="send_msg"]

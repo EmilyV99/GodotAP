@@ -72,11 +72,14 @@ func ap_reconnect() -> void:
 		url = "%s://%s:%s" % ["wss" if wss else "ws",creds.ip,creds.port]
 		socket.close()
 		var err := socket.connect_to_url(url)
-		if err:
-			AP.log("Connection to '%s' failed! Retrying (%d)" % [url,attempts])
-			wss = not wss
-			if wss: attempts += 1
-		else: break
+		if not err:
+			while socket.get_ready_state() == WebSocketPeer.STATE_CONNECTING:
+				socket.poll()
+			if socket.get_ready_state() == WebSocketPeer.STATE_OPEN:
+				break
+		AP.log("Connection to '%s' failed! Retrying (%d)" % [url,attempts])
+		wss = not wss
+		if wss: attempts += 1
 	AP.log("Connected to '%s'!" % url)
 	if output_console:
 		connecting_part = output_console.add_line("Connecting...","%s:%s %s" % [creds.ip,creds.port,creds.slot],output_console.COLOR_UI_MSG)
@@ -607,6 +610,8 @@ func _init():
 					cmd.output_usage(mgr.console)
 				if ipport.size() == 1 and ipport[0].length() == 5:
 					ipport = [creds.ip,ipport[0]]
+				elif ipport.size() == 1:
+					ipport.append("38281")
 				ap_connect(ipport[0],ipport[1],command_args[2],command_args[3])))
 	cmd_manager.register_command(ConsoleCommand.new("/reconnect")
 		.add_help("", "Refreshes the connection to the Archipelago server")
