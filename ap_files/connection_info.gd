@@ -22,9 +22,9 @@ func _init():
 func _to_string():
 	return "AP_CONN(SERV_%s, GEN_%s, SEED:%s, PLYR %d, TEAM %d, SLOT_DATA %s)" % [serv_version,gen_version,seed_name,player_id,team_id,slot_data]
 
-func get_player(id: int) -> NetworkPlayer:
+func get_player(id: int) -> NetworkPlayer: ## TODO handle Team
 	return players[id-1]
-func get_slot(id: int) -> NetworkSlot:
+func get_slot(id: int) -> NetworkSlot: ## TODO handle Team
 	return slots[id-1]
 func get_player_name(plyr_id: int, alias := true) -> String:
 	var name = get_player(plyr_id).get_name(alias)

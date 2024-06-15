@@ -257,9 +257,7 @@ class SpacingPart extends ConsolePart:
 				data.y += spacing.y
 class IndentPart extends ConsolePart:
 	var indent: float = 0.0
-#region New Code Region
 	func draw(_c: BaseConsole, data: ConsoleDrawData) -> void:
-#endregion
 		if Util.approx_eq(data.x, data.l):
 			data.x += indent
 		data.l += indent
@@ -339,8 +337,11 @@ func _process(_delta):
 	if Engine.is_editor_hint(): return
 	refocus_part()
 
+func _get_mouse_pos() -> Vector2:
+	return get_viewport().get_mouse_position() - global_position + Util.MOUSE_OFFSET
+
 func refocus_part():
-	var pos := get_viewport().get_mouse_position() + Util.MOUSE_OFFSET
+	var pos := _get_mouse_pos()
 	var new_hover: ConsolePart = null
 	var hov_hb: Rect2
 	if has_mouse:
@@ -380,7 +381,8 @@ func _draw():
 	tooltip_bg.visible = false
 	tooltip_label.text = ""
 	for part in parts:
-		#part.color = Color.RED if part == hovered_part else Color.WHITE
+		#if part is TextPart:
+			#part.color = Color.RED if part == hovered_part else Color.WHITE
 		part.draw(self, _draw_data)
 	if hovered_part:
 		hovered_part.draw_hover(self, _draw_data)
@@ -393,6 +395,8 @@ func _draw():
 		call_deferred("queue_redraw")
 	if Util.approx_eq(scroll,_draw_data.max_scroll()):
 		is_max_scroll = true
+	#var mpos = _get_mouse_pos()
+	#draw_rect(Rect2(mpos.x-1,mpos.y-1,2,2), Color.REBECCA_PURPLE)
 
 func scroll_by(amount: float) -> void:
 	scroll_by_abs(amount * SCROLL_MULT)

@@ -183,7 +183,7 @@ func handle_command(json: Dictionary) -> void:
 		"Connected":
 			conn.player_id = json["slot"]
 			conn.team_id = json["team"]
-			#conn.slot_data = json["slot_data"]
+			conn.slot_data = json["slot_data"]
 			for plyr in json["players"]:
 				conn.players.append(NetworkPlayer.from(plyr, conn))
 			var slot_info = json["slot_info"]
@@ -266,63 +266,26 @@ func handle_command(json: Dictionary) -> void:
 							var ni := NetworkItem.from(json["item"], conn, true)
 							if ni.src_player_id == conn.player_id:
 								output_data = true
+					"Join", "Part":
+						var data: Array = json["data"]
+						var elem: Dictionary = data.pop_front()
+						var txt: String = elem["text"]
+						var plyr := conn.get_player(json["slot"])
+						var spl := txt.split(plyr.get_name(), true, 1)
+						if spl.size() == 2:
+							elem.text = spl[0]
+							s += printjson_out([elem])
+							plyr.output(output_console)
+							elem.text = spl[1]
+							s += printjson_out([elem])
+							s += printjson_out(data)
+						else: output_data = true
 					_:
 						output_data = true
 				if pre_space and output_data:
 					output_console.add_header_spacing()
 				if output_data:
-					for elem in json["data"]:
-						var txt: String = elem["text"]
-						s += txt
-						match elem.get("type", "text"):
-							"player_name":
-								output_console.add_text(txt, "Arbitrary Player Name", COLOR_PLAYER)
-							"item_name":
-								output_console.add_text(txt, "Arbitrary Item Name", COLOR_ITEM)
-							"location_name":
-								output_console.add_text(txt, "Arbitrary Location Name", COLOR_LOCATION)
-							"entrance_name":
-								output_console.add_text(txt, "Arbitrary Entrance Name", COLOR_LOCATION)
-							"player_id":
-								var plyr_id = int(txt)
-								conn.get_player(plyr_id).output(output_console)
-							"item_id":
-								var item_id = int(txt)
-								var plyr_id = int(elem["player"])
-								var data := conn.get_gamedata_for_player(plyr_id)
-								var flags := int(elem["flags"])
-								AP.out_item(output_console, item_id, flags, data)
-							"location_id":
-								var loc_id = int(txt)
-								var plyr_id = int(elem["player"])
-								var data := conn.get_gamedata_for_player(plyr_id)
-								AP.out_location(output_console, loc_id, data)
-							"text":
-								output_console.add_text(txt)
-							"color":
-								var part := output_console.add_text(txt)
-								var col_str: String = elem["color"]
-								if col_str.ends_with("_bg"): # no handling for bg colors, just convert to fg
-									col_str = col_str.substr(0,col_str.length()-3)
-								match col_str:
-									"red":
-										part.color = Color.RED
-									"green":
-										part.color = Color.GREEN
-									"yellow":
-										part.color = Color.YELLOW
-									"blue":
-										part.color = Color.BLUE
-									"magenta":
-										part.color = Color.MAGENTA
-									"cyan":
-										part.color = Color.CYAN
-									"white":
-										part.color = Color.WHITE
-									"bold":
-										part.bold = true
-									"underline":
-										part.underline = true
+					s += printjson_out(json["data"])
 				if post_space and output_data:
 					output_console.add_header_spacing()
 			if output_console:
@@ -357,6 +320,71 @@ func handle_command(json: Dictionary) -> void:
 		_: #TODO "LocationInfo","Bounced","Retrieved","SetReply","InvalidPacket"
 			AP.log("[UNHANDLED PACKET TYPE] %s" % str(json))
 
+func printjson_out(elems: Array) -> String:
+	var s := ""
+	for elem in elems:
+		var txt: String = elem["text"]
+		s += txt
+		match elem.get("type", "text"):
+			"player_name":
+				output_console.add_text(txt, "Arbitrary Player Name", COLOR_PLAYER)
+			"item_name":
+				output_console.add_text(txt, "Arbitrary Item Name", COLOR_ITEM)
+			"location_name":
+				output_console.add_text(txt, "Arbitrary Location Name", COLOR_LOCATION)
+			"entrance_name":
+				output_console.add_text(txt, "Arbitrary Entrance Name", COLOR_LOCATION)
+			"player_id":
+				var plyr_id = int(txt)
+				conn.get_player(plyr_id).output(output_console)
+			"item_id":
+				var item_id = int(txt)
+				var plyr_id = int(elem["player"])
+				var data := conn.get_gamedata_for_player(plyr_id)
+				var flags := int(elem["flags"])
+				AP.out_item(output_console, item_id, flags, data)
+			"location_id":
+				var loc_id = int(txt)
+				var plyr_id = int(elem["player"])
+				var data := conn.get_gamedata_for_player(plyr_id)
+				AP.out_location(output_console, loc_id, data)
+			"text":
+				output_console.add_text(txt)
+			"color":
+				var part := output_console.add_text(txt)
+				var col_str: String = elem["color"]
+				if col_str.ends_with("_bg"): # no handling for bg colors, just convert to fg
+					col_str = col_str.substr(0,col_str.length()-3)
+				match col_str:
+					"red":
+						part.color = Color8(0xEE,0x00,0x00)
+					"green":
+						part.color = Color8(0x00,0xFF,0x7F)
+					"yellow":
+						part.color = Color8(0xFA,0xFA,0xD2)
+					"blue":
+						part.color = Color8(0x64,0x95,0xED)
+					"magenta":
+						part.color = Color8(0xEE,0x00,0xEE)
+					"cyan":
+						part.color = Color8(0x00,0xEE,0xEE)
+					"white":
+						part.color = Color.WHITE
+					"black":
+						part.color = Color.BLACK
+					"slateblue":
+						part.color = Color8(0x6D,0x8B,0xE8)
+					"plum":
+						part.color = Color8(0xAF,0x99,0xEF)
+					"salmon":
+						part.color = Color8(0xFA,0x80,0x72)
+					"orange":
+						part.color = Color8(0xFF,0x77,0x00)
+					"bold":
+						part.bold = true
+					"underline":
+						part.underline = true
+	return s
 #region DATAPACKS
 const READABLE_DATAPACK_FILES = true
 const datapack_cached_fields = ["item_name_to_id","location_name_to_id","checksum"]
