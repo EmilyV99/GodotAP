@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://by2e76emlvtsg"]
+
+[node name="Console" type="Window"]
+initial_position = 2
+size = Vector2i(800, 500)
+min_size = Vector2i(400, 200)
+
+[connection signal="close_requested" from="." to="." method="queue_free"]

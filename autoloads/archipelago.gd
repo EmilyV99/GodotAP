@@ -5,6 +5,7 @@ var AP_GAME_TAGS: Array[String] = ["TextOnly"]
 const AP_ITEM_HANDLING := ItemHandling.ALL
 const AP_PRINT_ITEMS_ON_CONNECT := false
 const AP_HIDE_NONLOCAL_ITEMSENDS := true ## Hide item send messages that don't involve the client
+const AP_AUTO_OPEN_CONSOLE := false
 
 #region LOGGING (godot console, not richtext console)
 const AP_LOG_COMMUNICATION := false
@@ -533,21 +534,43 @@ static func out_location(console: BaseConsole, id: int, data: DataCache) -> Base
 	var ttip = ""
 	return console.add_text(data.get_loc_name(id), ttip, COLOR_LOCATION)
 
-var output_console_window: ConsoleWindow = null
+var output_console_container: ConsoleContainer = null
 var output_console: BaseConsole :
 	get: return cmd_manager.console
 	set(val): cmd_manager.console = val
-func _open_console() -> void:
+
+func load_packed_console_as_scene(tree: SceneTree, console: PackedScene) -> bool:
+	if output_console: return false
+	var tmp_inst = console.instantiate()
+	if not (tmp_inst is Window or tmp_inst is ConsoleContainer):
+		return false
+	await tree.process_frame
+	tree.change_scene_to_packed(console)
+	await tree.node_added
+	assert(tree.current_scene)
+	load_console(tree.current_scene, false)
+	return true
+func load_console(console_scene: Variant, as_child := true) -> bool:
+	if output_console: return false
+	if not (console_scene is Window or console_scene is ConsoleContainer):
+		return false
+	if console_scene is ConsoleContainer:
+		output_console_container = console_scene
+	elif console_scene is Node:
+		output_console_container = Util.for_all_nodes(console_scene,
+			func(node):
+				return node is ConsoleContainer)
+	if as_child: add_child(console_scene)
+	console_scene.ready.connect(func():
+		output_console = output_console_container.console
+		output_console.send_text.connect(cmd_manager.call_cmd)
+		output_console.tree_exiting.connect(close_console)
+		output_console_container.typing_bar.cmd_manager = cmd_manager)
+	return true
+func open_console() -> void:
 	if output_console: return
-	output_console_window = load("res://ui/ap_console.tscn").instantiate()
-	output_console_window.title = "Archipelago Console"
-	add_child(output_console_window)
-	await output_console_window.ready
-	output_console = output_console_window.console
-	output_console.send_text.connect(cmd_manager.call_cmd)
-	output_console.tree_exiting.connect(_close_console)
-	output_console_window.typing_bar.cmd_manager = cmd_manager
-func _close_console() -> void:
+	load_console(load("res://ui/ap_console_window.tscn").instantiate())
+func close_console() -> void:
 	if output_console:
 		output_console.close()
 		output_console = null
@@ -557,7 +580,8 @@ func _close_console() -> void:
 var cmd_manager: CommandManager = CommandManager.new()
 func _init():
 	_update_tags()
-	_open_console()
+	if AP_AUTO_OPEN_CONSOLE:
+		open_console()
 	cmd_manager.register_default(func(mgr: CommandManager, msg: String):
 		if msg[0] == "/":
 			mgr.console.add_line("Unknown command '%s' - use '/help' to see commands" % msg.split(" ", true, 1)[0], "", mgr.console.COLOR_UI_MSG)

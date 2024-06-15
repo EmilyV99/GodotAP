@@ -22,8 +22,7 @@ Saves="*res://autoloads/saves.gd"
 
 [display]
 
-window/size/viewport_width=100
-window/size/viewport_height=100
+window/size/extend_to_title=true
 window/subwindows/embed_subwindows=false
 
 [rendering]

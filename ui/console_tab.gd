@@ -1,14 +1,14 @@
-@tool extends VBoxContainer
+class_name ConsoleTab extends VBoxContainer
 
 @onready var console_margin = $ConsoleMargin
 @onready var typing_bar = $TypingBar
 
 func _ready():
-	#pre_sort_children.connect(update_cont_size)
 	sort_children.connect(update_cont_size)
 	
 
 func update_cont_size():
+	assert(typing_bar)
 	var console_size = size
 	var bar_height = typing_bar.calc_height()
 	console_size.y = console_size.y - bar_height

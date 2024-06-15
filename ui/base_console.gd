@@ -24,9 +24,6 @@ class FontFlags:
 		queue_redraw()
 @export var COLOR_UI_MSG: Color = Color(.7,.7,.3)
 
-var window: ConsoleWindow :
-	get: return get_node("../../Console")
-
 signal send_text(msg: String)
 
 var font_bold: SystemFont :
@@ -433,10 +430,10 @@ func _gui_input(event):
 func close() -> void:
 	if Engine.is_editor_hint(): return
 	var p = self
-	while p and not p is Window:
+	while p and not p is ConsoleContainer:
 		p = p.get_parent()
 	if p:
-		p.close_requested.emit()
+		p.close()
 
 func send_msg(msg: String):
 	send_text.emit(msg)

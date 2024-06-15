@@ -1,0 +1,5 @@
+[gd_scene load_steps=2 format=3 uid="uid://cn7ah7d3ep4de"]
+
+[ext_resource type="PackedScene" uid="uid://cgq7n1figlpu3" path="res://ui/base_console.tscn" id="1_aq3x3"]
+
+[node name="ConsoleContainer" instance=ExtResource("1_aq3x3")]

@@ -1,4 +1,6 @@
-[gd_scene format=3 uid="uid://qhyyw87oovoy"]
+[gd_scene load_steps=2 format=3 uid="uid://qhyyw87oovoy"]
+
+[ext_resource type="Script" path="res://ui/commonclient_main.gd" id="1_stunr"]
 
 [node name="Main" type="ColorRect"]
 anchors_preset = 15
@@ -7,3 +9,4 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.394353, 0.394353, 0.394353, 1)
+script = ExtResource("1_stunr")
