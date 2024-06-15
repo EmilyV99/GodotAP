@@ -77,7 +77,7 @@ func setup_basic_commands() -> void:
 			mgr.console.add_header_spacing()
 			mgr.console.add_line("Command Help:", "", mgr.console.COLOR_UI_MSG)
 			for cmd in mgr.get_commands().filter(func(cmd):
-				return not (cmd.disabled or cmd.is_debug())):
+				return not (cmd.is_disabled() or cmd.is_debug())):
 				cmd.output_helptext(mgr.console)
 			mgr.console.add_header_spacing()))
 	register_command(ConsoleCommand.new("/cls")
@@ -96,7 +96,7 @@ func setup_debug_commands() -> void:
 			mgr.console.add_header_spacing()
 			mgr.console.add_line("Debug Help:", "", mgr.console.COLOR_UI_MSG)
 			for cmd in mgr.get_commands().filter(func(cmd):
-				return not cmd.disabled and cmd.is_debug()):
+				return not cmd.is_disabled() and cmd.is_debug()):
 				cmd.output_helptext(mgr.console)
 			mgr.console.add_header_spacing()))
 	register_command(ConsoleCommand.new("/debug").debug()
