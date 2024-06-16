@@ -446,3 +446,138 @@ func send_msg(msg: String):
 func clear() -> void:
 	parts.clear()
 	queue_redraw()
+
+func printjson_command(json: Dictionary) -> String:
+	var s := ""
+	var output_data := false
+	var pre_space := false
+	var post_space := false
+	match json.get("type"):
+		"Chat":
+			var msg = json.get("message","")
+			var name_part := AP.out_player(self, json["slot"], Archipelago.conn)
+			name_part.text += ": "
+			if not msg.is_empty():
+				add_text(msg)
+				s += name_part.text + msg
+		"CommandResult", "AdminCommandResult", "Goal", "Release", "Collect", "Tutorial":
+			pre_space = true
+			post_space = true
+			output_data = true
+		"Countdown":
+			if int(json["countdown"]) == 0:
+				post_space = true
+			output_data = true
+		"ItemSend", "ItemCheat":
+			if not Archipelago.AP_HIDE_NONLOCAL_ITEMSENDS:
+				output_data = true
+			elif int(json["receiving"]) == Archipelago.conn.player_id:
+				output_data = true
+			else:
+				var ni := NetworkItem.from(json["item"], Archipelago.conn, true)
+				if ni.src_player_id == Archipelago.conn.player_id:
+					output_data = true
+		"Hint":
+			if int(json["receiving"]) == Archipelago.conn.player_id:
+				output_data = true
+			else:
+				var ni := NetworkItem.from(json["item"], Archipelago.conn, true)
+				if ni.src_player_id == Archipelago.conn.player_id:
+					output_data = true
+		"Join", "Part":
+			var data: Array = json["data"]
+			var elem: Dictionary = data.pop_front()
+			var txt: String = elem["text"]
+			var plyr := Archipelago.conn.get_player(json["slot"])
+			var spl := txt.split(plyr.get_name(), true, 1)
+			if spl.size() == 2:
+				elem.text = spl[0]
+				s += printjson_out([elem])
+				plyr.output(self)
+				elem.text = spl[1]
+				s += printjson_out([elem])
+				s += printjson_out(data)
+			else: output_data = true
+		_:
+			output_data = true
+	if pre_space and output_data:
+		add_header_spacing()
+	if output_data:
+		s += printjson_out(json["data"])
+	if post_space and output_data:
+		add_header_spacing()
+	ensure_newline()
+	return s
+
+func printjson_out(elems: Array) -> String:
+	var s := ""
+	for elem in elems:
+		var txt: String = elem["text"]
+		s += txt
+		match elem.get("type", "text"):
+			"player_name":
+				add_text(txt, "Arbitrary Player Name", Archipelago.COLOR_PLAYER)
+			"item_name":
+				add_text(txt, "Arbitrary Item Name", Archipelago.COLOR_ITEM)
+			"location_name":
+				add_text(txt, "Arbitrary Location Name", Archipelago.COLOR_LOCATION)
+			"entrance_name":
+				add_text(txt, "Arbitrary Entrance Name", Archipelago.COLOR_LOCATION)
+			"player_id":
+				var plyr_id = int(txt)
+				Archipelago.conn.get_player(plyr_id).output(self)
+			"item_id":
+				var item_id = int(txt)
+				var plyr_id = int(elem["player"])
+				var data := Archipelago.conn.get_gamedata_for_player(plyr_id)
+				var flags := int(elem["flags"])
+				AP.out_item(self, item_id, flags, data)
+			"location_id":
+				var loc_id = int(txt)
+				var plyr_id = int(elem["player"])
+				var data := Archipelago.conn.get_gamedata_for_player(plyr_id)
+				AP.out_location(self, loc_id, data)
+			"text":
+				add_text(txt)
+			"color":
+				var part := add_text(txt)
+				var col_str: String = elem["color"]
+				if col_str.ends_with("_bg"): # no handling for bg colors, just convert to fg
+					col_str = col_str.substr(0,col_str.length()-3)
+				match col_str:
+					"red":
+						part.color = Color8(0xEE,0x00,0x00)
+					"green":
+						part.color = Color8(0x00,0xFF,0x7F)
+					"yellow":
+						part.color = Color8(0xFA,0xFA,0xD2)
+					"blue":
+						part.color = Color8(0x64,0x95,0xED)
+					"magenta":
+						part.color = Color8(0xEE,0x00,0xEE)
+					"cyan":
+						part.color = Color8(0x00,0xEE,0xEE)
+					"white":
+						part.color = Color.WHITE
+					"black":
+						part.color = Color.BLACK
+					"slateblue":
+						part.color = Color8(0x6D,0x8B,0xE8)
+					"plum":
+						part.color = Color8(0xAF,0x99,0xEF)
+					"salmon":
+						part.color = Color8(0xFA,0x80,0x72)
+					"orange":
+						part.color = Color8(0xFF,0x77,0x00)
+					"bold":
+						part.bold = true
+					"underline":
+						part.underline = true
+	return s
+
+static func printjson_str(elems: Array) -> String:
+	var s := ""
+	for elem in elems:
+		var txt: String = elem["text"]
+		s += txt
+	return s

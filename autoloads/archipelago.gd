@@ -7,6 +7,14 @@ const AP_PRINT_ITEMS_ON_CONNECT := false
 const AP_HIDE_NONLOCAL_ITEMSENDS := true ## Hide item send messages that don't involve the client
 const AP_AUTO_OPEN_CONSOLE := false
 
+signal bounce(json: Dictionary)
+signal deathlink(source: String, cause: String, json: Dictionary)
+signal locationinfo(json: Dictionary)
+signal retrieved(json: Dictionary)
+signal setreply(json: Dictionary)
+signal roomupdate(json: Dictionary)
+
+
 #region LOGGING (godot console, not richtext console)
 const AP_LOG_COMMUNICATION := false
 const AP_LOG_RECIEVED := false
@@ -229,67 +237,8 @@ func handle_command(json: Dictionary) -> void:
 				await get_tree().create_timer(3).timeout
 				printout_recieved_items = false
 		"PrintJSON":
-			var s: String = ""
-			if output_console:
-				var output_data := false
-				var pre_space := false
-				var post_space := false
-				match json.get("type"):
-					"Chat":
-						var msg = json.get("message","")
-						var name_part := AP.out_player(output_console, json["slot"], conn)
-						name_part.text += ": "
-						if not msg.is_empty():
-							output_console.add_text(msg)
-							s += name_part.text + msg
-					"CommandResult", "AdminCommandResult", "Goal", "Release", "Collect", "Tutorial":
-						pre_space = true
-						post_space = true
-						output_data = true
-					"Countdown":
-						if int(json["countdown"]) == 0:
-							post_space = true
-						output_data = true
-					"ItemSend", "ItemCheat":
-						if not AP_HIDE_NONLOCAL_ITEMSENDS:
-							output_data = true
-						elif int(json["receiving"]) == conn.player_id:
-							output_data = true
-						else:
-							var ni := NetworkItem.from(json["item"], conn, true)
-							if ni.src_player_id == conn.player_id:
-								output_data = true
-					"Hint":
-						if int(json["receiving"]) == conn.player_id:
-							output_data = true
-						else:
-							var ni := NetworkItem.from(json["item"], conn, true)
-							if ni.src_player_id == conn.player_id:
-								output_data = true
-					"Join", "Part":
-						var data: Array = json["data"]
-						var elem: Dictionary = data.pop_front()
-						var txt: String = elem["text"]
-						var plyr := conn.get_player(json["slot"])
-						var spl := txt.split(plyr.get_name(), true, 1)
-						if spl.size() == 2:
-							elem.text = spl[0]
-							s += printjson_out([elem])
-							plyr.output(output_console)
-							elem.text = spl[1]
-							s += printjson_out([elem])
-							s += printjson_out(data)
-						else: output_data = true
-					_:
-						output_data = true
-				if pre_space and output_data:
-					output_console.add_header_spacing()
-				if output_data:
-					s += printjson_out(json["data"])
-				if post_space and output_data:
-					output_console.add_header_spacing()
-			if output_console:
-				output_console.ensure_newline()
+			var s: String = (output_console.printjson_command(json) if output_console
+				else BaseConsole.printjson_str(json["data"]))
 			AP.log("[PRINT] %s" % s)
 		"DataPackage":
 			var packs = json["data"]["games"]
@@ -317,74 +266,25 @@ func handle_command(json: Dictionary) -> void:
 				conn.players.clear()
 				for plyr in json["players"]:
 					conn.players.append(NetworkPlayer.from(plyr, conn))
-		_: #TODO "LocationInfo","Bounced","Retrieved","SetReply","InvalidPacket"
+			roomupdate.emit(json)
+		"Bounced":
+			bounce.emit(json)
+			var tags: Array = json.get("tags", [])
+			if tags.has("DeathLink"):
+				var source: String = json["data"].get("source", "")
+				var cause: String = json["data"].get("cause", "")
+				deathlink.emit(source, cause, json)
+		"LocationInfo":
+			locationinfo.emit(json)
+		"Retrieved":
+			retrieved.emit(json)
+		"SetReply":
+			setreply.emit(json)
+		"InvalidPacket":
+			AP.log("[INVALID PACKET] Error with %s of command '%s' (%s)" % [json["type"], json.get("original_cmd", "?"), json["text"]])
+		_:
 			AP.log("[UNHANDLED PACKET TYPE] %s" % str(json))
 
-func printjson_out(elems: Array) -> String:
-	var s := ""
-	for elem in elems:
-		var txt: String = elem["text"]
-		s += txt
-		match elem.get("type", "text"):
-			"player_name":
-				output_console.add_text(txt, "Arbitrary Player Name", COLOR_PLAYER)
-			"item_name":
-				output_console.add_text(txt, "Arbitrary Item Name", COLOR_ITEM)
-			"location_name":
-				output_console.add_text(txt, "Arbitrary Location Name", COLOR_LOCATION)
-			"entrance_name":
-				output_console.add_text(txt, "Arbitrary Entrance Name", COLOR_LOCATION)
-			"player_id":
-				var plyr_id = int(txt)
-				conn.get_player(plyr_id).output(output_console)
-			"item_id":
-				var item_id = int(txt)
-				var plyr_id = int(elem["player"])
-				var data := conn.get_gamedata_for_player(plyr_id)
-				var flags := int(elem["flags"])
-				AP.out_item(output_console, item_id, flags, data)
-			"location_id":
-				var loc_id = int(txt)
-				var plyr_id = int(elem["player"])
-				var data := conn.get_gamedata_for_player(plyr_id)
-				AP.out_location(output_console, loc_id, data)
-			"text":
-				output_console.add_text(txt)
-			"color":
-				var part := output_console.add_text(txt)
-				var col_str: String = elem["color"]
-				if col_str.ends_with("_bg"): # no handling for bg colors, just convert to fg
-					col_str = col_str.substr(0,col_str.length()-3)
-				match col_str:
-					"red":
-						part.color = Color8(0xEE,0x00,0x00)
-					"green":
-						part.color = Color8(0x00,0xFF,0x7F)
-					"yellow":
-						part.color = Color8(0xFA,0xFA,0xD2)
-					"blue":
-						part.color = Color8(0x64,0x95,0xED)
-					"magenta":
-						part.color = Color8(0xEE,0x00,0xEE)
-					"cyan":
-						part.color = Color8(0x00,0xEE,0xEE)
-					"white":
-						part.color = Color.WHITE
-					"black":
-						part.color = Color.BLACK
-					"slateblue":
-						part.color = Color8(0x6D,0x8B,0xE8)
-					"plum":
-						part.color = Color8(0xAF,0x99,0xEF)
-					"salmon":
-						part.color = Color8(0xFA,0x80,0x72)
-					"orange":
-						part.color = Color8(0xFF,0x77,0x00)
-					"bold":
-						part.bold = true
-					"underline":
-						part.underline = true
-	return s
 #region DATAPACKS
 const READABLE_DATAPACK_FILES = true
 const datapack_cached_fields = ["item_name_to_id","location_name_to_id","checksum"]
