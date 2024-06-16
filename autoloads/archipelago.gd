@@ -118,7 +118,8 @@ func ap_disconnect() -> void:
 
 static var logging_file = null
 static func open_logger() -> void:
-	logging_file = FileAccess.open("user://ap/ap_log.log",FileAccess.WRITE)
+	if not logging_file:
+		logging_file = FileAccess.open("user://ap/ap_log.log",FileAccess.WRITE)
 static func close_logger() -> void:
 	if logging_file:
 		logging_file.close()

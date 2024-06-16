@@ -1,10 +1,8 @@
-[gd_scene load_steps=8 format=3 uid="uid://cgq7n1figlpu3"]
+[gd_scene load_steps=6 format=3 uid="uid://cgq7n1figlpu3"]
 
 [ext_resource type="Script" path="res://ui/console_container.gd" id="1_gj1xe"]
-[ext_resource type="Script" path="res://ui/base_console.gd" id="1_hvqhv"]
-[ext_resource type="Script" path="res://ui/console_tab.gd" id="2_6f1h8"]
-[ext_resource type="Script" path="res://ui/typing_bar.gd" id="3_37wlj"]
-[ext_resource type="SystemFont" uid="uid://73rjoc23d4ub" path="res://ui/console_font.tres" id="3_qc5eo"]
+[ext_resource type="PackedScene" uid="uid://c51q4vrwhlcl7" path="res://ui/console_tab.tscn" id="2_704wl"]
+[ext_resource type="Script" path="res://ui/hints_tab.gd" id="3_iwodb"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_rud5c"]
 
@@ -28,70 +26,37 @@ layout_mode = 2
 color = Color(0.231373, 0.231373, 0.231373, 1)
 
 [node name="Tabs" type="TabContainer" parent="."]
+custom_minimum_size = Vector2(1366, 705)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_rud5c")
 theme_override_styles/tabbar_background = SubResource("StyleBoxFlat_5222u")
-tabs_visible = false
 tab_focus_mode = 0
 
-[node name="Console" type="VBoxContainer" parent="Tabs"]
+[node name="Console" parent="Tabs" instance=ExtResource("2_704wl")]
 layout_mode = 2
-script = ExtResource("2_6f1h8")
+theme_override_constants/separation = 0
 
-[node name="Cont" type="MarginContainer" parent="Tabs/Console"]
-layout_mode = 2
-theme_override_constants/margin_left = 0
-theme_override_constants/margin_top = 0
-theme_override_constants/margin_right = 0
-theme_override_constants/margin_bottom = 0
-
-[node name="BG" type="ColorRect" parent="Tabs/Console/Cont"]
-layout_mode = 2
-color = Color(0, 0, 0, 1)
-
-[node name="ConsoleMargin" type="MarginContainer" parent="Tabs/Console/Cont"]
-clip_contents = true
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-focus_next = NodePath("Console")
-focus_previous = NodePath("Console")
-focus_mode = 1
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 8
-theme_override_constants/margin_bottom = 8
-
-[node name="Console" type="Control" parent="Tabs/Console/Cont/ConsoleMargin"]
-layout_mode = 2
-focus_next = NodePath("../../../TypingBar")
-focus_previous = NodePath("../../../TypingBar")
-focus_mode = 2
-mouse_filter = 1
-script = ExtResource("1_hvqhv")
-font = ExtResource("3_qc5eo")
-
-[node name="TooltipBG" type="ColorRect" parent="Tabs/Console/Cont/ConsoleMargin/Console"]
+[node name="Hints" type="VBoxContainer" parent="Tabs"]
 visible = false
 layout_mode = 2
-offset_right = 40.0
-offset_bottom = 40.0
-mouse_filter = 2
-color = Color(0.150075, 0.150075, 0.150075, 1)
+theme_override_constants/separation = 0
+script = ExtResource("3_iwodb")
 
-[node name="Tooltip" type="Label" parent="Tabs/Console/Cont/ConsoleMargin/Console/TooltipBG"]
-layout_mode = 0
-offset_right = 1.0
-offset_bottom = 23.0
-autowrap_mode = 2
-
-[node name="TypingBar" type="ColorRect" parent="Tabs/Console"]
+[node name="Header" type="HBoxContainer" parent="Tabs/Hints"]
+custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
-focus_next = NodePath(".")
-focus_previous = NodePath(".")
-focus_mode = 2
-color = Color(0.145266, 0.145266, 0.145266, 1)
-script = ExtResource("3_37wlj")
-font = ExtResource("3_qc5eo")
+size_flags_stretch_ratio = 0.0
 
-[connection signal="send_text" from="Tabs/Console/TypingBar" to="Tabs/Console/Cont/ConsoleMargin/Console" method="send_msg"]
+[node name="Button" type="Button" parent="Tabs/Hints/Header"]
+layout_mode = 2
+size_flags_horizontal = 0
+text = "Receiving Player"
+
+[node name="Console" parent="Tabs/Hints" instance=ExtResource("2_704wl")]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TypingBar" parent="Tabs/Hints/Console" index="1"]
+visible = false
+
+[editable path="Tabs/Hints/Console"]

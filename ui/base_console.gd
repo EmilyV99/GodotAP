@@ -153,19 +153,20 @@ class TextPart extends ConsolePart:
 			if trim_pos < 0: trim_pos = text.length()
 			var subtext := text.substr(text_pos,trim_pos-text_pos)
 			var str_sz := c.get_string_size(subtext, _font_flags)
-			while data.x < data.r and data.x + str_sz.x >= data.r:
+			while data.x < data.r and data.x + str_sz.x >= data.r and trim_pos > text_pos:
 				while trim_pos > text_pos and not text[trim_pos-1].lstrip(" \t"):
 					trim_pos -= 1
 				while trim_pos > text_pos and text[trim_pos-1].lstrip(" \t"):
 					trim_pos -= 1
 				subtext = text.substr(text_pos,trim_pos-text_pos)
 				str_sz = c.get_string_size(subtext, _font_flags)
-			if data.x >= data.r or trim_pos <= text_pos: # no space! next line!
+			if trim_pos <= text_pos: # No space at all, window is too thin
+				break # abort to avoid infinite loop
+			if data.x >= data.r: # no space! next line!
 				data.newline(c)
 				while text_pos < text.length() and not text[text_pos].lstrip("\n"):
 					text_pos += 1
 				continue
-			subtext = text.substr(text_pos,trim_pos-text_pos)
 			if subtext.lstrip(" \t"): #not all whitespace
 				str_sz = c.get_string_size(subtext, _font_flags)
 				var col = color if color.a8 else c.font_color
@@ -273,7 +274,9 @@ func add_text(text: String, ttip := "", col := Color.TRANSPARENT) -> TextPart:
 	return part
 
 func add_line(text: String, ttip := "", col := Color.TRANSPARENT) -> TextPart:
-	return add_text(text+"\n", ttip, col)
+	var ret = add_text(text, ttip, col)
+	ensure_newline()
+	return ret
 
 func add_linebreak(count := 1) -> LineBreakPart:
 	var part = LineBreakPart.new()
@@ -341,6 +344,7 @@ func _get_mouse_pos() -> Vector2:
 	return get_viewport().get_mouse_position() - global_position + Util.MOUSE_OFFSET
 
 func refocus_part():
+	if Engine.is_editor_hint(): return
 	var pos := _get_mouse_pos()
 	var new_hover: ConsolePart = null
 	var hov_hb: Rect2
@@ -386,6 +390,9 @@ func _draw():
 		part.draw(self, _draw_data)
 	if hovered_part:
 		hovered_part.draw_hover(self, _draw_data)
+	
+	if Engine.is_editor_hint(): return
+	
 	var max_scroll = _draw_data.max_scroll()
 	if scroll > max_scroll:
 		scroll = max_scroll

@@ -1,0 +1,78 @@
+[gd_scene load_steps=6 format=3 uid="uid://c51q4vrwhlcl7"]
+
+[ext_resource type="Script" path="res://ui/console_tab.gd" id="1_wya3j"]
+[ext_resource type="Script" path="res://ui/base_console.gd" id="2_ilcwq"]
+[ext_resource type="SystemFont" uid="uid://73rjoc23d4ub" path="res://ui/console_font.tres" id="3_iispj"]
+[ext_resource type="Script" path="res://ui/typing_bar.gd" id="4_gp0g4"]
+[ext_resource type="PackedScene" uid="uid://cm123kfw5gslb" path="res://ui/stringbar.tscn" id="5_6p6ej"]
+
+[node name="Console" type="VBoxContainer"]
+offset_right = 46.0
+offset_bottom = 20.0
+script = ExtResource("1_wya3j")
+
+[node name="Cont" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
+
+[node name="BG" type="ColorRect" parent="Cont"]
+layout_mode = 2
+color = Color(0, 0, 0, 1)
+
+[node name="ConsoleMargin" type="MarginContainer" parent="Cont"]
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+focus_next = NodePath("Console")
+focus_previous = NodePath("Console")
+focus_mode = 1
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="Console" type="Control" parent="Cont/ConsoleMargin"]
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+focus_next = NodePath("../../../TypingBar")
+focus_previous = NodePath("../../../TypingBar")
+focus_mode = 2
+mouse_filter = 1
+script = ExtResource("2_ilcwq")
+font = ExtResource("3_iispj")
+
+[node name="TooltipBG" type="ColorRect" parent="Cont/ConsoleMargin/Console"]
+visible = false
+layout_mode = 2
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+color = Color(0.150075, 0.150075, 0.150075, 1)
+
+[node name="Tooltip" type="Label" parent="Cont/ConsoleMargin/Console/TooltipBG"]
+layout_mode = 0
+offset_right = 1.0
+offset_bottom = 23.0
+autowrap_mode = 2
+
+[node name="TypingBar" type="ColorRect" parent="."]
+layout_mode = 2
+focus_next = NodePath(".")
+focus_previous = NodePath(".")
+focus_mode = 2
+color = Color(0.145266, 0.145266, 0.145266, 1)
+script = ExtResource("4_gp0g4")
+font = ExtResource("3_iispj")
+
+[node name="StringBar" parent="TypingBar" instance=ExtResource("5_6p6ej")]
+layout_mode = 1
+offset_left = -219.5
+offset_top = 99.0
+offset_right = -219.5
+offset_bottom = 66.0
+
+[connection signal="send_text" from="TypingBar" to="Cont/ConsoleMargin/Console" method="send_msg"]
