@@ -10,6 +10,7 @@ const AP_AUTO_OPEN_CONSOLE := false
 # Connection packets
 signal roominfo(conn: ConnectionInfo, json: Dictionary)
 signal connected(conn: ConnectionInfo, json: Dictionary)
+signal disconnected
 
 #region LOGGING (godot console, not richtext console)
 const AP_LOG_COMMUNICATION := false
@@ -151,14 +152,22 @@ func poll():
 			socket.poll()
 			if socket.get_ready_state() == WebSocketPeer.STATE_OPEN:
 				AP.log("Connected to '%s'!" % _url)
-				if output_console:
-					connecting_part = output_console.add_line("Connecting...","%s:%s %s" % [creds.ip,creds.port,creds.slot],output_console.COLOR_UI_MSG)
 				status = APStatus.CONNECTING
 				return
 			else:
-				AP.log("Connection to '%s' failed! Retrying (%d)" % [_url,_connect_attempts])
-				_wss = not _wss
-				if _wss: _connect_attempts += 1
+				if _connect_attempts >= 50:
+					socket.close()
+					status = APStatus.DISCONNECTED
+					AP.log("Connection to '%s' failed too much! Giving up!")
+					if output_console and connecting_part:
+						connecting_part.text = "Connection Failed!\n"
+						connecting_part.tooltip += "\nFailed connecting too many times. Check your connection details, or '/reconnect' to try again."
+						connecting_part = null
+					return
+				else:
+					AP.log("Connection to '%s' failed! Retrying (%d)" % [_url,_connect_attempts])
+					_wss = not _wss
+					if _wss: _connect_attempts += 1
 		if socket.get_ready_state() != WebSocketPeer.STATE_CONNECTING:
 			_url = "%s://%s:%s" % ["wss" if _wss else "ws",creds.ip,creds.port]
 			socket.close()
@@ -167,12 +176,15 @@ func poll():
 				AP.log("Connection to '%s' failed! Retrying (%d)" % [_url,_connect_attempts])
 				_wss = not _wss
 				if _wss: _connect_attempts += 1
+			elif output_console and not connecting_part:
+				connecting_part = output_console.add_line("Connecting...","%s:%s %s" % [creds.ip,creds.port,creds.slot],output_console.COLOR_UI_MSG)
 		return
 	socket.poll()
 	match socket.get_ready_state():
 		WebSocketPeer.STATE_CLOSED: # Exited; handle reconnection, or concluding intentional disconnection
 			if status == APStatus.DISCONNECTING:
 				status = APStatus.DISCONNECTED
+				disconnected.emit()
 			else:
 				AP.log("Accidental disconnection; reconnecting!")
 				ap_reconnect()
@@ -217,6 +229,7 @@ func handle_command(json: Dictionary) -> void:
 			if output_console and connecting_part:
 				connecting_part.text = "Connection Refused!\n"
 				connecting_part.tooltip += "\nERROR(S): "+err_str
+				connecting_part = null
 			AP.log("Connection errors: %s" % err_str)
 			ap_disconnect()
 		"Connected":
@@ -235,6 +248,7 @@ func handle_command(json: Dictionary) -> void:
 					connecting_part.text = "Connection Mismatch! Wrong slot for this save!\n"
 					for s in lock_err:
 						connecting_part.tooltip += "\n%s" % s
+						connecting_part = null
 					ap_disconnect()
 					return
 			
@@ -262,6 +276,7 @@ func handle_command(json: Dictionary) -> void:
 			status = APStatus.PLAYING
 			if output_console and connecting_part:
 				connecting_part.text = "Connected Successfully!\n"
+				connecting_part = null
 			
 			if AP_PRINT_ITEMS_ON_CONNECT:
 				printout_recieved_items = true

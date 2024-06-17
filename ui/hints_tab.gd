@@ -13,6 +13,8 @@ var status_filters: Dictionary = {
 	NetworkHint.Status.FOUND: false,
 }
 
+var old_status_system := false
+
 var _sort_index_data: Dictionary = {}
 func sort_by_dest(a: NetworkHint, b: NetworkHint) -> int:
 	return (Archipelago.conn.get_player_name(a.item.dest_player_id).nocasecmp_to(
@@ -43,6 +45,12 @@ func do_sort(a: NetworkHint, b: NetworkHint) -> bool:
 		elif c > 0: return not sort_ascending[sort_cols[q]]
 	return sort_by_prev_index(a,b) >= 0
 
+func _status_filter(s: NetworkHint.Status) -> bool:
+	match s:
+		NetworkHint.Status.FOUND: return true
+		NetworkHint.Status.NOT_FOUND: return old_status_system
+		_: return not old_status_system
+
 func sort_click(event: InputEventMouseButton, index: int) -> bool:
 	if not event.pressed: return false
 	if event.button_index == MOUSE_BUTTON_LEFT:
@@ -63,12 +71,11 @@ func sort_click(event: InputEventMouseButton, index: int) -> bool:
 		if not index in [4]: # TODO temp, remove
 			return false
 		
-		
 		var vbox := headings[index].pop_dropdown(hint_console)
 		match index:
 			4: # Status
 				var arr: Array = ["Force All"]
-				arr.append_array(Util.reversed(NetworkHint.status_names.keys()))
+				arr.append_array(Util.reversed(NetworkHint.status_names.keys()).filter(_status_filter))
 				for s in arr:
 					var hbox := HBoxContainer.new()
 					hbox.set_anchors_preset(PRESET_CENTER)
@@ -92,6 +99,7 @@ func _ready():
 		var hint_key := "_read_hints_%d_%d" % [Archipelago.conn.team_id, Archipelago.conn.player_id]
 		conn.set_notify(hint_key, self.load_hints_from_json)
 		conn.retrieve(hint_key, self.load_hints_from_json))
+	Archipelago.disconnected.connect(func(): load_hints_from_json([]))
 	var header := BaseConsole.ColumnsPart.new()
 	headings.append(header.add(hint_console.make_c_text("Receiving Player"), 500))
 	headings.append(header.add(hint_console.make_c_text("Item"), 500))
@@ -116,7 +124,10 @@ func refresh_hints():
 	_stored_hints.sort_custom(do_sort)
 	
 	hint_container.clear()
+	old_status_system = true
 	for hint in _stored_hints:
+		if hint.status != NetworkHint.Status.NOT_FOUND and hint.status != NetworkHint.Status.FOUND:
+			old_status_system = false
 		if filter_allow(hint):
 			hint_container._add(hint_console.make_hint(hint))
 	hint_console.queue_redraw()

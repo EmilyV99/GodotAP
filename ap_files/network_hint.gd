@@ -26,22 +26,6 @@ static var status_colors: Dictionary = {
 	Status.NOT_FOUND: "red",
 }
 
-static func next_status(s: Status) -> Status:
-	match s:
-		Status.FOUND: return Status.FOUND
-		Status.NON_PRIORITY: return Status.AVOID
-		Status.AVOID: return Status.PRIORITY
-		Status.PRIORITY: return Status.NON_PRIORITY
-		_: return Status.NON_PRIORITY
-static func prev_status(s: Status) -> Status:
-	match s:
-		Status.FOUND: return Status.FOUND
-		Status.NON_PRIORITY: return Status.PRIORITY
-		Status.AVOID: return Status.NON_PRIORITY
-		Status.PRIORITY: return Status.AVOID
-		_: return Status.NON_PRIORITY
-
-
 var item: NetworkItem
 var entrance: String
 var status: Status = Status.NOT_FOUND
