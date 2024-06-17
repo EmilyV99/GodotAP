@@ -574,8 +574,8 @@ func _init():
 				send_command("Say", {"text":msg}))
 	cmd_manager.register_command(ConsoleCommand.new("/connect")
 		.add_help("port", "Connects to a new port, with the same ip/slot/password.")
-		.add_help("ip:port", "Connects to a new ip+port, with the same slot/password.")
-		.add_help("ip:port slot [pwd]", "Connects to a new ip+port, with a new slot and [optional] password.")
+		.add_help("ip[:port]", "Connects to a new ip+[optional] port, with the same slot/password. (if port omitted, uses 38281)")
+		.add_help("ip[:port] slot [pwd]", "Connects to a new ip+port, with a new slot and [optional] password. (if port omitted, uses 38281)")
 		.set_call(func(mgr: CommandManager, cmd: ConsoleCommand, msg: String):
 			var command_args = msg.split(" ", true, 3)
 			if command_args.size() == 2:
