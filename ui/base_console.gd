@@ -474,6 +474,8 @@ class HintPart extends ColumnsPart: ## A part representing a hint info
 		add(hint.make_status(c).centered(), 500).on_click = func(evt): return change_status(evt,c)
 	func change_status(event: InputEventMouseButton, c: BaseConsole) -> bool:
 		if not event.pressed: return false
+		if hint.item.dest_player_id != Archipelago.conn.player_id:
+			return false # Lacking permission
 		if hint.status == NetworkHint.Status.FOUND: return false # Can't change found
 		if hint.status == NetworkHint.Status.NOT_FOUND: return false # Indicates feature unsupported
 		if event.button_index == MOUSE_BUTTON_LEFT or event.button_index == MOUSE_BUTTON_RIGHT:
