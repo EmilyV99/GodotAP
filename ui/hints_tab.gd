@@ -63,23 +63,8 @@ func sort_click(event: InputEventMouseButton, index: int) -> bool:
 		if not index in [4]: # TODO temp, remove
 			return false
 		
-		var window := Window.new()
-		window.transient = true
-		window.exclusive = true
-		window.unresizable = true
-		window.borderless = true
-		window.popup_window = true
-		window.close_requested.connect(window.queue_free)
-		window.position = get_window().position + Vector2i(event.global_position)
-		window.ready.connect(func():
-			window.size.x = roundi(get_window().size.x/5.0)
-			window.position = get_window().position
-			window.position.x += window.size.x*index
-			window.position.y += roundi(hint_console.global_position.y + headings[0].get_hitboxes()[0].size.y)
-			, CONNECT_ONE_SHOT)
-		var vbox := VBoxContainer.new()
-		window.add_child(vbox)
-		vbox.set_anchors_preset(PRESET_FULL_RECT) 
+		
+		var vbox := headings[index].pop_dropdown(hint_console)
 		match index:
 			4: # Status
 				var arr: Array = ["Force All"]
@@ -99,9 +84,6 @@ func sort_click(event: InputEventMouseButton, index: int) -> bool:
 					lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 					hbox.add_child(lbl)
 					vbox.add_child(hbox)
-		window.ready.connect(func():
-			window.size.y = ceili(vbox.size.y))
-		add_child(window)
 		return true
 	return false
 

@@ -139,6 +139,17 @@ class ConsolePart: ## A base part, for all other parts to inherit from
 		return false
 	func get_hitboxes() -> Array[Rect2]:
 		return []
+	func get_hitbox() -> Rect2: ## Combines all the hitboxes from 'get_hitboxes()' rectangularly
+		var hbs := get_hitboxes()
+		if hbs.is_empty(): return Rect2()
+		var ret: Rect2 = hbs.pop_back()
+		for hb in hbs:
+			var hb2 = ret
+			ret.position.x = min(hb.position.x, hb2.position.x)
+			ret.size.x = max(hb.position.x+hb.size.x, hb2.position.x+hb2.size.x) - ret.position.x
+			ret.position.y = min(hb.position.y, hb2.position.y)
+			ret.size.y = max(hb.position.y+hb.size.y, hb2.position.y+hb2.size.y) - ret.position.y
+		return ret
 	func try_hover(c: BaseConsole, pos: Vector2) -> bool:
 		for hb in get_hitboxes():
 			if hb.has_point(pos):
@@ -151,6 +162,30 @@ class ConsolePart: ## A base part, for all other parts to inherit from
 				if hb.has_point(pos):
 					return on_click.call(evt)
 		return false
+	func pop_dropdown(c: BaseConsole) -> VBoxContainer:
+		var window := Window.new()
+		window.min_size = Vector2.ZERO
+		window.reset_size()
+		window.transient = true
+		window.exclusive = true
+		window.unresizable = true
+		window.borderless = true
+		window.popup_window = true
+		window.visible = false
+		window.close_requested.connect(window.queue_free)
+		var vbox := VBoxContainer.new()
+		window.add_child(vbox)
+		window.ready.connect(func():
+			var hb := get_hitbox()
+			window.size.x = roundi(hb.size.x)
+			window.size.y = ceili(vbox.size.y)
+			window.position = c.get_window().position
+			window.position.x += roundi(c.global_position.x + hb.position.x)
+			window.position.y += roundi(c.global_position.y + hb.position.y + hb.size.y)
+			window.visible = true)
+		vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
+		c.add_child.call_deferred(window) # Defer adding it, to allow caller to add things to the vbox
+		return vbox
 class TextPart extends ConsolePart: ## A part that displays text, with opt color+tooltip
 	var text: String = ""
 	var tooltip: String = ""
@@ -436,15 +471,23 @@ class HintPart extends ColumnsPart: ## A part representing a hint info
 		add(hint.item.output(c, false).centered(), 500)
 		add(Archipelago.out_player(c, hint.item.src_player_id, false).centered(), 500)
 		add(Archipelago.out_location(c, hint.item.loc_id, data, false).centered(), 500)
-		add(hint.make_status(c).centered(), 500).on_click = cycle_status
-	func cycle_status(event: InputEventMouseButton) -> bool:
-		if event.pressed:
-			if event.button_index == MOUSE_BUTTON_LEFT:
-				Archipelago.conn.update_hint(hint.item.loc_id, hint.item.src_player_id, NetworkHint.next_status(hint.status))
-				return true
-			elif event.button_index == MOUSE_BUTTON_RIGHT:
-				Archipelago.conn.update_hint(hint.item.loc_id, hint.item.src_player_id, NetworkHint.prev_status(hint.status))
-				return true
+		add(hint.make_status(c).centered(), 500).on_click = func(evt): return change_status(evt,c)
+	func change_status(event: InputEventMouseButton, c: BaseConsole) -> bool:
+		if not event.pressed: return false
+		if hint.status == NetworkHint.Status.FOUND: return false # Can't change found
+		if hint.status == NetworkHint.Status.NOT_FOUND: return false # Indicates feature unsupported
+		if event.button_index == MOUSE_BUTTON_LEFT or event.button_index == MOUSE_BUTTON_RIGHT:
+			var vbox := parts[4].pop_dropdown(c)
+			vbox.add_theme_constant_override("separation", 0)
+			for s in [NetworkHint.Status.AVOID,NetworkHint.Status.NON_PRIORITY,NetworkHint.Status.PRIORITY]:
+				var btn := Button.new()
+				btn.text = NetworkHint.status_names[s]
+				btn.set_anchors_preset(Control.PRESET_HCENTER_WIDE)
+				btn.pressed.connect(func():
+					Archipelago.conn.update_hint(hint.item.loc_id, hint.item.src_player_id, s)
+					vbox.get_window().close_requested.emit())
+				vbox.add_child(btn)
+			return true
 		return false
 
 func add(part: ConsolePart) -> ConsolePart:
