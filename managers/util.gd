@@ -142,3 +142,8 @@ static func split_args(msg: String) -> Array[String]:
 		if s.count("\"") % 2:
 			open_quote = not open_quote
 	return args
+
+static func reversed(arr: Array) -> Array:
+	var dup := arr.duplicate()
+	dup.reverse()
+	return dup

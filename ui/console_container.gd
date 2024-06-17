@@ -15,18 +15,6 @@
 		hide_hints_tab = val
 		refresh_hidden()
 
-var console_window: Window :
-	get = get_console_window
-
-## Returns the window containing the console
-func get_console_window() -> Window:
-	if console_window: return console_window
-	var p = get_parent()
-	while not p is Window:
-		p = p.get_parent()
-	console_window = p
-	return p
-
 func recount() -> int: ## Returns the number of visible tabs, and sets the tabbar's visibility.
 	var count := 0
 	for q in tabs.get_tab_count():
@@ -47,17 +35,17 @@ func refresh_hidden() -> void:
 func _ready() -> void:
 	refresh_hidden()
 	typing_bar.grab_focus()
-	console_window.size_changed.connect(update_cont_size)
+	get_window().size_changed.connect(update_cont_size)
 	update_cont_size()
 
 func update_cont_size() -> void:
 	position = Vector2.ZERO
-	var sz := console_window.size
+	var sz := get_window().size
 	custom_minimum_size = sz
 	tabs.custom_minimum_size = sz
 	reset_size()
 	queue_sort()
 
 func close() -> void:
-	console_window.close_requested.emit()
+	get_window().close_requested.emit()
 	

@@ -1,4 +1,4 @@
-@tool class_name ConsoleTab extends BaseTab
+@tool class_name ConsoleTab extends VBoxContainer
 
 @onready var console_cont = $Cont
 @onready var console: BaseConsole = $Cont/ConsoleMargin/Console
@@ -10,7 +10,7 @@ func _ready():
 
 func update_cont_size():
 	var console_size = size
-	var bar_height = typing_bar.calc_height() if typing_bar and typing_bar.visible else 0
+	var bar_height = typing_bar.calc_height() if typing_bar and typing_bar.visible else 0.0
 	console_size.y = console_size.y - bar_height
 	
 	if typing_bar:

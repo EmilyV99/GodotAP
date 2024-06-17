@@ -4,7 +4,5 @@
 
 [node name="ConsoleContainer" instance=ExtResource("1_aq3x3")]
 
-[node name="Header" parent="Tabs/Hints" index="0"]
-size_flags_vertical = 3
-
 [editable path="Tabs/Console"]
+[editable path="Tabs/Hints/Console"]

@@ -18,8 +18,21 @@ static func from(json: Dictionary, conn_info: ConnectionInfo, recv: bool) -> Net
 	v.dest_player_id = conn_info.player_id if recv else json["player"]
 	v.flags = json["flags"]
 	return v
+static func from_hint(json: Dictionary) -> NetworkItem:
+	if json["class"] != "Hint":
+		return null
+	var v := NetworkItem.new()
+	v.id = json["item"]
+	v.loc_id = json["location"]
+	v.src_player_id = json["finding_player"]
+	v.dest_player_id = json["receiving_player"]
+	v.flags = json["item_flags"]
+	return v
+
+func is_local() -> bool:
+	return src_player_id == dest_player_id
 
 func _to_string():
 	return "ITEM(%d at %d,player %d->%d,flags %d)" % [id,loc_id,src_player_id,dest_player_id,flags]
-func output(console: BaseConsole, data: DataCache) -> void:
-	AP.out_item(console, id, flags, data)
+func output(console: BaseConsole, add := true) -> BaseConsole.TextPart:
+	return Archipelago.out_item(console, id, flags, Archipelago.conn.get_gamedata_for_player(dest_player_id), add)

@@ -7,24 +7,43 @@ const AP_PRINT_ITEMS_ON_CONNECT := false
 const AP_HIDE_NONLOCAL_ITEMSENDS := true ## Hide item send messages that don't involve the client
 const AP_AUTO_OPEN_CONSOLE := false
 
-signal bounce(json: Dictionary)
-signal deathlink(source: String, cause: String, json: Dictionary)
-signal locationinfo(json: Dictionary)
-signal retrieved(json: Dictionary)
-signal setreply(json: Dictionary)
-signal roomupdate(json: Dictionary)
-
+# Connection packets
+signal roominfo(conn: ConnectionInfo, json: Dictionary)
+signal connected(conn: ConnectionInfo, json: Dictionary)
 
 #region LOGGING (godot console, not richtext console)
 const AP_LOG_COMMUNICATION := false
 const AP_LOG_RECIEVED := false
 #endregion
 #region COLORS
-const COLOR_PLAYER: Color = Color8(238,0,238)
-const COLOR_ITEM_PROG: Color = Color8(175,153,239)
-const COLOR_ITEM: Color = Color8(1,234,234)
-const COLOR_ITEM_TRAP: Color = Color.RED
-const COLOR_LOCATION: Color = Color8(1,252,126)
+var COLOR_PLAYER: Color :
+	get: return rich_colors["magenta"]
+var COLOR_ITEM_PROG: Color :
+	get: return rich_colors["plum"]
+var COLOR_ITEM: Color :
+	get: return rich_colors["cyan"]
+var COLOR_ITEM_USEFUL: Color :
+	get: return rich_colors["slateblue"]
+var COLOR_ITEM_TRAP: Color :
+	get: return rich_colors["salmon"]
+var COLOR_LOCATION: Color :
+	get: return rich_colors["green"]
+
+var rich_colors: Dictionary = {
+	"red": Color8(0xEE,0x00,0x00),
+	"green": Color8(0x00,0xFF,0x7F),
+	"yellow": Color8(0xFA,0xFA,0xD2),
+	"blue": Color8(0x64,0x95,0xED),
+	"magenta": Color8(0xEE,0x00,0xEE),
+	"cyan": Color8(0x00,0xEE,0xEE),
+	"white": Color.WHITE,
+	"black": Color.BLACK,
+	"slateblue": Color8(0x6D,0x8B,0xE8),
+	"plum": Color8(0xAF,0x99,0xEF),
+	"salmon": Color8(0xFA,0x80,0x72),
+	"orange": Color8(0xFF,0x77,0x00),
+}
+
 #endregion COLORS
 
 enum ItemHandling {
@@ -45,6 +64,7 @@ var conn: ConnectionInfo
 
 enum APStatus {
 	DISCONNECTED,
+	SOCKET_CONNECTING,
 	CONNECTING,
 	CONNECTED,
 	PLAYING, # 'Authenticated'
@@ -68,30 +88,17 @@ func is_not_connected() -> bool:
 
 var connecting_part: BaseConsole.TextPart
 
+var _connect_attempts := 1
+var _wss := true
+var _url := ""
 func ap_reconnect() -> void:
 	if status != APStatus.DISCONNECTED:
 		ap_disconnect()
 		queue_reconnect = true
 		return
-	var attempts := 1
-	var wss := true
-	var url: String
-	while true:
-		url = "%s://%s:%s" % ["wss" if wss else "ws",creds.ip,creds.port]
-		socket.close()
-		var err := socket.connect_to_url(url)
-		if not err:
-			while socket.get_ready_state() == WebSocketPeer.STATE_CONNECTING:
-				socket.poll()
-			if socket.get_ready_state() == WebSocketPeer.STATE_OPEN:
-				break
-		AP.log("Connection to '%s' failed! Retrying (%d)" % [url,attempts])
-		wss = not wss
-		if wss: attempts += 1
-	AP.log("Connected to '%s'!" % url)
-	if output_console:
-		connecting_part = output_console.add_line("Connecting...","%s:%s %s" % [creds.ip,creds.port,creds.slot],output_console.COLOR_UI_MSG)
-	status = APStatus.CONNECTING
+	status = APStatus.SOCKET_CONNECTING
+	_connect_attempts = 1
+	_wss = true
 
 func ap_connect(room_ip: String, room_port: String, slot_name: String, room_pwd := "") -> void:
 	if status != APStatus.DISCONNECTED:
@@ -139,6 +146,28 @@ static func dblog(s: Variant) -> void:
 func poll():
 	if status == APStatus.DISCONNECTED:
 		return
+	if status == APStatus.SOCKET_CONNECTING:
+		if socket.get_ready_state() == WebSocketPeer.STATE_CONNECTING:
+			socket.poll()
+			if socket.get_ready_state() == WebSocketPeer.STATE_OPEN:
+				AP.log("Connected to '%s'!" % _url)
+				if output_console:
+					connecting_part = output_console.add_line("Connecting...","%s:%s %s" % [creds.ip,creds.port,creds.slot],output_console.COLOR_UI_MSG)
+				status = APStatus.CONNECTING
+				return
+			else:
+				AP.log("Connection to '%s' failed! Retrying (%d)" % [_url,_connect_attempts])
+				_wss = not _wss
+				if _wss: _connect_attempts += 1
+		if socket.get_ready_state() != WebSocketPeer.STATE_CONNECTING:
+			_url = "%s://%s:%s" % ["wss" if _wss else "ws",creds.ip,creds.port]
+			socket.close()
+			var err := socket.connect_to_url(_url)
+			if err:
+				AP.log("Connection to '%s' failed! Retrying (%d)" % [_url,_connect_attempts])
+				_wss = not _wss
+				if _wss: _connect_attempts += 1
+		return
 	socket.poll()
 	match socket.get_ready_state():
 		WebSocketPeer.STATE_CLOSED: # Exited; handle reconnection, or concluding intentional disconnection
@@ -181,6 +210,7 @@ func handle_command(json: Dictionary) -> void:
 			args["game"] = AP_GAME_NAME
 			args["tags"] = AP_GAME_TAGS
 			args["items_handling"] = AP_ITEM_HANDLING
+			roominfo.emit(conn, json)
 			send_command("Connect",args)
 		"ConnectionRefused":
 			var err_str := str(json["errors"])
@@ -237,6 +267,7 @@ func handle_command(json: Dictionary) -> void:
 				printout_recieved_items = true
 				await get_tree().create_timer(3).timeout
 				printout_recieved_items = false
+			connected.emit(conn, json)
 		"PrintJSON":
 			var s: String = (output_console.printjson_command(json) if output_console
 				else BaseConsole.printjson_str(json["data"]))
@@ -267,20 +298,20 @@ func handle_command(json: Dictionary) -> void:
 				conn.players.clear()
 				for plyr in json["players"]:
 					conn.players.append(NetworkPlayer.from(plyr, conn))
-			roomupdate.emit(json)
+			conn.roomupdate.emit(json)
 		"Bounced":
-			bounce.emit(json)
+			conn.bounce.emit(json)
 			var tags: Array = json.get("tags", [])
 			if tags.has("DeathLink"):
 				var source: String = json["data"].get("source", "")
 				var cause: String = json["data"].get("cause", "")
-				deathlink.emit(source, cause, json)
+				conn.deathlink.emit(source, cause, json)
 		"LocationInfo":
-			locationinfo.emit(json)
+			conn.locationinfo.emit(json)
 		"Retrieved":
-			retrieved.emit(json)
+			conn._on_retrieve(json)
 		"SetReply":
-			setreply.emit(json)
+			conn.setreply.emit(json)
 		"InvalidPacket":
 			AP.log("[INVALID PACKET] Error with %s of command '%s' (%s)" % [json["type"], json.get("original_cmd", "?"), json["text"]])
 		_:
@@ -352,11 +383,11 @@ func recieve_item(index: int, item: NetworkItem) -> void:
 	var msg := ""
 	if item.dest_player_id == item.src_player_id:
 		if output_console and printout_recieved_items:
-			AP.out_player(output_console, conn.player_id, conn)
+			conn.get_player().output(output_console)
 			output_console.add_text(" found their ")
-			item.output(output_console, data)
+			item.output(output_console)
 			output_console.add_text(" (")
-			AP.out_location(output_console, item.loc_id, data)
+			out_location(output_console, item.loc_id, data)
 			output_console.add_line(")")
 		msg = "You found your %s at %s!" % [data.get_item_name(item.id),data.get_loc_name(item.loc_id)]
 		_remove_loc(item.loc_id)
@@ -365,11 +396,11 @@ func recieve_item(index: int, item: NetworkItem) -> void:
 		if output_console and printout_recieved_items:
 			conn.get_player(item.src_player_id).output(output_console)
 			output_console.add_text(" sent ")
-			item.output(output_console, data)
+			item.output(output_console)
 			output_console.add_text(" to ")
-			AP.out_player(output_console, conn.player_id, conn)
+			conn.get_player().output(output_console)
 			output_console.add_text(" (")
-			AP.out_location(output_console, item.loc_id, src_data)
+			out_location(output_console, item.loc_id, src_data)
 			output_console.add_line(")")
 		msg = "%s found your %s at their %s!" % [conn.get_player_name(item.src_player_id), data.get_item_name(item.id), src_data.get_loc_name(item.loc_id)]
 	
@@ -446,7 +477,7 @@ func _notification(what):
 
 #region CONSOLE
 
-static func out_item(console: BaseConsole, id: int, flags: int, data: DataCache) -> BaseConsole.TextPart:
+func out_item(console: BaseConsole, id: int, flags: int, data: DataCache, add := true) -> BaseConsole.TextPart:
 	if not console: return
 	var ttip = "Type: %s" % AP.get_item_classification(flags)
 	var color := COLOR_ITEM
@@ -454,17 +485,23 @@ static func out_item(console: BaseConsole, id: int, flags: int, data: DataCache)
 		color = COLOR_ITEM_PROG
 	elif flags&ICLASS_TRAP:
 		color = COLOR_ITEM_TRAP
-	return console.add_text(data.get_item_name(id), ttip, color)
-static func out_player(console: BaseConsole, id: int, conn_info: ConnectionInfo) -> BaseConsole.TextPart:
+	var ret := console.make_text(data.get_item_name(id), ttip, color)
+	if add: console.add(ret)
+	return ret
+func out_player(console: BaseConsole, id: int, add := true) -> BaseConsole.TextPart:
 	if not console: return
-	var player := conn_info.get_player(id)
-	var ttip = "Game: %s" % conn_info.get_slot(id).game
+	var player := conn.get_player(id)
+	var ttip = "Game: %s" % conn.get_slot(id).game
 	if not player.alias.is_empty():
 		ttip += "\nName: %s" % player.name
-	return console.add_text(conn_info.get_player_name(id), ttip, COLOR_PLAYER)
-static func out_location(console: BaseConsole, id: int, data: DataCache) -> BaseConsole.TextPart:
+	var ret := console.make_text(conn.get_player_name(id), ttip, Archipelago.COLOR_PLAYER)
+	if add: console.add(ret)
+	return ret
+func out_location(console: BaseConsole, id: int, data: DataCache, add := true) -> BaseConsole.TextPart:
 	var ttip = ""
-	return console.add_text(data.get_loc_name(id), ttip, COLOR_LOCATION)
+	var ret := console.make_text(data.get_loc_name(id), ttip, COLOR_LOCATION)
+	if add: console.add(ret)
+	return ret
 
 var output_console_container: ConsoleContainer = null
 var output_console: BaseConsole :

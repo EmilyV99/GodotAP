@@ -36,21 +36,14 @@ tab_focus_mode = 0
 layout_mode = 2
 theme_override_constants/separation = 0
 
-[node name="Hints" type="VBoxContainer" parent="Tabs"]
+[node name="Hints" type="MarginContainer" parent="Tabs"]
 visible = false
 layout_mode = 2
-theme_override_constants/separation = 0
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
 script = ExtResource("3_iwodb")
-
-[node name="Header" type="HBoxContainer" parent="Tabs/Hints"]
-custom_minimum_size = Vector2(0, 50)
-layout_mode = 2
-size_flags_stretch_ratio = 0.0
-
-[node name="Button" type="Button" parent="Tabs/Hints/Header"]
-layout_mode = 2
-size_flags_horizontal = 0
-text = "Receiving Player"
 
 [node name="Console" parent="Tabs/Hints" instance=ExtResource("2_704wl")]
 layout_mode = 2

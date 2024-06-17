@@ -30,5 +30,5 @@ static func from(json: Dictionary, conn_info: ConnectionInfo) -> NetworkPlayer:
 
 func _to_string():
 	return "PLAYER(%s[%s],team %d,slot %d)" % [name,alias,team,slot]
-func output(console: BaseConsole) -> void:
-	AP.out_player(console, slot, conn)
+func output(console: BaseConsole, add := true) -> BaseConsole.TextPart:
+	return Archipelago.out_player(console, slot, add)
