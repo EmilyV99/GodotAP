@@ -91,7 +91,10 @@ var connecting_part: BaseConsole.TextPart
 
 var _connect_attempts := 1
 var _wss := true
-var _url := ""
+
+func get_url() -> String:
+	return "%s://%s:%s" % ["wss" if _wss else "ws",creds.ip,creds.port]
+
 func ap_reconnect() -> void:
 	if status != APStatus.DISCONNECTED:
 		ap_disconnect()
@@ -148,36 +151,39 @@ func poll():
 	if status == APStatus.DISCONNECTED:
 		return
 	if status == APStatus.SOCKET_CONNECTING:
-		if socket.get_ready_state() == WebSocketPeer.STATE_CONNECTING:
-			socket.poll()
-			if socket.get_ready_state() == WebSocketPeer.STATE_OPEN:
-				AP.log("Connected to '%s'!" % _url)
-				status = APStatus.CONNECTING
+		match socket.get_ready_state():
+			WebSocketPeer.STATE_OPEN: # Already connected, disconnect that connection
+				ap_disconnect()
 				return
-			else:
-				if _connect_attempts >= 50:
-					socket.close()
-					status = APStatus.DISCONNECTED
-					AP.log("Connection to '%s' failed too much! Giving up!")
-					if output_console and connecting_part:
-						connecting_part.text = "Connection Failed!\n"
-						connecting_part.tooltip += "\nFailed connecting too many times. Check your connection details, or '/reconnect' to try again."
-						connecting_part = null
-					return
-				else:
-					AP.log("Connection to '%s' failed! Retrying (%d)" % [_url,_connect_attempts])
+			WebSocketPeer.STATE_CLOSED: # Start a new connection
+				var err := socket.connect_to_url(get_url())
+				if err:
+					AP.log("Connection to '%s' failed! Retrying (%d)" % [get_url(),_connect_attempts])
 					_wss = not _wss
 					if _wss: _connect_attempts += 1
-		if socket.get_ready_state() != WebSocketPeer.STATE_CONNECTING:
-			_url = "%s://%s:%s" % ["wss" if _wss else "ws",creds.ip,creds.port]
-			socket.close()
-			var err := socket.connect_to_url(_url)
-			if err:
-				AP.log("Connection to '%s' failed! Retrying (%d)" % [_url,_connect_attempts])
-				_wss = not _wss
-				if _wss: _connect_attempts += 1
-			elif output_console and not connecting_part:
-				connecting_part = output_console.add_line("Connecting...","%s:%s %s" % [creds.ip,creds.port,creds.slot],output_console.COLOR_UI_MSG)
+				elif output_console and not connecting_part:
+					connecting_part = output_console.add_line("Connecting...","%s:%s %s" % [creds.ip,creds.port,creds.slot],output_console.COLOR_UI_MSG)
+			WebSocketPeer.STATE_CONNECTING: # Continue trying to make new connection
+				socket.poll()
+				var state := socket.get_ready_state()
+				if state == WebSocketPeer.STATE_OPEN:
+					AP.log("Connected to '%s'!" % get_url())
+					status = APStatus.CONNECTING
+				elif state != WebSocketPeer.STATE_CONNECTING:
+					if _connect_attempts >= 50:
+						socket.close()
+						status = APStatus.DISCONNECTING
+						AP.log("Connection to '%s' failed too much! Giving up!" % get_url())
+						if output_console and connecting_part:
+							connecting_part.text = "Connection Failed!\n"
+							connecting_part.tooltip += "\nFailed connecting too many times. Check your connection details, or '/reconnect' to try again."
+							connecting_part = null
+					else:
+						AP.log("Connection to '%s' failed! Retrying (%d)" % [get_url(),_connect_attempts])
+						_wss = not _wss
+						if _wss: _connect_attempts += 1
+			WebSocketPeer.STATE_CLOSING:
+				return
 		return
 	socket.poll()
 	match socket.get_ready_state():
