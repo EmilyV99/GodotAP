@@ -49,7 +49,6 @@ func get_gamedata_for_player(plyr_id: int = -1) -> DataCache:
 # Incoming server packets
 signal bounce(json: Dictionary) ## Emitted when a `Bounce` packet is received.
 signal deathlink(source: String, cause: String, json: Dictionary) ## Emitted when a `Bounce` packet of type `DeathLink` is received, after the `bounce` signal.
-signal locationinfo(json: Dictionary) ## Emitted when a `LocationInfo` packet is received
 signal setreply(json: Dictionary) ## Emitted when a `SetReply` packet is received
 signal roomupdate(json: Dictionary) ## Emitted when a `RoomUpdate` packet is received
 signal obtained_item(item: NetworkItem) ## Emitted for each item received
@@ -83,3 +82,51 @@ func _on_retrieve(json: Dictionary) -> void:
 ## Only valid if the server is running a branch with https://github.com/ArchipelagoMW/Archipelago/pull/3506
 func update_hint(loc: int, plyr: int, status: NetworkHint.Status) -> void:
 	Archipelago.send_command("UpdateHint", {"location": loc, "player": plyr, "status": status})
+
+var _scout_cache: Dictionary
+var _scout_queue: Dictionary
+## Sends a `LocationScouts` packet, and connects the specified `Callable[NetworkItem]->void`
+## to be called with the returned information.
+## If the location has already been scouted this session, returns the cached info.
+func scout(location: int, create_as_hint: int, proc: Callable):
+	var item: NetworkItem = _scout_cache.get(location)
+	if item:
+		proc.call(item)
+	else:
+		Archipelago.send_command("LocationScouts", {"locations": [location], "create_as_hint": create_as_hint})
+		if not _scout_queue.has(location):
+			_scout_queue[location] = [proc]
+		else: _scout_queue[location].append(proc)
+func _on_locinfo(json: Dictionary) -> void:
+	for loc in json.get("locations", []):
+		var locid = loc["location"]
+		_scout_cache[locid] = NetworkItem.from(loc, false)
+		for proc in _scout_queue.get(locid, []):
+			proc.call(_scout_cache[locid])
+		_scout_queue.erase(locid)
+
+
+## Sends a `Bounce` packet with whatever information you like
+func send_bounce(data: Dictionary, games: Array[String], slots: Array[String], tags: Array[String]) -> void:
+	var cmd: Dictionary = {}
+	if games:
+		cmd["games"] = games
+	if slots:
+		cmd["slots"] = slots
+	if tags:
+		cmd["tags"] = tags
+	if not cmd: return
+	cmd.merge(data)
+	Archipelago.send_command("Bounce", cmd)
+
+## Sends a `Bounce` packet designed for the `DeathLink` feature
+## Requires the client be connected with the `DeathLink` tag
+func send_deathlink(cause: String = ""):
+	if not "DeathLink" in Archipelago.AP_GAME_TAGS:
+		AP.log("Tried to send DeathLink while DeathLink is not enabled!")
+		return
+	var cmd: Dictionary = {}
+	if not cause.is_empty():
+		cmd["cause"] = cause
+	cmd["source"] = get_player_name(false)
+	send_bounce(cmd, [], [], ["DeathLink"])

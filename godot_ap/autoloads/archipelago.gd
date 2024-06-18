@@ -343,10 +343,12 @@ func _handle_command(json: Dictionary) -> void:
 			var tags: Array = json.get("tags", [])
 			if tags.has("DeathLink"):
 				var source: String = json["data"].get("source", "")
+				if source == conn.get_player_name(false):
+					return # Skip deaths from self
 				var cause: String = json["data"].get("cause", "")
 				conn.deathlink.emit(source, cause, json)
 		"LocationInfo":
-			conn.locationinfo.emit(json)
+			conn._on_locinfo(json)
 		"Retrieved":
 			conn._on_retrieve(json)
 		"SetReply":
@@ -849,3 +851,6 @@ func _ensure_connected(console: BaseConsole) -> bool:
 		return true
 	console.add_line("Not connected to Archipelago! Please connect first!", "", console.COLOR_UI_MSG)
 	return false
+
+func set_deathlink(state: bool) -> void:
+	set_tag("DeathLink", state)
