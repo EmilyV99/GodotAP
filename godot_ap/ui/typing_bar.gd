@@ -99,7 +99,7 @@ func _ready():
 			showing_cursor = not showing_cursor)
 		timer.start()
 	# Add autofill rect
-	autofill_rect = load("res://ui/stringbar.tscn").instantiate()
+	autofill_rect = load("res://godot_ap/ui/stringbar.tscn").instantiate()
 	add_child(autofill_rect)
 	autofill_rect.position.y = 0
 	autofill_rect.clicked.connect(func(indx: int):

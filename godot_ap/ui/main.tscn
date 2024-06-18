@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://qhyyw87oovoy"]
 
-[ext_resource type="Script" path="res://ui/commonclient_main.gd" id="1_stunr"]
+[ext_resource type="Script" path="res://godot_ap/ui/commonclient_main.gd" id="1_stunr"]
 
 [node name="Main" type="ColorRect"]
 anchors_preset = 15

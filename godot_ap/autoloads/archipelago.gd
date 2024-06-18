@@ -559,7 +559,7 @@ func load_console(console_scene: Variant, as_child := true) -> bool:
 	return true
 func open_console() -> void:
 	if output_console: return
-	load_console(load("res://ui/ap_console_window.tscn").instantiate())
+	load_console(load("res://godot_ap/ui/ap_console_window.tscn").instantiate())
 func close_console() -> void:
 	if output_console:
 		output_console.close()

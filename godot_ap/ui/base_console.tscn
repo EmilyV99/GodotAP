@@ -1,8 +1,8 @@
 [gd_scene load_steps=6 format=3 uid="uid://cgq7n1figlpu3"]
 
-[ext_resource type="Script" path="res://ui/console_container.gd" id="1_gj1xe"]
-[ext_resource type="PackedScene" uid="uid://c51q4vrwhlcl7" path="res://ui/console_tab.tscn" id="2_704wl"]
-[ext_resource type="Script" path="res://ui/hints_tab.gd" id="3_iwodb"]
+[ext_resource type="Script" path="res://godot_ap/ui/console_container.gd" id="1_gj1xe"]
+[ext_resource type="PackedScene" uid="uid://c51q4vrwhlcl7" path="res://godot_ap/ui/console_tab.tscn" id="2_704wl"]
+[ext_resource type="Script" path="res://godot_ap/ui/hints_tab.gd" id="3_iwodb"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_rud5c"]
 

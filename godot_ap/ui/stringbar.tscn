@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://cm123kfw5gslb"]
 
-[ext_resource type="Script" path="res://ui/autofill_bar.gd" id="1_fwo2d"]
-[ext_resource type="SystemFont" uid="uid://73rjoc23d4ub" path="res://ui/console_font.tres" id="2_xunq5"]
+[ext_resource type="Script" path="res://godot_ap/ui/autofill_bar.gd" id="1_fwo2d"]
+[ext_resource type="SystemFont" uid="uid://73rjoc23d4ub" path="res://godot_ap/ui/console_font.tres" id="2_xunq5"]
 
 [node name="StringBar" type="Control"]
 layout_mode = 3

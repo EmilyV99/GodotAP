@@ -7,5 +7,5 @@ func _ready():
 		Archipelago.close_console()
 	get_window().min_size = Vector2(750,400)
 	get_window().title = "AP Text Client"
-	Archipelago.load_packed_console_as_scene(get_tree(), load("res://ui/commonclient_console.tscn"))
+	Archipelago.load_packed_console_as_scene(get_tree(), load("res://godot_ap/ui/commonclient_console.tscn"))
 

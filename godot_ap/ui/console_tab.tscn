@@ -1,10 +1,10 @@
 [gd_scene load_steps=6 format=3 uid="uid://c51q4vrwhlcl7"]
 
-[ext_resource type="Script" path="res://ui/console_tab.gd" id="1_wya3j"]
-[ext_resource type="Script" path="res://ui/base_console.gd" id="2_ilcwq"]
-[ext_resource type="SystemFont" uid="uid://73rjoc23d4ub" path="res://ui/console_font.tres" id="3_iispj"]
-[ext_resource type="Script" path="res://ui/typing_bar.gd" id="4_gp0g4"]
-[ext_resource type="PackedScene" uid="uid://cm123kfw5gslb" path="res://ui/stringbar.tscn" id="5_6p6ej"]
+[ext_resource type="Script" path="res://godot_ap/ui/console_tab.gd" id="1_wya3j"]
+[ext_resource type="Script" path="res://godot_ap/ui/base_console.gd" id="2_ilcwq"]
+[ext_resource type="SystemFont" uid="uid://73rjoc23d4ub" path="res://godot_ap/ui/console_font.tres" id="3_iispj"]
+[ext_resource type="Script" path="res://godot_ap/ui/typing_bar.gd" id="4_gp0g4"]
+[ext_resource type="PackedScene" uid="uid://cm123kfw5gslb" path="res://godot_ap/ui/stringbar.tscn" id="5_6p6ej"]
 
 [node name="Console" type="VBoxContainer"]
 offset_right = 46.0
