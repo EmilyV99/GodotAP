@@ -131,6 +131,7 @@ class ConsoleDrawData:
 			y = max(y, r_y + spacing.y) # max to avoid reducing space
 class ConsolePart: ## A base part, for all other parts to inherit from
 	var on_click: Callable # Callable[InputEventMouseButton]->bool
+	signal hitbox_changed
 	func draw(_c: BaseConsole, _data: ConsoleDrawData) -> void:
 		pass
 	func draw_hover(_c: BaseConsole, _data: ConsoleDrawData) -> void:
@@ -142,7 +143,7 @@ class ConsolePart: ## A base part, for all other parts to inherit from
 	func get_hitbox() -> Rect2: ## Combines all the hitboxes from 'get_hitboxes()' rectangularly
 		var hbs := get_hitboxes()
 		if hbs.is_empty(): return Rect2()
-		var ret: Rect2 = hbs.pop_back()
+		var ret: Rect2 = hbs.back()
 		for hb in hbs:
 			var hb2 = ret
 			ret.position.x = min(hb.position.x, hb2.position.x)
@@ -163,6 +164,7 @@ class ConsolePart: ## A base part, for all other parts to inherit from
 					return on_click.call(evt)
 		return false
 	func pop_dropdown(c: BaseConsole) -> VBoxContainer:
+		var parent_window := c.get_window()
 		var window := Window.new()
 		window.min_size = Vector2.ZERO
 		window.reset_size()
@@ -172,19 +174,23 @@ class ConsolePart: ## A base part, for all other parts to inherit from
 		window.borderless = true
 		window.popup_window = true
 		window.visible = false
+		window.focus_exited.connect(window.queue_free)
 		window.close_requested.connect(window.queue_free)
+		parent_window.close_requested.connect(window.queue_free)
 		var vbox := VBoxContainer.new()
-		window.add_child(vbox)
-		window.ready.connect(func():
+		var resize_window: Callable = func():
 			var hb := get_hitbox()
 			window.size.x = roundi(hb.size.x)
 			window.size.y = ceili(vbox.size.y)
-			window.position = c.get_window().position
-			window.position.x += roundi(c.global_position.x + hb.position.x)
-			window.position.y += roundi(c.global_position.y + hb.position.y + hb.size.y)
-			window.visible = true)
-		vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
+			window.position.x = roundi(c.global_position.x + hb.position.x)
+			window.position.y = roundi(c.global_position.y + hb.position.y + hb.size.y)
+			if not window.visible: window.visible = true
+		hitbox_changed.connect(resize_window)
+		window.add_child(vbox)
+		window.ready.connect(resize_window)
+		window.tree_exiting.connect(func(): hitbox_changed.disconnect(resize_window))
 		c.add_child.call_deferred(window) # Defer adding it, to allow caller to add things to the vbox
+		vbox.set_anchors_preset.call_deferred(Control.PRESET_FULL_RECT)
 		return vbox
 class TextPart extends ConsolePart: ## A part that displays text, with opt color+tooltip
 	var text: String = ""
@@ -212,6 +218,7 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 	func draw(c: BaseConsole, data: ConsoleDrawData) -> void:
 		var text_pos = 0
 		var trim_pos: int
+		var old_hitbox := get_hitbox()
 		hitboxes.clear()
 		while true:
 			if text_pos >= text.length():
@@ -250,6 +257,8 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 				# Trimmed whitespace, need to force the line down though
 				data.x = data.r
 			text_pos = trim_pos
+		if old_hitbox != get_hitbox():
+			hitbox_changed.emit()
 	func _ttip_calc_size(c: BaseConsole, data: ConsoleDrawData, clip := false) -> void:
 		if clip:
 			c.tooltip_label.size = Vector2(data.win_w,c.tooltip_label.size.y)
@@ -524,7 +533,6 @@ func add_line(text: String, ttip := "", col := Color.TRANSPARENT) -> TextPart:
 func make_linebreak(count := 1) -> LineBreakPart:
 	var part = LineBreakPart.new()
 	part.break_count = count
-	#no redraw needed for pure spacing
 	return part
 func add_linebreak(count := 1) -> LineBreakPart:
 	return add(make_linebreak(count))
@@ -534,7 +542,6 @@ func make_spacing(spacing: Vector2, reset_line := true, from_reset_y := false) -
 	part.spacing = spacing
 	part.reset_line = reset_line
 	part.from_reset_y = from_reset_y
-	#no redraw needed for pure spacing
 	return part
 func add_spacing(spacing: Vector2, reset_line := true, from_reset_y := false) -> SpacingPart:
 	return add(make_spacing(spacing, reset_line, from_reset_y))
@@ -548,7 +555,6 @@ func add_header_spacing(vspace: float = -0.5) -> SpacingPart:
 func make_indent(indent: float) -> IndentPart:
 	var part = IndentPart.new()
 	part.indent = indent
-	#no redraw needed for pure spacing
 	return part
 func add_indent(indent: float) -> IndentPart:
 	return add(make_indent(indent))
