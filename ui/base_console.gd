@@ -762,14 +762,13 @@ func printjson_command(json: Dictionary) -> String:
 		"Join", "Part":
 			var data: Array = json["data"]
 			var elem: Dictionary = data.pop_front()
-			var txt: String = elem["text"]
 			var plyr := Archipelago.conn.get_player(json["slot"])
-			var spl := txt.split(plyr.get_name(), true, 1)
+			var spl := (elem["text"] as String).split(plyr.get_name(), true, 1)
 			if spl.size() == 2:
-				elem.text = spl[0]
+				elem["text"] = spl[0]
 				s += printjson_out([elem])
-				plyr.output(self)
-				elem.text = spl[1]
+				s += plyr.output(self).text
+				elem["text"] = spl[1]
 				s += printjson_out([elem])
 				s += printjson_out(data)
 			else: output_data = true
