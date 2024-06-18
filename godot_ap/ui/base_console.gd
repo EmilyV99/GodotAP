@@ -749,14 +749,14 @@ func printjson_command(json: Dictionary) -> String:
 			elif int(json["receiving"]) == Archipelago.conn.player_id:
 				output_data = true
 			else:
-				var ni := NetworkItem.from(json["item"], Archipelago.conn, true)
+				var ni := NetworkItem.from(json["item"], true)
 				if ni.src_player_id == Archipelago.conn.player_id:
 					output_data = true
 		"Hint":
 			if int(json["receiving"]) == Archipelago.conn.player_id:
 				output_data = true
 			else:
-				var ni := NetworkItem.from(json["item"], Archipelago.conn, true)
+				var ni := NetworkItem.from(json["item"], true)
 				if ni.src_player_id == Archipelago.conn.player_id:
 					output_data = true
 		"Join", "Part":
