@@ -190,7 +190,7 @@ class ConsolePart: ## A base part, for all other parts to inherit from
 		window.ready.connect(resize_window)
 		window.tree_exiting.connect(func(): hitbox_changed.disconnect(resize_window))
 		c.add_child.call_deferred(window) # Defer adding it, to allow caller to add things to the vbox
-		vbox.set_anchors_preset.call_deferred(Control.PRESET_FULL_RECT)
+		vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
 		return vbox
 class TextPart extends ConsolePart: ## A part that displays text, with opt color+tooltip
 	var text: String = ""
@@ -790,13 +790,13 @@ func printjson_out(elems: Array) -> String:
 		s += txt
 		match elem.get("type", "text"):
 			"player_name":
-				add_text(txt, "Arbitrary Player Name", Archipelago.COLOR_PLAYER)
+				add_text(txt, "Arbitrary Player Name", AP.rich_colors[AP.COLORNAME_PLAYER])
 			"item_name":
-				add_text(txt, "Arbitrary Item Name", Archipelago.COLOR_ITEM)
+				add_text(txt, "Arbitrary Item Name", AP.rich_colors[AP.COLORNAME_ITEM])
 			"location_name":
-				add_text(txt, "Arbitrary Location Name", Archipelago.COLOR_LOCATION)
+				add_text(txt, "Arbitrary Location Name", AP.rich_colors[AP.COLORNAME_LOCATION])
 			"entrance_name":
-				add_text(txt, "Arbitrary Entrance Name", Archipelago.COLOR_LOCATION)
+				add_text(txt, "Arbitrary Entrance Name", AP.rich_colors[AP.COLORNAME_LOCATION])
 			"player_id":
 				var plyr_id = int(txt)
 				Archipelago.conn.get_player(plyr_id).output(self)

@@ -31,3 +31,6 @@ func compare(other: Version) -> int:
 
 func _as_ap_dict() -> Dictionary:
 	return {"major":major,"minor":minor,"build":build,"class":"Version"}
+
+func _as_semver_dict() -> Dictionary:
+	return {"major":major,"minor":minor,"patch":build}

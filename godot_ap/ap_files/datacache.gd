@@ -34,3 +34,6 @@ func get_item_name(id:int) -> String:
 func get_loc_name(id:int) -> String:
 	var v = location_name_to_id.find_key(id)
 	return v if v else str(id)
+
+func is_valid() -> bool:
+	return not checksum.is_empty()

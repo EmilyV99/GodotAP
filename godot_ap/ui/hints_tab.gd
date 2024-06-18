@@ -66,9 +66,7 @@ func sort_click(event: InputEventMouseButton, index: int) -> bool:
 		refresh_hints()
 		return true
 	elif event.button_index == MOUSE_BUTTON_RIGHT:
-		# TODO handle popping up filter list
-		
-		if not index in [4]: # TODO temp, remove
+		if not index in [4]: # TODO handle filters for other headings
 			return false
 		
 		var vbox := headings[index].pop_dropdown(hint_console)

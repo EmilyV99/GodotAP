@@ -6,7 +6,7 @@ enum Status {
 	NON_PRIORITY = 10,
 	AVOID = 20,
 	PRIORITY = 30,
-	NOT_FOUND = 9999999, # Deprecated by new hint status code, still supported for now
+	NOT_FOUND = 9999999, # Deprecated by new hint status code https://github.com/ArchipelagoMW/Archipelago/pull/3506, still supported for now
 }
 
 static var status_names: Dictionary = {
@@ -52,4 +52,4 @@ func make_status(c: BaseConsole) -> BaseConsole.CenterTextPart:
 
 
 func _to_string():
-	return "%d %d %d %d %d" % [item.src_player_id,item.id,item.dest_player_id,item.loc_id,status]
+	return "HINT(%d %d %d %d %d)" % [item.src_player_id,item.id,item.dest_player_id,item.loc_id,status]

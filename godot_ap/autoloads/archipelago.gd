@@ -1,36 +1,36 @@
 class_name AP extends Node
 
-const AP_GAME_NAME := ""
-var AP_GAME_TAGS: Array[String] = ["TextOnly"]
-const AP_ITEM_HANDLING := ItemHandling.ALL
-const AP_PRINT_ITEMS_ON_CONNECT := false
-const AP_HIDE_NONLOCAL_ITEMSENDS := true ## Hide item send messages that don't involve the client
-const AP_AUTO_OPEN_CONSOLE := false
+var AP_GAME_NAME := "" ## The game name to connect to. Empty string for TextOnly or HintGame clients.
+var AP_GAME_TAGS: Array[String] = [] ## The tags for your game
+var AP_CLIENT_VERSION = Version.val(0,0,0) ## The version of your client. Arbitrary number for you to manage.
+var AP_ITEM_HANDLING := ItemHandling.ALL ## The ItemHandling to use when connecting
+var AP_PRINT_ITEMS_ON_CONNECT := false ## Prints what items have been previously collected when reconnecting to a slot
+var AP_HIDE_NONLOCAL_ITEMSENDS := true ## Hide item send messages that don't involve the client
+const AP_AUTO_OPEN_CONSOLE := false ## Automatically opens a default AP text console
 
 # Connection packets
-signal roominfo(conn: ConnectionInfo, json: Dictionary)
-signal connected(conn: ConnectionInfo, json: Dictionary)
-signal disconnected
+# See `ConnectionInfo` (Archipelago.conn) for more signals
+signal roominfo(conn: ConnectionInfo, json: Dictionary) ## Emitted when `RoomInfo` is received
+signal connectionrefused(conn: ConnectionInfo, json: Dictionary) ## Emitted when `ConnectionRefused` is received
+signal connected(conn: ConnectionInfo, json: Dictionary) ## Emitted when `Connected` is received
+signal printjson(json: Dictionary, plaintext: String) ## Emitted when `PrintJSON` is received
+signal disconnected ## Emitted when the connection is lost
 
 #region LOGGING (godot console, not richtext console)
-const AP_LOG_COMMUNICATION := false
-const AP_LOG_RECIEVED := false
+const AP_LOG_COMMUNICATION := false ## Enables additional logging
+const AP_LOG_RECIEVED := false ## Enables additional logging
 #endregion
 #region COLORS
-var COLOR_PLAYER: Color :
-	get: return rich_colors["magenta"]
-var COLOR_ITEM_PROG: Color :
-	get: return rich_colors["plum"]
-var COLOR_ITEM: Color :
-	get: return rich_colors["cyan"]
-var COLOR_ITEM_USEFUL: Color :
-	get: return rich_colors["slateblue"]
-var COLOR_ITEM_TRAP: Color :
-	get: return rich_colors["salmon"]
-var COLOR_LOCATION: Color :
-	get: return rich_colors["green"]
+const COLORNAME_PLAYER: StringName = "magenta"
+const COLORNAME_ITEM_PROG: StringName = "plum"
+const COLORNAME_ITEM: StringName = "cyan"
+const COLORNAME_ITEM_USEFUL: StringName = "slateblue"
+const COLORNAME_ITEM_TRAP: StringName = "salmon"
+const COLORNAME_LOCATION: StringName = "green"
 
-var rich_colors: Dictionary = {
+## The rich-text colors used for console output
+## Chosen to match Archipelago CommonClient
+static var rich_colors: Dictionary = {
 	"red": Color8(0xEE,0x00,0x00),
 	"green": Color8(0x00,0xFF,0x7F),
 	"yellow": Color8(0xFA,0xFA,0xD2),
@@ -55,24 +55,31 @@ enum ItemHandling {
 	ALL = 7,
 }
 
+## The current connection credentials to be used
 var creds: APCredentials = APCredentials.new()
+## The current APLock object. A default lock object is "unlocked".
+## If an "unlocked" object is set here, it will be "locked" when you connect to a slot.
+## If a "locked" object is set here, it will disallow you from connecting to any slot different from the one it locked to.
+## Saving an APLock object in a save file allows you to lock it to a particular room.
 var aplock: APLock = null
 
-var socket := WebSocketPeer.new()
+var _socket := WebSocketPeer.new()
 
 #region CONNECTION
-var conn: ConnectionInfo
+var conn: ConnectionInfo ## The active Archipelago connection
+
 
 enum APStatus {
-	DISCONNECTED,
-	SOCKET_CONNECTING,
-	CONNECTING,
-	CONNECTED,
-	PLAYING, # 'Authenticated'
-	DISCONNECTING,
+	DISCONNECTED, ## Not connected to any Archipelago server
+	SOCKET_CONNECTING, ## Socket attempting to connect
+	CONNECTING, ## Socket connected, trying to connect with server
+	CONNECTED, ## Connected with server, authenticating for selected slot
+	PLAYING, ## Authenticated and acively playing
+	DISCONNECTING, ## Attempting to disconnect from the server
 }
-signal status_updated
-var queue_reconnect := false
+signal status_updated ## Signals when 'status' changes
+var _queue_reconnect := false
+## The current connection status
 var status: APStatus = APStatus.DISCONNECTED :
 	set(val):
 		if status != val:
@@ -80,30 +87,34 @@ var status: APStatus = APStatus.DISCONNECTED :
 			status_updated.emit()
 		if status == APStatus.DISCONNECTED:
 			conn = null
-			if queue_reconnect:
-				queue_reconnect = false
+			if _queue_reconnect:
+				_queue_reconnect = false
 				ap_reconnect()
 
+## Returns true if there is no active Archipelago connection
 func is_not_connected() -> bool:
 	return status != APStatus.PLAYING
 
-var connecting_part: BaseConsole.TextPart
+var _connecting_part: BaseConsole.TextPart
 
 var _connect_attempts := 1
 var _wss := true
 
+## Returns the URL currently being targetted for connection
 func get_url() -> String:
 	return "%s://%s:%s" % ["wss" if _wss else "ws",creds.ip,creds.port]
 
+## Reconnect to Archipelago with the same information as before
 func ap_reconnect() -> void:
 	if status != APStatus.DISCONNECTED:
 		ap_disconnect()
-		queue_reconnect = true
+		_queue_reconnect = true
 		return
 	status = APStatus.SOCKET_CONNECTING
 	_connect_attempts = 1
 	_wss = true
 
+## Connect to Archipelago with the specified connection information
 func ap_connect(room_ip: String, room_port: String, slot_name: String, room_pwd := "") -> void:
 	if status != APStatus.DISCONNECTED:
 		ap_disconnect() # Do it here so the ip/port/slot are correct in the disconnect message
@@ -114,11 +125,12 @@ func ap_connect(room_ip: String, room_port: String, slot_name: String, room_pwd 
 	creds.pwd = room_pwd
 	ap_reconnect()
 
+## Disconnect from Archipelago
 func ap_disconnect() -> void:
 	if status == APStatus.DISCONNECTED or status == APStatus.DISCONNECTING:
 		return
 	status = APStatus.DISCONNECTING
-	socket.close()
+	_socket.close()
 	AP.close_logger()
 	if output_console:
 		var part := output_console.add_line("Disconnecting...","%s:%s %s" % [creds.ip,creds.port,creds.slot],output_console.COLOR_UI_MSG)
@@ -128,56 +140,61 @@ func ap_disconnect() -> void:
 #endregion CONNECTION
 
 static var logging_file = null
+## Opens the GodotAP logging file, if it isn't already open
 static func open_logger() -> void:
 	if not logging_file:
 		logging_file = FileAccess.open("user://ap/ap_log.log",FileAccess.WRITE)
+## Closes the GodotAP logging file, if its open
 static func close_logger() -> void:
 	if logging_file:
 		logging_file.close()
 		logging_file = null
+## Logs a message to the GodotAP log
 static func log(s: Variant) -> void:
 	if logging_file:
 		logging_file.store_line(str(s))
 		if OS.is_debug_build(): logging_file.flush()
 	print("[AP] %s" % str(s))
+## Logs a message to the GodotAP log, but only if AP_LOG_COMMUNICATION is true
 static func comm_log(pref: String, s: Variant) -> void:
 	if not AP_LOG_COMMUNICATION: return
 	AP.log("[%s] %s" % [pref,str(s)])
+## Logs a message to the GodotAP log, but only in a Debug build
 static func dblog(s: Variant) -> void:
 	if not OS.is_debug_build(): return
 	AP.log(s)
 
-func poll():
+func _poll():
 	if status == APStatus.DISCONNECTED:
 		return
 	if status == APStatus.SOCKET_CONNECTING:
-		match socket.get_ready_state():
+		match _socket.get_ready_state():
 			WebSocketPeer.STATE_OPEN: # Already connected, disconnect that connection
 				ap_disconnect()
 				return
 			WebSocketPeer.STATE_CLOSED: # Start a new connection
-				var err := socket.connect_to_url(get_url())
+				var err := _socket.connect_to_url(get_url())
 				if err:
 					AP.log("Connection to '%s' failed! Retrying (%d)" % [get_url(),_connect_attempts])
 					_wss = not _wss
 					if _wss: _connect_attempts += 1
-				elif output_console and not connecting_part:
-					connecting_part = output_console.add_line("Connecting...","%s:%s %s" % [creds.ip,creds.port,creds.slot],output_console.COLOR_UI_MSG)
+				elif output_console and not _connecting_part:
+					_connecting_part = output_console.add_line("Connecting...","%s:%s %s" % [creds.ip,creds.port,creds.slot],output_console.COLOR_UI_MSG)
 			WebSocketPeer.STATE_CONNECTING: # Continue trying to make new connection
-				socket.poll()
-				var state := socket.get_ready_state()
+				_socket.poll()
+				var state := _socket.get_ready_state()
 				if state == WebSocketPeer.STATE_OPEN:
 					AP.log("Connected to '%s'!" % get_url())
 					status = APStatus.CONNECTING
 				elif state != WebSocketPeer.STATE_CONNECTING:
 					if _connect_attempts >= 50:
-						socket.close()
+						_socket.close()
 						status = APStatus.DISCONNECTING
 						AP.log("Connection to '%s' failed too much! Giving up!" % get_url())
-						if output_console and connecting_part:
-							connecting_part.text = "Connection Failed!\n"
-							connecting_part.tooltip += "\nFailed connecting too many times. Check your connection details, or '/reconnect' to try again."
-							connecting_part = null
+						if output_console and _connecting_part:
+							_connecting_part.text = "Connection Failed!\n"
+							_connecting_part.tooltip += "\nFailed connecting too many times. Check your connection details, or '/reconnect' to try again."
+							_connecting_part = null
 					else:
 						AP.log("Connection to '%s' failed! Retrying (%d)" % [get_url(),_connect_attempts])
 						_wss = not _wss
@@ -185,8 +202,8 @@ func poll():
 			WebSocketPeer.STATE_CLOSING:
 				return
 		return
-	socket.poll()
-	match socket.get_ready_state():
+	_socket.poll()
+	match _socket.get_ready_state():
 		WebSocketPeer.STATE_CLOSED: # Exited; handle reconnection, or concluding intentional disconnection
 			if status == APStatus.DISCONNECTING:
 				status = APStatus.DISCONNECTED
@@ -195,29 +212,31 @@ func poll():
 				AP.log("Accidental disconnection; reconnecting!")
 				ap_reconnect()
 		WebSocketPeer.STATE_OPEN: # Running; handle communication
-			while socket.get_available_packet_count():
-				var packet: PackedByteArray = socket.get_packet()
+			while _socket.get_available_packet_count():
+				var packet: PackedByteArray = _socket.get_packet()
 				var json = JSON.parse_string(packet.get_string_from_utf8())
 				if not json is Array:
 					json = [json]
 				for dict in json:
-					handle_command(dict)
+					_handle_command(dict)
 
-var printout_recieved_items: bool = false
-func send_command(cmdname: String, obj: Dictionary) -> void:
-	obj["cmd"] = cmdname
-	send_packet([obj])
+var _printout_recieved_items: bool = false
+## Sends a command of the specified name, with the given dictionary as the command arguments, to the Archipelago server
+func send_command(cmdname: String, args: Dictionary) -> void:
+	args["cmd"] = cmdname
+	send_packet([args])
+## Sends an array of dictionaries as a packet of commands to the server
 func send_packet(obj: Array) -> void:
 	var s := JSON.stringify(obj)
 	AP.comm_log("SEND", s)
-	socket.send_text(s)
-func handle_command(json: Dictionary) -> void:
+	_socket.send_text(s)
+func _handle_command(json: Dictionary) -> void:
 	var command = json["cmd"]
 	match command:
 		"RoomInfo":
 			status = APStatus.CONNECTED
-			if output_console and connecting_part:
-				connecting_part.text = "Authenticating...\n"
+			if output_console and _connecting_part:
+				_connecting_part.text = "Authenticating...\n"
 			conn = ConnectionInfo.new()
 			conn.serv_version = Version.from(json["version"])
 			conn.gen_version = Version.from(json["generator_version"])
@@ -232,18 +251,19 @@ func handle_command(json: Dictionary) -> void:
 			send_command("Connect",args)
 		"ConnectionRefused":
 			var err_str := str(json["errors"])
-			if output_console and connecting_part:
-				connecting_part.text = "Connection Refused!\n"
-				connecting_part.tooltip += "\nERROR(S): "+err_str
-				connecting_part = null
+			if output_console and _connecting_part:
+				_connecting_part.text = "Connection Refused!\n"
+				_connecting_part.tooltip += "\nERROR(S): "+err_str
+				_connecting_part = null
 			AP.log("Connection errors: %s" % err_str)
+			connectionrefused.emit(conn, json)
 			ap_disconnect()
 		"Connected":
 			conn.player_id = json["slot"]
 			conn.team_id = json["team"]
 			conn.slot_data = json["slot_data"]
 			for plyr in json["players"]:
-				conn.players.append(NetworkPlayer.from(plyr, conn))
+				conn.players.append(NetworkPlayer.from(plyr))
 			var slot_info = json["slot_info"]
 			for key in slot_info:
 				conn.slots.append(NetworkSlot.from(slot_info[key]))
@@ -251,10 +271,10 @@ func handle_command(json: Dictionary) -> void:
 			if aplock:
 				var lock_err := aplock.lock(conn)
 				if lock_err:
-					connecting_part.text = "Connection Mismatch! Wrong slot for this save!\n"
+					_connecting_part.text = "Connection Mismatch! Wrong slot for this save!\n"
 					for s in lock_err:
-						connecting_part.tooltip += "\n%s" % s
-						connecting_part = null
+						_connecting_part.tooltip += "\n%s" % s
+						_connecting_part = null
 					ap_disconnect()
 					return
 			
@@ -277,27 +297,28 @@ func handle_command(json: Dictionary) -> void:
 			# Deathlink stuff?
 			# If deathlink stuff, possibly ConnectUpdate to add DeathLink tag?
 			
-			send_datapack_request()
+			_send_datapack_request()
 			
 			status = APStatus.PLAYING
-			if output_console and connecting_part:
-				connecting_part.text = "Connected Successfully!\n"
-				connecting_part = null
+			if output_console and _connecting_part:
+				_connecting_part.text = "Connected Successfully!\n"
+				_connecting_part = null
 			
 			if AP_PRINT_ITEMS_ON_CONNECT:
-				printout_recieved_items = true
+				_printout_recieved_items = true
 				await get_tree().create_timer(3).timeout
-				printout_recieved_items = false
+				_printout_recieved_items = false
 			connected.emit(conn, json)
 		"PrintJSON":
 			var s: String = (output_console.printjson_command(json) if output_console
 				else BaseConsole.printjson_str(json["data"]))
 			AP.log("[PRINT] %s" % s)
+			printjson.emit(json, s)
 		"DataPackage":
 			var packs = json["data"]["games"]
 			for game in packs.keys():
-				handle_datapack(game, packs[game])
-			send_datapack_request()
+				_handle_datapack(game, packs[game])
+			_send_datapack_request()
 		"ReceivedItems":
 			if datapack_pending:
 				await all_datapacks_loaded
@@ -310,7 +331,7 @@ func handle_command(json: Dictionary) -> void:
 			for obj in json["items"]:
 				items.append(NetworkItem.from(obj, conn, true))
 			for item in items:
-				recieve_item(idx, item)
+				_recieve_item(idx, item)
 				idx += 1
 		"RoomUpdate":
 			for loc in json.get("checked_locations", []):
@@ -318,7 +339,7 @@ func handle_command(json: Dictionary) -> void:
 			if json.has("players"):
 				conn.players.clear()
 				for plyr in json["players"]:
-					conn.players.append(NetworkPlayer.from(plyr, conn))
+					conn.players.append(NetworkPlayer.from(plyr))
 			conn.roomupdate.emit(json)
 		"Bounced":
 			conn.bounce.emit(json)
@@ -339,11 +360,13 @@ func handle_command(json: Dictionary) -> void:
 			AP.log("[UNHANDLED PACKET TYPE] %s" % str(json))
 
 #region DATAPACKS
-const READABLE_DATAPACK_FILES = true
+const READABLE_DATAPACK_FILES = true ## If true, datapackage local files will be stringified in a readable mode
 const datapack_cached_fields = ["item_name_to_id","location_name_to_id","checksum"]
 var datapack_cache: Dictionary
 var datapack_pending: Array = []
 signal all_datapacks_loaded
+## For each game (key) in the checksums dictionary, requests an update for its datapackage
+## if the locally stored checksum does not match the given value
 func handle_datapackage_checksums(checksums: Dictionary) -> void:
 	DirAccess.make_dir_recursive_absolute("user://ap/datapacks/") # Ensure the directory exists, for later
 	var cachefile: FileAccess = FileAccess.open("user://ap/datapacks/cache.dat", FileAccess.READ)
@@ -362,14 +385,15 @@ func handle_datapackage_checksums(checksums: Dictionary) -> void:
 			_:
 				datapack_pending.append(game)
 
-func handle_datapack(game: String, data: Dictionary) -> void:
+## Caches and stores to disk `data` as the DataCache file for `game`
+func _handle_datapack(game: String, data: Dictionary) -> void:
 	var data_file := FileAccess.open("user://ap/datapacks/%s.json" % game, FileAccess.WRITE)
 	datapack_cache[game] = {"checksum":data["checksum"],"fields":datapack_cached_fields.duplicate()}
 	for key in data.keys():
 		if not key in datapack_cached_fields:
 			data.erase(key)
 	data_file.store_string(JSON.stringify(data, "\t" if READABLE_DATAPACK_FILES else ""))
-func send_datapack_request() -> void:
+func _send_datapack_request() -> void:
 	if datapack_pending:
 		var game = datapack_pending.pop_front()
 		var req = [{"cmd":"GetDataPackage","games":[game]}]
@@ -383,6 +407,7 @@ func send_datapack_request() -> void:
 		all_datapacks_loaded.emit()
 
 static var _data_caches: Dictionary = {}
+## Returns a DataCache for the specified game. If it cannot be found, returns an empty (invalid) DataCache, which can still be used, albeit it will not have the desired data within.
 static func get_datacache(game: String) -> DataCache:
 	var ret: DataCache = _data_caches.get(game)
 	if ret: return ret
@@ -396,14 +421,14 @@ static func get_datacache(game: String) -> DataCache:
 #endregion DATAPACKS
 
 #region ITEMS
-func recieve_item(index: int, item: NetworkItem) -> void:
+func _recieve_item(index: int, item: NetworkItem) -> void:
 	assert(item.dest_player_id == conn.player_id)
 	if index <= conn.recieved_index:
 		return # Already recieved, skip
 	var data := conn.get_gamedata_for_player(conn.player_id)
 	var msg := ""
 	if item.dest_player_id == item.src_player_id:
-		if output_console and printout_recieved_items:
+		if output_console and _printout_recieved_items:
 			conn.get_player().output(output_console)
 			output_console.add_text(" found their ")
 			item.output(output_console)
@@ -414,7 +439,7 @@ func recieve_item(index: int, item: NetworkItem) -> void:
 		_remove_loc(item.loc_id)
 	else:
 		var src_data := conn.get_gamedata_for_player(item.src_player_id)
-		if output_console and printout_recieved_items:
+		if output_console and _printout_recieved_items:
 			conn.get_player(item.src_player_id).output(output_console)
 			output_console.add_text(" sent ")
 			item.output(output_console)
@@ -425,7 +450,7 @@ func recieve_item(index: int, item: NetworkItem) -> void:
 			output_console.add_line(")")
 		msg = "%s found your %s at their %s!" % [conn.get_player_name(item.src_player_id), data.get_item_name(item.id), src_data.get_loc_name(item.loc_id)]
 	
-	#TODO actually handle recieving?
+	conn.obtained_item.emit(item)
 	
 	if AP_LOG_RECIEVED:
 		AP.log(msg)
@@ -441,38 +466,46 @@ func _remove_loc(loc_id: int) -> void:
 	if conn and not conn.checked_locations.get(loc_id, false):
 		conn.checked_locations[loc_id] = true
 		_remove_location.emit(loc_id)
-func _on_removed_id(loc_id: int, proc: Callable) -> void:
+## Will call `proc` when the specified location id is "removed" (i.e. collected, either by the player or the server)
+## If the location is already removed when you call this, `proc` will be called immediately.
+func on_removed_id(loc_id: int, proc: Callable) -> void:
 	if conn.checked_locations.get(loc_id, false):
 		proc.call()
 	else:
 		_remove_location.connect(func(id:int):
 			if id == loc_id:
 				proc.call())
+## Will call `proc` when the specified location name is "removed" (i.e. collected, either by the player or the server)
+## If the location is already removed when you call this, `proc` will be called immediately.
 func on_removed(loc_name: String, proc: Callable) -> void:
-	_on_removed_id(conn.get_gamedata_for_player(conn.player_id).get_loc_id(loc_name), proc)
+	on_removed_id(conn.get_gamedata_for_player(conn.player_id).get_loc_id(loc_name), proc)
 
-## Call when a location is collected and needs to be sent to the server.
+## Call when a single location is collected and needs to be sent to the server.
 func collect_location(loc_id: int) -> void:
 	if is_tracker_textclient: return
-	printout_recieved_items = false
+	_printout_recieved_items = false
 	send_command("LocationChecks", {"locations":[loc_id]})
 	_remove_loc(loc_id)
 ## Call when multiple locations are collected and need to be sent to the server at once.
 func collect_locations(locs: Array[int]) -> void:
 	if is_tracker_textclient: return
-	printout_recieved_items = false
+	_printout_recieved_items = false
 	send_command("LocationChecks", {"locations":locs})
 	for loc_id in locs:
 		_remove_loc(loc_id)
 
+## Returns if the location exists in the slot or not.
 func location_exists(loc_id: int) -> bool:
 	return conn.checked_locations.has(loc_id)
+## Returns if the location was checked or not. `def` is returned if the location does not exist in the slot.
 func location_checked(loc_id: int, def := false) -> bool:
 	return conn.checked_locations.get(loc_id, def)
 #endregion LOCATIONS
 func _process(_delta):
-	poll()
+	_poll()
 
+## Try to reconnect to the current connection details, BUT if it detects errors in the details,
+## it will instead prompt the user to enter the details.
 func ap_reconnect_to_save() -> void:
 	if creds.slot.is_empty() or creds.port.length() != 5:
 		if output_console:
@@ -498,29 +531,32 @@ func _notification(what):
 
 #region CONSOLE
 
+## Prints an Item in richtext (to the console, if `add` is true) and returns the TextPart
 func out_item(console: BaseConsole, id: int, flags: int, data: DataCache, add := true) -> BaseConsole.TextPart:
 	if not console: return
 	var ttip = "Type: %s" % AP.get_item_classification(flags)
-	var color := COLOR_ITEM
+	var colorname := COLORNAME_ITEM
 	if flags&ICLASS_PROG:
-		color = COLOR_ITEM_PROG
+		colorname = COLORNAME_ITEM_PROG
 	elif flags&ICLASS_TRAP:
-		color = COLOR_ITEM_TRAP
-	var ret := console.make_text(data.get_item_name(id), ttip, color)
+		colorname = COLORNAME_ITEM_TRAP
+	var ret := console.make_text(data.get_item_name(id), ttip, rich_colors[colorname])
 	if add: console.add(ret)
 	return ret
+## Prints a Player in richtext (to the console, if `add` is true) and returns the TextPart
 func out_player(console: BaseConsole, id: int, add := true) -> BaseConsole.TextPart:
 	if not console: return
 	var player := conn.get_player(id)
 	var ttip = "Game: %s" % conn.get_slot(id).game
 	if not player.alias.is_empty():
 		ttip += "\nName: %s" % player.name
-	var ret := console.make_text(conn.get_player_name(id), ttip, Archipelago.COLOR_PLAYER)
+	var ret := console.make_text(conn.get_player_name(id), ttip, rich_colors[COLORNAME_PLAYER])
 	if add: console.add(ret)
 	return ret
+## Prints a Location in richtext (to the console, if `add` is true) and returns the TextPart
 func out_location(console: BaseConsole, id: int, data: DataCache, add := true) -> BaseConsole.TextPart:
 	var ttip = ""
-	var ret := console.make_text(data.get_loc_name(id), ttip, COLOR_LOCATION)
+	var ret := console.make_text(data.get_loc_name(id), ttip, rich_colors[COLORNAME_LOCATION])
 	if add: console.add(ret)
 	return ret
 
@@ -529,6 +565,7 @@ var output_console: BaseConsole :
 	get: return cmd_manager.console
 	set(val): cmd_manager.console = val
 
+## Loads a PackedScene as the active console. This becomes the active scene in the passed SceneTree.
 func load_packed_console_as_scene(tree: SceneTree, console: PackedScene) -> bool:
 	if output_console: return false
 	var tmp_inst = console.instantiate()
@@ -540,16 +577,17 @@ func load_packed_console_as_scene(tree: SceneTree, console: PackedScene) -> bool
 	assert(tree.current_scene)
 	load_console(tree.current_scene, false)
 	return true
-func load_console(console_scene: Variant, as_child := true) -> bool:
+## Loads a Node as the active console. The window this node is in will be considered the console window.
+func load_console(console_scene: Node, as_child := true) -> bool:
 	if output_console: return false
-	if not (console_scene is Window or console_scene is ConsoleContainer):
-		return false
 	if console_scene is ConsoleContainer:
 		output_console_container = console_scene
 	elif console_scene is Node:
 		output_console_container = Util.for_all_nodes(console_scene,
 			func(node):
 				return node is ConsoleContainer)
+		if not output_console_container:
+			return false
 	if as_child: add_child(console_scene)
 	console_scene.ready.connect(func():
 		output_console = output_console_container.console
@@ -557,9 +595,11 @@ func load_console(console_scene: Variant, as_child := true) -> bool:
 		output_console.tree_exiting.connect(close_console)
 		output_console_container.typing_bar.cmd_manager = cmd_manager)
 	return true
+## Opens a default Archipelago text console popup
 func open_console() -> void:
 	if output_console: return
 	load_console(load("res://godot_ap/ui/ap_console_window.tscn").instantiate())
+## Closes the currently attached console
 func close_console() -> void:
 	if output_console:
 		output_console.close()
@@ -567,68 +607,68 @@ func close_console() -> void:
 
 #endregion CONSOLE
 
+## The CommandManager for console commands. New commands can be registered as you like.
 var cmd_manager: CommandManager = CommandManager.new()
-func _init():
-	_update_tags()
-	if AP_AUTO_OPEN_CONSOLE:
-		open_console()
+## Resets the CommandManager used by the archipelago console
+func init_command_manager(can_connect: bool, server_autofills: bool = true):
+	cmd_manager.reset()
 	cmd_manager.register_default(func(mgr: CommandManager, msg: String):
 		if msg[0] == "/":
 			mgr.console.add_line("Unknown command '%s' - use '/help' to see commands" % msg.split(" ", true, 1)[0], "", mgr.console.COLOR_UI_MSG)
 		else:
-			if ensure_connected(mgr.console):
+			if _ensure_connected(mgr.console):
 				send_command("Say", {"text":msg}))
-	cmd_manager.register_command(ConsoleCommand.new("/connect")
-		.add_help("port", "Connects to a new port, with the same ip/slot/password.")
-		.add_help("ip[:port]", "Connects to a new ip+[optional] port, with the same slot/password. (if port omitted, uses 38281)")
-		.add_help("ip[:port] slot [pwd]", "Connects to a new ip+port, with a new slot and [optional] password. (if port omitted, uses 38281)")
-		.set_call(func(mgr: CommandManager, cmd: ConsoleCommand, msg: String):
-			var command_args = msg.split(" ", true, 3)
-			if command_args.size() == 2:
-				command_args.append(creds.slot)
-				command_args.append(creds.pwd)
-			elif command_args.size() == 3:
-				command_args.append("")
-			if command_args.size() != 4:
-				cmd.output_usage(mgr.console)
-			else:
-				var ipport = command_args[1].split(":",1)
-				if ipport.is_empty():
+	if can_connect:
+		cmd_manager.register_command(ConsoleCommand.new("/connect")
+			.add_help("port", "Connects to a new port, with the same ip/slot/password.")
+			.add_help("ip[:port]", "Connects to a new ip+[optional] port, with the same slot/password. (if port omitted, uses 38281)")
+			.add_help("ip[:port] slot [pwd]", "Connects to a new ip+port, with a new slot and [optional] password. (if port omitted, uses 38281)")
+			.set_call(func(mgr: CommandManager, cmd: ConsoleCommand, msg: String):
+				var command_args = msg.split(" ", true, 3)
+				if command_args.size() == 2:
+					command_args.append(creds.slot)
+					command_args.append(creds.pwd)
+				elif command_args.size() == 3:
+					command_args.append("")
+				if command_args.size() != 4:
 					cmd.output_usage(mgr.console)
-				if ipport.size() == 1 and ipport[0].length() == 5:
-					ipport = [creds.ip,ipport[0]]
-				elif ipport.size() == 1:
-					ipport.append("38281")
-				ap_connect(ipport[0],ipport[1],command_args[2],command_args[3])))
-	cmd_manager.register_command(ConsoleCommand.new("/reconnect")
-		.add_help("", "Refreshes the connection to the Archipelago server")
-		.set_call(func(_mgr: CommandManager, _cmd: ConsoleCommand, _msg: String): ap_reconnect()))
-	cmd_manager.register_command(ConsoleCommand.new("/disconnect")
-		.add_help("", "Kills the connection to the Archipelago server")
-		.set_call(func(_mgr: CommandManager, _cmd: ConsoleCommand, _msg: String): ap_disconnect()))
-	#region Autofill for some AP commands
-	cmd_manager.register_command(ConsoleCommand.new("!hint_location")
-		.set_autofill(_autofill_locs)
-		.add_disable(is_not_connected))
-	cmd_manager.register_command(ConsoleCommand.new("!hint")
-		.set_autofill(_autofill_items)
-		.add_disable(is_not_connected))
-	cmd_manager.register_command(ConsoleCommand.new("!help")
-		.add_help("", "Displays server-based command help")
-		.add_disable(is_not_connected))
-	cmd_manager.register_command(ConsoleCommand.new("!remaining")
-		.add_disable(is_not_connected))
-	cmd_manager.register_command(ConsoleCommand.new("!missing")
-		.add_disable(is_not_connected))
-	cmd_manager.register_command(ConsoleCommand.new("!checked")
-		.add_disable(is_not_connected))
-	cmd_manager.register_command(ConsoleCommand.new("!collect")
-		.add_disable(is_not_connected))
-	cmd_manager.register_command(ConsoleCommand.new("!release")
-		.add_disable(is_not_connected))
-	cmd_manager.register_command(ConsoleCommand.new("!players")
-		.add_disable(is_not_connected))
-	#endregion Autofill for some AP commands
+				else:
+					var ipport = command_args[1].split(":",1)
+					if ipport.is_empty():
+						cmd.output_usage(mgr.console)
+					if ipport.size() == 1 and ipport[0].length() == 5:
+						ipport = [creds.ip,ipport[0]]
+					elif ipport.size() == 1:
+						ipport.append("38281")
+					ap_connect(ipport[0],ipport[1],command_args[2],command_args[3])))
+		cmd_manager.register_command(ConsoleCommand.new("/reconnect")
+			.add_help("", "Refreshes the connection to the Archipelago server")
+			.set_call(func(_mgr: CommandManager, _cmd: ConsoleCommand, _msg: String): ap_reconnect()))
+		cmd_manager.register_command(ConsoleCommand.new("/disconnect")
+			.add_help("", "Kills the connection to the Archipelago server")
+			.set_call(func(_mgr: CommandManager, _cmd: ConsoleCommand, _msg: String): ap_disconnect()))
+	if server_autofills: # Autofill for some AP commands
+		cmd_manager.register_command(ConsoleCommand.new("!hint_location")
+			.set_autofill(_autofill_locs)
+			.add_disable(is_not_connected))
+		cmd_manager.register_command(ConsoleCommand.new("!hint")
+			.set_autofill(_autofill_items)
+			.add_disable(is_not_connected))
+		cmd_manager.register_command(ConsoleCommand.new("!help")
+			.add_help("", "Displays server-based command help")
+			.add_disable(is_not_connected))
+		cmd_manager.register_command(ConsoleCommand.new("!remaining")
+			.add_disable(is_not_connected))
+		cmd_manager.register_command(ConsoleCommand.new("!missing")
+			.add_disable(is_not_connected))
+		cmd_manager.register_command(ConsoleCommand.new("!checked")
+			.add_disable(is_not_connected))
+		cmd_manager.register_command(ConsoleCommand.new("!collect")
+			.add_disable(is_not_connected))
+		cmd_manager.register_command(ConsoleCommand.new("!release")
+			.add_disable(is_not_connected))
+		cmd_manager.register_command(ConsoleCommand.new("!players")
+			.add_disable(is_not_connected))
 	cmd_manager.setup_basic_commands()
 	if OS.is_debug_build():
 		cmd_manager.register_command(ConsoleCommand.new("/send").debug()
@@ -636,7 +676,7 @@ func _init():
 			.add_disable(func(): return is_tracker_textclient)
 			.set_autofill(_autofill_locs)
 			.set_call(func(mgr: CommandManager, cmd: ConsoleCommand, msg: String):
-				if not ensure_connected(mgr.console): return
+				if not _ensure_connected(mgr.console): return
 				var command_args = msg.split(" ", true, 1)
 				if command_args.size() > 1 and command_args[1]:
 					var data = conn.get_gamedata_for_player(conn.player_id)
@@ -705,9 +745,15 @@ func _init():
 			.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, _msg: String):
 				mgr.console.add_line(str(AP_GAME_TAGS), "", mgr.console.COLOR_UI_MSG)))
 		cmd_manager.setup_debug_commands()
+func _init():
+	init_command_manager(true)
+	_update_tags()
+	if AP_AUTO_OPEN_CONSOLE:
+		open_console()
 const ICLASS_PROG := 0b001
 const ICLASS_USEFUL := 0b010
 const ICLASS_TRAP := 0b100
+## Returns the string name representing the combined item classifications flags
 static func get_item_classification(flags: int) -> String:
 	match flags:
 		0b001:
@@ -786,6 +832,7 @@ func _update_tags() -> void:
 		if tag == "TextOnly" or tag == "Tracker":
 			is_tracker_textclient = true
 			break
+## Sets a given Archipelago tag (on or off)
 func set_tag(tag: String, state := true) -> void:
 	if tag.is_empty(): return
 	for q in AP_GAME_TAGS.size():
@@ -798,12 +845,13 @@ func set_tag(tag: String, state := true) -> void:
 	if state:
 		AP_GAME_TAGS.append(tag)
 		_update_tags()
+## Sets the Archipelago connection tags (overwriting all existing tags)
 func set_tags(tags: Array[String]) -> void:
 	if AP_GAME_TAGS != tags:
 		AP_GAME_TAGS.assign(tags)
 		_update_tags()
 
-func ensure_connected(console: BaseConsole) -> bool:
+func _ensure_connected(console: BaseConsole) -> bool:
 	if status == APStatus.PLAYING:
 		return true
 	console.add_line("Not connected to Archipelago! Please '/connect' first!", "", console.COLOR_UI_MSG)

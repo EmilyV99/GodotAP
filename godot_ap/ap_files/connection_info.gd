@@ -7,7 +7,6 @@ var gen_version: Version
 var seed_name: String
 var recieved_index: int = -1
 var uid: int
-var death_alias: String = ""
 
 var player_id: int
 var team_id: int
@@ -26,36 +25,47 @@ func _init():
 func _to_string():
 	return "AP_CONN(SERV_%s, GEN_%s, SEED:%s, PLYR %d, TEAM %d, SLOT_DATA %s)" % [serv_version,gen_version,seed_name,player_id,team_id,slot_data]
 
+## Returns a NetworkPlayer for the given ID (or the current slot)
 func get_player(id: int = -1) -> NetworkPlayer: ## TODO handle Team
 	if id < 0: return players[player_id-1]
 	return players[id-1]
+## Returns a NetworkSlot for the given ID (or the current slot)
 func get_slot(id: int = -1) -> NetworkSlot: ## TODO handle Team
 	if id < 0: return slots[player_id-1]
 	return slots[id-1]
-func get_player_name(plyr_id: int, alias := true) -> String:
+## Returns a player's name for the given ID (or the current slot)
+## If `alias` is false, will return the slot name regardless of alias
+func get_player_name(plyr_id: int = -1, alias := true) -> String:
 	var name = get_player(plyr_id).get_name(alias)
 	if not name: name = "Player %d" % plyr_id
 	return name
-func get_game_for_player(plyr_id: int) -> String:
-	return slots[plyr_id-1].game
-func get_gamedata_for_player(plyr_id: int) -> DataCache:
+## Returns the game name for the given player ID (or the current slot)
+func get_game_for_player(plyr_id: int = -1) -> String:
+	return get_slot(plyr_id).game
+## Returns the DataCache for the given player ID (or the current slot)
+func get_gamedata_for_player(plyr_id: int = -1) -> DataCache:
 	return AP.get_datacache(get_game_for_player(plyr_id))
 
 # Incoming server packets
-signal bounce(json: Dictionary)
-signal deathlink(source: String, cause: String, json: Dictionary)
-signal locationinfo(json: Dictionary)
-signal setreply(json: Dictionary)
-signal roomupdate(json: Dictionary)
+signal bounce(json: Dictionary) ## Emitted when a `Bounce` packet is received.
+signal deathlink(source: String, cause: String, json: Dictionary) ## Emitted when a `Bounce` packet of type `DeathLink` is received, after the `bounce` signal.
+signal locationinfo(json: Dictionary) ## Emitted when a `LocationInfo` packet is received
+signal setreply(json: Dictionary) ## Emitted when a `SetReply` packet is received
+signal roomupdate(json: Dictionary) ## Emitted when a `RoomUpdate` packet is received
+signal obtained_item(item: NetworkItem) ## Emitted for each item received
 
 # Outgoing server packets
-func set_notify(key: String, proc: Callable) -> void: ## Callable[Variant]->void
+## Sends a `SetNotify` packet, and connects the specified `Callable[Variant]->void`
+## to be called every time the specified `key` is updated on the server.
+func set_notify(key: String, proc: Callable) -> void: ## 
 	Archipelago.send_command("SetNotify", {"keys": [key]})
 	setreply.connect(func(json):
 		if json["key"] == key:
 			proc.call(json.get("value")))
 
 var _retrieve_queue: Dictionary
+## Sends a `Get` packet, and connects the specified `Callable[Variant]->void`
+## to be called once when the result is retrieved
 func retrieve(key: String, proc: Callable) -> void: ## Callable[Variant]->void
 	Archipelago.send_command("Get", {"keys": [key]})
 	if not _retrieve_queue.has(key):
@@ -68,5 +78,8 @@ func _on_retrieve(json: Dictionary) -> void:
 			proc.call(vals[key])
 		_retrieve_queue[key] = []
 
+## Sends an `UpdateHint` packet, updating the status of an existing hint
+## The hint is identified by `loc, plyr`, the location it is for and the player who is to find it
+## Only valid if the server is running a branch with https://github.com/ArchipelagoMW/Archipelago/pull/3506
 func update_hint(loc: int, plyr: int, status: NetworkHint.Status) -> void:
 	Archipelago.send_command("UpdateHint", {"location": loc, "player": plyr, "status": status})

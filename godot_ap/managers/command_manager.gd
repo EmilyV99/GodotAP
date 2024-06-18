@@ -14,6 +14,13 @@ var default_procs: Array[Callable] ## [(CommandManager,String)->void]
 
 var console: BaseConsole = null
 
+func reset() -> void:
+	_commands.clear()
+	_commands_by_name.clear()
+	debug_hidden = true
+	default_procs.clear()
+	#does NOT clear console reference
+
 func debug_disabled() -> bool:
 	return debug_hidden
 func autofill(msg: String, capacity := 5) -> Array[String]:

@@ -5,16 +5,15 @@ var slot: int
 var alias := ""
 var name : String
 
-var conn: ConnectionInfo
 func get_slot() -> NetworkSlot:
-	return conn.slots[slot]
+	return Archipelago.conn.get_slot(slot)
 func get_name(use_alias := true) -> String:
 	var ret := ""
 	if use_alias: ret = alias
 	if not ret: ret = name
 	return ret
 
-static func from(json: Dictionary, conn_info: ConnectionInfo) -> NetworkPlayer:
+static func from(json: Dictionary) -> NetworkPlayer:
 	if json["class"] != "NetworkPlayer":
 		return null
 	var v := NetworkPlayer.new()
@@ -25,7 +24,6 @@ static func from(json: Dictionary, conn_info: ConnectionInfo) -> NetworkPlayer:
 		v.alias = json["alias"]
 		if v.alias == v.name:
 			v.alias = ""
-	v.conn = conn_info
 	return v
 
 func _to_string():

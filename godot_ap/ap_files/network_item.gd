@@ -32,6 +32,8 @@ static func from_hint(json: Dictionary) -> NetworkItem:
 func is_local() -> bool:
 	return src_player_id == dest_player_id
 
+func get_name() -> String:
+	return Archipelago.conn.get_gamedata_for_player(dest_player_id).get_item_name(id)
 func _to_string():
 	return "ITEM(%d at %d,player %d->%d,flags %d)" % [id,loc_id,src_player_id,dest_player_id,flags]
 func output(console: BaseConsole, add := true) -> BaseConsole.TextPart:
