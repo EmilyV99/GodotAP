@@ -1,11 +1,31 @@
-@tool class_name TypingBar extends ColorRect
+@tool class_name TypingBar extends Control
 
-@export var font: Font
+@export var font: Font :
+	set(val):
+		font = val
+		custom_minimum_size.y = calc_height()
+		reset_size()
 @export var font_size: int = 20
 @export var color_text: Color = Color.WHITE
+@export var color_dis_text: Color = Color.SLATE_GRAY
 @export var color_highlight: Color = Color.DIM_GRAY
 @export var color_autofill: Color = Color(Color.DARK_GRAY,.5)
+@export var color_bg: Color = Color8(0x25,0x25,0x25)
+@export var color_dis_bg: Color = Color8(0x25,0x25,0x25)
 @export var blink_rate: float = 0.5
+@export var clear_text_on_send := true
+@export var store_history := true
+@export var disabled := false :
+	set(val):
+		if disabled != val:
+			queue_redraw()
+			disabled = val
+			focus_mode = Control.FOCUS_NONE if disabled else Control.FOCUS_ALL
+@export var pwd_mode := false :
+	set(val):
+		if pwd_mode != val:
+			pwd_mode = val
+			queue_redraw()
 
 var cmd_manager: CommandManager = null
 var autofill_rect: StringBar
@@ -37,6 +57,7 @@ var _tab_completions: Array[String] = []
 var _history: Array[String] = []
 var _hist_indx := 0
 func history_step(by: int) -> void:
+	if not store_history: return
 	if by == 0 or (_hist_indx >= _history.size() if by > 0 else _hist_indx <= 0):
 		return
 	_hist_indx = clamp(_hist_indx+by, 0, _history.size())
@@ -45,6 +66,7 @@ func history_step(by: int) -> void:
 	else:
 		retype("")
 func history_add(s: String) -> void:
+	if not store_history: return
 	if _history.is_empty() or s != _history.back():
 		_history.append(s)
 	_hist_indx = _history.size()
@@ -104,11 +126,16 @@ func _ready():
 	autofill_rect.position.y = 0
 	autofill_rect.clicked.connect(func(indx: int):
 		auto_complete(_tab_completions[indx]))
-
+	custom_minimum_size.y = calc_height()
 func _process(_delta):
 	update_mouse()
 
 func _draw():
+	var draw_text: String = text
+	if pwd_mode:
+		draw_text = "*".repeat(draw_text.length())
+	if disabled: _unfocus()
+	draw_rect(Rect2(Vector2.ZERO, size), color_dis_bg if disabled else color_bg)
 	if _tab_completions and had_focus:
 		draw_string(font, Vector2(HMARGIN,VMARGIN+font.get_ascent(font_size)), _tab_completions[0], HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, color_autofill)
 		if _tab_completions.size() > 1:
@@ -118,11 +145,12 @@ func _draw():
 			autofill_rect.size.y = 0
 			autofill_rect.queue_redraw()
 	var h = font.get_height(font_size)
-	var pre_w := font.get_string_size(text.substr(0, low_pos), HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+	var pre_w := font.get_string_size(draw_text.substr(0, low_pos), HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
 	if had_focus and has_select():
-		var rw = font.get_string_size(text.substr(0, high_pos), HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x - pre_w
+		var rw = font.get_string_size(draw_text.substr(0, high_pos), HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x - pre_w
 		draw_rect(Rect2(HMARGIN+pre_w-1,VMARGIN,rw,h), color_highlight)
-	draw_string(font, Vector2(HMARGIN,VMARGIN+font.get_ascent(font_size)), text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, color_text)
+		
+	draw_string(font, Vector2(HMARGIN,VMARGIN+font.get_ascent(font_size)), draw_text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, color_dis_text if disabled else color_text)
 	if had_focus and showing_cursor:
 		draw_rect(Rect2(HMARGIN+pre_w-1,VMARGIN,2.0,h), color_highlight)
 
@@ -194,10 +222,11 @@ func _gui_input(event):
 				KEY_ENTER, KEY_KP_ENTER:
 					history_add(text)
 					send_text.emit(text)
-					text = ""
-					text_pos = 0
-					clear_select()
-					updated_text = true
+					if clear_text_on_send:
+						text = ""
+						text_pos = 0
+						clear_select()
+						updated_text = true
 				KEY_TAB:
 					if _tab_completions:
 						auto_complete(_tab_completions[0])
@@ -266,6 +295,7 @@ func auto_complete(msg: String):
 
 func _focus():
 	if Engine.is_editor_hint(): return
+	if disabled: return _unfocus()
 	if not had_focus:
 		had_focus = true
 		update()
@@ -276,3 +306,8 @@ func _unfocus():
 		had_focus = false
 		update()
 		queue_redraw()
+
+func set_pwd_mode(state: bool) -> void:
+	pwd_mode = state
+func set_show_pwd(state: bool) -> void:
+	pwd_mode = not state

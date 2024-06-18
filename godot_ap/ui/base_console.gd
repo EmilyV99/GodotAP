@@ -709,7 +709,7 @@ func _gui_input(event):
 func close() -> void:
 	if Engine.is_editor_hint(): return
 	var p = self
-	while p and not p is ConsoleContainer:
+	while p and not p is ConsoleWindowContainer:
 		p = p.get_parent()
 	if p:
 		p.close()

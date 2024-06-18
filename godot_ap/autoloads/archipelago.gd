@@ -119,10 +119,7 @@ func ap_connect(room_ip: String, room_port: String, slot_name: String, room_pwd 
 	if status != APStatus.DISCONNECTED:
 		ap_disconnect() # Do it here so the ip/port/slot are correct in the disconnect message
 	AP.open_logger()
-	creds.ip = room_ip
-	creds.port = room_port
-	creds.slot = slot_name
-	creds.pwd = room_pwd
+	creds.update(room_ip, room_port, slot_name, room_pwd)
 	ap_reconnect()
 
 ## Disconnect from Archipelago
@@ -329,7 +326,7 @@ func _handle_command(json: Dictionary) -> void:
 			var idx: int = json["index"]
 			var items: Array[NetworkItem] = []
 			for obj in json["items"]:
-				items.append(NetworkItem.from(obj, conn, true))
+				items.append(NetworkItem.from(obj, true))
 			for item in items:
 				_recieve_item(idx, item)
 				idx += 1
@@ -515,9 +512,6 @@ func ap_reconnect_to_save() -> void:
 			else:
 				s += "Connect to a room when ready."
 			output_console.add_line(s, "", output_console.COLOR_UI_MSG)
-			var cmd = cmd_manager.get_command("/connect")
-			if cmd:
-				cmd.output_usage(output_console)
 	else:
 		ap_reconnect()
 
@@ -568,8 +562,7 @@ var output_console: BaseConsole :
 ## Loads a PackedScene as the active console. This becomes the active scene in the passed SceneTree.
 func load_packed_console_as_scene(tree: SceneTree, console: PackedScene) -> bool:
 	if output_console: return false
-	var tmp_inst = console.instantiate()
-	if not (tmp_inst is Window or tmp_inst is ConsoleContainer):
+	if not Util.for_all_nodes(console.instantiate(), func(node): return node is ConsoleContainer):
 		return false
 	await tree.process_frame
 	tree.change_scene_to_packed(console)
@@ -854,5 +847,5 @@ func set_tags(tags: Array[String]) -> void:
 func _ensure_connected(console: BaseConsole) -> bool:
 	if status == APStatus.PLAYING:
 		return true
-	console.add_line("Not connected to Archipelago! Please '/connect' first!", "", console.COLOR_UI_MSG)
+	console.add_line("Not connected to Archipelago! Please connect first!", "", console.COLOR_UI_MSG)
 	return false

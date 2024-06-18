@@ -4,5 +4,13 @@
 
 [node name="ConsoleContainer" instance=ExtResource("1_aq3x3")]
 
-[editable path="Tabs/Console"]
+[node name="TypingBar" parent="Tabs/Hints/Console" index="1"]
+color_dis_text = null
+color_bg = null
+color_dis_bg = null
+clear_text_on_send = null
+store_history = null
+disabled = null
+pwd_mode = null
+
 [editable path="Tabs/Hints/Console"]

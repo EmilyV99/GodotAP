@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3 uid="uid://c51q4vrwhlcl7"]
 
-[ext_resource type="Script" path="res://godot_ap/ui/console_tab.gd" id="1_wya3j"]
+[ext_resource type="Script" path="res://godot_ap/ui/console_container.gd" id="1_wya3j"]
 [ext_resource type="Script" path="res://godot_ap/ui/base_console.gd" id="2_ilcwq"]
 [ext_resource type="SystemFont" uid="uid://73rjoc23d4ub" path="res://godot_ap/ui/console_font.tres" id="3_iispj"]
 [ext_resource type="Script" path="res://godot_ap/ui/typing_bar.gd" id="4_gp0g4"]
@@ -60,6 +60,7 @@ offset_bottom = 23.0
 autowrap_mode = 2
 
 [node name="TypingBar" type="ColorRect" parent="."]
+custom_minimum_size = Vector2(0, 33)
 layout_mode = 2
 focus_neighbor_left = NodePath(".")
 focus_neighbor_top = NodePath(".")
@@ -71,6 +72,7 @@ focus_mode = 2
 color = Color(0.145266, 0.145266, 0.145266, 1)
 script = ExtResource("4_gp0g4")
 font = ExtResource("3_iispj")
+color_dis_bg = Color(0.304462, 0.304462, 0.304462, 1)
 
 [node name="StringBar" parent="TypingBar" instance=ExtResource("5_6p6ej")]
 layout_mode = 1
