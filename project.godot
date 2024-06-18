@@ -10,7 +10,10 @@ config_version=5
 
 [application]
 
-config/name="AP"
+config/name="GodotAP"
+config/description="Archipelago connection handler for Godot.
+See https://github.com/EmilyV99/GodotAP"
+config/version="0.0.1"
 run/main_scene="res://ui/main.tscn"
 config/features=PackedStringArray("4.2", "Mobile")
 config/icon="res://icon.svg"
