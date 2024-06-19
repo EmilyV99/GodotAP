@@ -8,10 +8,20 @@ var headings: Array[BaseConsole.TextPart]
 var sort_ascending := [true,true,true,true,false]
 var sort_cols := [4,0,2,1,3]
 
+const FORCE_ALL := "[Force All]"
+const LOCAL_ITEMS := "[Local Items]"
+const ITEMS_PROG := "[Progression]"
+const ITEMS_USEFUL := "[Useful]"
+const ITEMS_TRAP := "[Trap]"
+const ITEMS_FILLER := "[Filler]"
 var status_filters: Dictionary = {
-	"Force All": false,
+	FORCE_ALL: false,
 	NetworkHint.Status.FOUND: false,
 }
+var recv_filters: Dictionary = {}
+var finding_filters: Dictionary = {}
+var item_filters: Dictionary = {}
+var loc_filters: Dictionary = {}
 
 var old_status_system := false
 
@@ -63,41 +73,126 @@ func sort_click(event: InputEventMouseButton, index: int) -> bool:
 			sort_cols.push_front(index)
 			sort_ascending[index] = index != 4
 			headings[index].text += (" ↑" if sort_ascending[index] else " ↓")
-		refresh_hints()
+		queue_refresh()
 		return true
 	elif event.button_index == MOUSE_BUTTON_RIGHT:
-		if not index in [4]: # TODO handle filters for other headings
-			return false
-		
 		var vbox := headings[index].pop_dropdown(hint_console)
+		# Create action buttons
+		var btnrow := HBoxContainer.new()
+		var btn_checkall := Button.new()
+		btn_checkall.text = "Check All"
+		btn_checkall.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		btn_checkall.pressed.connect(func():
+			Util.for_all_nodes(vbox, func(node: Node):
+				if node is CheckBox:
+					node.button_pressed = true))
+		var btn_uncheckall := Button.new()
+		btn_uncheckall.text = "Uncheck All"
+		btn_uncheckall.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		btn_uncheckall.pressed.connect(func():
+			Util.for_all_nodes(vbox, func(node: Node):
+				if node is CheckBox:
+					node.button_pressed = false))
+		btnrow.add_child(btn_checkall)
+		btnrow.add_child(btn_uncheckall)
+		vbox.add_child(btnrow)
+		# Add filter options
 		match index:
+			0: # Receiving Player
+				var arr: Array = [LOCAL_ITEMS]
+				arr.append_array(recv_filters.keys().filter(func(s): return not s in arr))
+				for s in arr:
+					var proc: Callable
+					if s == LOCAL_ITEMS:
+						proc = func(state: bool):
+							recv_filters[s] = state
+							finding_filters[s] = state # Shared option
+							queue_refresh()
+					else:
+						proc = func(state: bool):
+							recv_filters[s] = state
+							queue_refresh()
+					var hbox := _add_cbox_row(s, recv_filters.get(s, true), proc)
+					vbox.add_child(hbox)
+			1: # Item
+				var arr: Array = [ITEMS_FILLER,ITEMS_TRAP,ITEMS_USEFUL,ITEMS_PROG]
+				arr.append_array(item_filters.keys().filter(func(s): return not s in arr))
+				for s in arr:
+					var hbox := _add_cbox_row(s, item_filters.get(s, true), func(state: bool):
+						item_filters[s] = state
+						queue_refresh())
+					vbox.add_child(hbox)
+			2: # Finding Player
+				var arr: Array = [LOCAL_ITEMS]
+				arr.append_array(finding_filters.keys().filter(func(s): return not s in arr))
+				for s in arr:
+					var proc: Callable
+					if s == LOCAL_ITEMS:
+						proc = func(state: bool):
+							finding_filters[s] = state
+							recv_filters[s] = state # Shared option
+							queue_refresh()
+					else:
+						proc = func(state: bool):
+							finding_filters[s] = state
+							queue_refresh()
+					var hbox := _add_cbox_row(s, finding_filters.get(s, true), proc)
+					vbox.add_child(hbox)
+			3: # Location
+				var arr: Array = loc_filters.keys()
+				for s in arr:
+					var hbox := _add_cbox_row(s, loc_filters.get(s, true), func(state: bool):
+						loc_filters[s] = state
+						queue_refresh())
+					vbox.add_child(hbox)
 			4: # Status
-				var arr: Array = ["Force All"]
+				var arr: Array = [FORCE_ALL]
 				arr.append_array(Util.reversed(NetworkHint.status_names.keys()).filter(_status_filter))
 				for s in arr:
-					var hbox := HBoxContainer.new()
-					hbox.set_anchors_preset(PRESET_CENTER)
-					var cbox := CheckBox.new()
-					cbox.set_pressed_no_signal(status_filters.get(s, true))
-					cbox.toggled.connect(func(state: bool):
-						status_filters[s] = state
-						refresh_hints())
-					cbox.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
-					hbox.add_child(cbox)
-					var lbl := Label.new()
-					lbl.text = s if s is String else NetworkHint.status_names[s]
-					lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-					hbox.add_child(lbl)
+					var hbox := _add_cbox_row(s if s is String else NetworkHint.status_names[s],
+						status_filters.get(s, true),
+						func(state: bool):
+							status_filters[s] = state
+							queue_refresh())
 					vbox.add_child(hbox)
 		return true
 	return false
 
+func _add_cbox_row(s: String, initial_state: bool, proc: Callable) -> HBoxContainer:
+	var hbox := HBoxContainer.new()
+	hbox.set_anchors_preset(PRESET_CENTER)
+	var cbox := CheckBox.new()
+	cbox.set_pressed_no_signal(initial_state)
+	cbox.toggled.connect(proc)
+	cbox.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+	hbox.add_child(cbox)
+	var lbl := Label.new()
+	lbl.text = s
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	hbox.add_child(lbl)
+	return hbox
+
+func reset_hints_to_empty() -> void:
+	recv_filters = {
+		LOCAL_ITEMS: recv_filters.get(LOCAL_ITEMS, true),
+	}
+	finding_filters = {
+		LOCAL_ITEMS: finding_filters.get(LOCAL_ITEMS, true),
+	}
+	item_filters = {
+		ITEMS_PROG: item_filters.get(ITEMS_PROG, true),
+		ITEMS_USEFUL: item_filters.get(ITEMS_USEFUL, true),
+		ITEMS_TRAP: item_filters.get(ITEMS_TRAP, true),
+		ITEMS_FILLER: item_filters.get(ITEMS_FILLER, true),
+	}
+	loc_filters = {}
+	load_hints_from_json([])
 func _ready():
 	Archipelago.connected.connect(func(conn: ConnectionInfo, _j: Dictionary):
 		var hint_key := "_read_hints_%d_%d" % [Archipelago.conn.team_id, Archipelago.conn.player_id]
 		conn.set_notify(hint_key, self.load_hints_from_json)
 		conn.retrieve(hint_key, self.load_hints_from_json))
-	Archipelago.disconnected.connect(func(): load_hints_from_json([]))
+	Archipelago.disconnected.connect(reset_hints_to_empty)
 	var header := BaseConsole.ColumnsPart.new()
 	headings.append(header.add(hint_console.make_c_text("Receiving Player"), 500))
 	headings.append(header.add(hint_console.make_c_text("Item"), 500))
@@ -108,6 +203,16 @@ func _ready():
 		headings[q].on_click = func(evt): return sort_click(evt,q)
 	hint_console.add(header)
 	hint_container = hint_console.add(BaseConsole.ContainerPart.new())
+
+
+var _queued_refresh_hints := false
+func _process(_delta):
+	if _queued_refresh_hints:
+		_queued_refresh_hints = false
+		refresh_hints()
+
+func queue_refresh() -> void:
+	_queued_refresh_hints = true
 
 var _stored_hints: Array[NetworkHint] = []
 func load_hints_from_json(hints: Array) -> void:
@@ -128,9 +233,44 @@ func refresh_hints():
 			old_status_system = false
 		if filter_allow(hint):
 			hint_container._add(hint_console.make_hint(hint))
+	hint_console.is_max_scroll = false # Prevent auto-scrolling
 	hint_console.queue_redraw()
 
-func filter_allow(hint: NetworkHint):
+func filter_allow(hint: NetworkHint) -> bool:
+	var recv_name := Archipelago.conn.get_player_name(hint.item.dest_player_id, false)
+	var item_name := hint.item.get_name()
+	var find_name := Archipelago.conn.get_player_name(hint.item.src_player_id, false)
+	var loc_name := Archipelago.conn.get_gamedata_for_player(hint.item.src_player_id).get_loc_name(hint.item.loc_id)
+	#region Add filters if missing
+	if not recv_filters.has(recv_name):
+		recv_filters[recv_name] = true
+	if not item_filters.has(item_name):
+		item_filters[item_name] = true
+	if not finding_filters.has(find_name):
+		finding_filters[find_name] = true
+	if not loc_filters.has(loc_name):
+		loc_filters[loc_name] = true
+	#endregion
+	if not recv_filters.get(recv_name, true):
+		return false
+	if not item_filters.get(item_name, true):
+		return false
+	if not finding_filters.get(find_name, true):
+		return false
+	if not loc_filters.get(loc_name, true):
+		return false
+	if hint.is_local() and not recv_filters.get(LOCAL_ITEMS, true):
+		return false
+	var flags := hint.item.flags
+	if (flags & AP.ICLASS_PROG) and not item_filters.get(ITEMS_PROG, true):
+		return false
+	if (flags & AP.ICLASS_USEFUL) and not item_filters.get(ITEMS_USEFUL, true):
+		return false
+	if (flags & AP.ICLASS_TRAP) and not item_filters.get(ITEMS_TRAP, true):
+		return false
+	if (not flags) and not item_filters.get(ITEMS_FILLER, true):
+		return false
 	if not status_filters.get(hint.status, true):
-		return status_filters.get("Force All", false)
+		if not status_filters.get(FORCE_ALL, false):
+			return false
 	return true
