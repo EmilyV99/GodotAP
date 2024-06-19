@@ -742,6 +742,7 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 		cmd_manager.setup_debug_commands()
 func _init():
 	init_command_manager(true)
+	_socket.inbound_buffer_size = 65535*8
 	_update_tags()
 	if AP_AUTO_OPEN_CONSOLE:
 		open_console()
