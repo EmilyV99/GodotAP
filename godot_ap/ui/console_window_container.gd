@@ -54,7 +54,6 @@ func _ready() -> void:
 		if w > right_bar_w:
 			right_bar_w = w
 	console_margin.add_theme_constant_override("margin_right", 8+ceili(right_bar_w))
-	print(right_bar_w)
 
 func update_cont_size() -> void:
 	position = Vector2.ZERO

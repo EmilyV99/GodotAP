@@ -1,6 +1,6 @@
 class_name HintsTab extends MarginContainer
 
-@onready var hint_console: BaseConsole = $Console/Cont/ConsoleMargin/Console
+@onready var hint_console: BaseConsole = $Console.console
 
 var hint_container: BaseConsole.ContainerPart
 var headings: Array[BaseConsole.TextPart]

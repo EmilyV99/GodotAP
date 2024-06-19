@@ -27,25 +27,30 @@ clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-focus_next = NodePath("Console")
-focus_previous = NodePath("Console")
+focus_next = NodePath("Row/Console")
+focus_previous = NodePath("Row/Console")
 focus_mode = 1
 theme_override_constants/margin_left = 8
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
-[node name="Console" type="Control" parent="Cont/ConsoleMargin"]
+[node name="Row" type="HBoxContainer" parent="Cont/ConsoleMargin"]
+layout_mode = 2
+
+[node name="Console" type="Control" parent="Cont/ConsoleMargin/Row" node_paths=PackedStringArray("scroll_bar")]
 custom_minimum_size = Vector2(30, 0)
 layout_mode = 2
-focus_next = NodePath("../../../TypingBar")
-focus_previous = NodePath("../../../TypingBar")
+size_flags_horizontal = 3
+focus_next = NodePath("../../../../TypingBar")
+focus_previous = NodePath("../../../../TypingBar")
 focus_mode = 2
 mouse_filter = 1
 script = ExtResource("2_ilcwq")
 font = ExtResource("3_iispj")
+scroll_bar = NodePath("../ScrollBar")
 
-[node name="TooltipBG" type="ColorRect" parent="Cont/ConsoleMargin/Console"]
+[node name="TooltipBG" type="ColorRect" parent="Cont/ConsoleMargin/Row/Console"]
 visible = false
 layout_mode = 2
 offset_right = 40.0
@@ -53,11 +58,15 @@ offset_bottom = 40.0
 mouse_filter = 2
 color = Color(0.150075, 0.150075, 0.150075, 1)
 
-[node name="Tooltip" type="Label" parent="Cont/ConsoleMargin/Console/TooltipBG"]
+[node name="Tooltip" type="Label" parent="Cont/ConsoleMargin/Row/Console/TooltipBG"]
 layout_mode = 0
 offset_right = 1.0
 offset_bottom = 23.0
 autowrap_mode = 2
+
+[node name="ScrollBar" type="VScrollBar" parent="Cont/ConsoleMargin/Row"]
+layout_mode = 2
+size_flags_horizontal = 8
 
 [node name="TypingBar" type="ColorRect" parent="."]
 custom_minimum_size = Vector2(0, 33)
@@ -81,4 +90,4 @@ offset_top = 99.0
 offset_right = -219.5
 offset_bottom = 66.0
 
-[connection signal="send_text" from="TypingBar" to="Cont/ConsoleMargin/Console" method="send_msg"]
+[connection signal="send_text" from="TypingBar" to="Cont/ConsoleMargin/Row/Console" method="send_msg"]

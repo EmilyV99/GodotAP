@@ -25,6 +25,15 @@ class FontFlags:
 		SPACING = val
 		queue_redraw()
 @export var COLOR_UI_MSG: Color = Color(.7,.7,.3)
+@export var scroll_bar: VScrollBar :
+	set(val):
+		if scroll_bar == val: return
+		if scroll_bar:
+			scroll_bar.scrolling.disconnect(update_scroll)
+			scroll_bar.value_changed.disconnect(_update_scroll2)
+		scroll_bar = val
+		scroll_bar.scrolling.connect(update_scroll)
+		scroll_bar.value_changed.connect(_update_scroll2)
 
 signal send_text(msg: String)
 
@@ -579,7 +588,11 @@ func add_ensure_newline(): ## Returns SpacingPart | null
 var parts: Array[ConsolePart] = []
 var hovered_part: ConsolePart = null
 var hovered_hitbox: Rect2
-var scroll: float = 0
+var scroll: float = 0 :
+	get: return scroll_bar.value if scroll_bar else scroll
+	set(val):
+		if scroll_bar: scroll_bar.value = val
+		else: scroll = val
 var is_max_scroll := true
 var has_mouse := false
 
@@ -661,12 +674,16 @@ func _draw():
 	var max_scroll = _draw_data.max_scroll()
 	if scroll > max_scroll:
 		scroll = max_scroll
-		call_deferred("queue_redraw")
+		queue_redraw.call_deferred()
 	elif scroll < max_scroll and is_max_scroll:
 		scroll = _draw_data.max_scroll()
-		call_deferred("queue_redraw")
+		queue_redraw.call_deferred()
 	if Util.approx_eq(scroll,_draw_data.max_scroll()):
 		is_max_scroll = true
+	if scroll_bar:
+		scroll_bar.max_value = max_scroll
+		scroll_bar.value = scroll
+		scroll_bar.visible = max_scroll > Util.GAMMA
 	#var mpos = _get_mouse_pos()
 	#draw_rect(Rect2(mpos.x-1,mpos.y-1,2,2), Color.REBECCA_PURPLE)
 
@@ -674,11 +691,14 @@ func scroll_by(amount: float) -> void:
 	scroll_by_abs(amount * SCROLL_MULT)
 func scroll_by_abs(amount: float) -> void:
 	var old_scroll := scroll
-	scroll += amount
-	scroll = clampf(scroll, 0, _draw_data.max_scroll())
-	is_max_scroll = Util.approx_eq(scroll,_draw_data.max_scroll())
+	scroll = clampf(scroll + amount, 0, _draw_data.max_scroll())
 	if not Util.approx_eq(scroll,old_scroll):
-		queue_redraw()
+		update_scroll()
+func _update_scroll2(_junk) -> void:
+	return update_scroll()
+func update_scroll() -> void:
+	is_max_scroll = Util.approx_eq(scroll,_draw_data.max_scroll())
+	queue_redraw()
 func _gui_input(event):
 	if Engine.is_editor_hint(): return
 	if event is InputEventMouseButton:

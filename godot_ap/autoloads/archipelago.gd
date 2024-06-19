@@ -199,6 +199,8 @@ func _poll():
 			WebSocketPeer.STATE_CLOSING:
 				return
 		return
+	if _connecting_part:
+		_connecting_part = null
 	_socket.poll()
 	match _socket.get_ready_state():
 		WebSocketPeer.STATE_CLOSED: # Exited; handle reconnection, or concluding intentional disconnection
