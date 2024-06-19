@@ -19,7 +19,7 @@ class FontFlags:
 	set(val):
 		font_color = val
 		queue_redraw()
-@export var SCROLL_MULT: float = 3
+@export var SCROLL_MULT: float = 10
 @export var SPACING = 0 :
 	set(val):
 		SPACING = val

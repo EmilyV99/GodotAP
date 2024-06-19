@@ -107,14 +107,14 @@ func _on_locinfo(json: Dictionary) -> void:
 
 
 ## Sends a `Bounce` packet with whatever information you like
-func send_bounce(data: Dictionary, games: Array[String], slots: Array[String], tags: Array[String]) -> void:
+func send_bounce(data: Dictionary, target_games: Array[String], target_slots: Array[String], target_tags: Array[String]) -> void:
 	var cmd: Dictionary = {}
-	if games:
-		cmd["games"] = games
-	if slots:
-		cmd["slots"] = slots
-	if tags:
-		cmd["tags"] = tags
+	if target_games:
+		cmd["games"] = target_games
+	if target_slots:
+		cmd["slots"] = target_slots
+	if target_tags:
+		cmd["tags"] = target_tags
 	if not cmd: return
 	cmd.merge(data)
 	Archipelago.send_command("Bounce", cmd)
