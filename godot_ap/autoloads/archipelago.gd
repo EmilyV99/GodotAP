@@ -2,7 +2,8 @@ class_name AP extends Node
 
 var AP_GAME_NAME := "" ## The game name to connect to. Empty string for TextOnly or HintGame clients.
 var AP_GAME_TAGS: Array[String] = [] ## The tags for your game
-var AP_CLIENT_VERSION = Version.val(0,0,0) ## The version of your client. Arbitrary number for you to manage.
+var AP_CLIENT_VERSION := Version.val(0,0,0) ## The version of your client. Arbitrary number for you to manage.
+var AP_VERSION := Version.val(0,5,0) ## The target AP version. Not arbitrary - used in `Connect` packet
 var AP_ITEM_HANDLING := ItemHandling.ALL ## The ItemHandling to use when connecting
 var AP_PRINT_ITEMS_ON_CONNECT := false ## Prints what items have been previously collected when reconnecting to a slot
 var AP_HIDE_NONLOCAL_ITEMSENDS := true ## Hide item send messages that don't involve the client
@@ -242,7 +243,7 @@ func _handle_command(json: Dictionary) -> void:
 			conn.seed_name = json["seed_name"]
 			handle_datapackage_checksums(json["datapackage_checksums"])
 			var args: Dictionary = {"name":creds.slot,"password":creds.pwd,"uuid":conn.uid,
-				"version":Version.val(0,4,6)._as_ap_dict(),"slot_data":true}
+				"version":AP_VERSION._as_ap_dict(),"slot_data":true}
 			args["game"] = AP_GAME_NAME
 			args["tags"] = AP_GAME_TAGS
 			args["items_handling"] = AP_ITEM_HANDLING
