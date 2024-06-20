@@ -9,13 +9,14 @@ var AP_PRINT_ITEMS_ON_CONNECT := false ## Prints what items have been previously
 var AP_HIDE_NONLOCAL_ITEMSENDS := true ## Hide item send messages that don't involve the client
 const AP_AUTO_OPEN_CONSOLE := false ## Automatically opens a default AP text console
 
-# Connection packets
+#region Connection packets
 # See `ConnectionInfo` (Archipelago.conn) for more signals
 signal roominfo(conn: ConnectionInfo, json: Dictionary) ## Emitted when `RoomInfo` is received
 signal connectionrefused(conn: ConnectionInfo, json: Dictionary) ## Emitted when `ConnectionRefused` is received
 signal connected(conn: ConnectionInfo, json: Dictionary) ## Emitted when `Connected` is received
 signal printjson(json: Dictionary, plaintext: String) ## Emitted when `PrintJSON` is received
 signal disconnected ## Emitted when the connection is lost
+#endregion
 
 #region LOGGING (godot console, not richtext console)
 const AP_LOG_COMMUNICATION := false ## Enables additional logging
@@ -330,9 +331,24 @@ func _handle_command(json: Dictionary) -> void:
 			var items: Array[NetworkItem] = []
 			for obj in json["items"]:
 				items.append(NetworkItem.from(obj, true))
-			for item in items:
-				_recieve_item(idx, item)
-				idx += 1
+			var refr_items: Array[NetworkItem] = []
+			if idx == 0:
+				refr_items.assign(items)
+			if items:
+				var q := 0
+				while q < items.size():
+					if _receive_item(idx, items[q]):
+						q += 1
+					else:
+						items.remove_at(q)
+					idx += 1
+				items.make_read_only()
+				conn.obtained_items.emit(items)
+			
+			if json["index"] == 0:
+				refr_items.make_read_only()
+				conn.received_items.assign(refr_items)
+				conn.refresh_items.emit(refr_items)
 		"RoomUpdate":
 			for loc in json.get("checked_locations", []):
 				_remove_loc(loc)
@@ -423,10 +439,10 @@ static func get_datacache(game: String) -> DataCache:
 #endregion DATAPACKS
 
 #region ITEMS
-func _recieve_item(index: int, item: NetworkItem) -> void:
+func _receive_item(index: int, item: NetworkItem) -> bool:
 	assert(item.dest_player_id == conn.player_id)
-	if index <= conn.recieved_index:
-		return # Already recieved, skip
+	if conn.received_index(index):
+		return false # Already recieved, skip
 	var data := conn.get_gamedata_for_player(conn.player_id)
 	var msg := ""
 	if item.dest_player_id == item.src_player_id:
@@ -457,7 +473,13 @@ func _recieve_item(index: int, item: NetworkItem) -> void:
 	if AP_LOG_RECIEVED:
 		AP.log(msg)
 	
-	conn.recieved_index = index
+	if conn.received_items.size() == index:
+		conn.received_items.append(item)
+	else:
+		if conn.received_items.size() < index+1:
+			conn.received_items.resize(index+1)
+		conn.received_items[index] = item
+	return true
 #endregion ITEMS
 
 #region LOCATIONS

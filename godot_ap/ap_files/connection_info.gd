@@ -5,7 +5,6 @@ class_name ConnectionInfo
 var serv_version: Version
 var gen_version: Version
 var seed_name: String
-var recieved_index: int = -1
 var uid: int
 
 var player_id: int
@@ -16,8 +15,12 @@ var players: Array[NetworkPlayer]
 var slots: Array[NetworkSlot]
 
 var checked_locations: Dictionary = {}
+var received_items: Array[NetworkItem] = []
 
 # Init / Getters
+
+func received_index(index: int) -> bool:
+	return received_items.size() > index and received_items[index] != null
 
 func _init():
 	uid = randi()
@@ -52,6 +55,8 @@ signal deathlink(source: String, cause: String, json: Dictionary) ## Emitted whe
 signal setreply(json: Dictionary) ## Emitted when a `SetReply` packet is received
 signal roomupdate(json: Dictionary) ## Emitted when a `RoomUpdate` packet is received
 signal obtained_item(item: NetworkItem) ## Emitted for each item received
+signal obtained_items(items: Array[NetworkItem]) ## Emitted for each item *packet* received
+signal refresh_items(items: Array[NetworkItem]) ## Emitted when the server re-sends ALL obtained items
 
 # Outgoing server packets
 ## Sends a `SetNotify` packet, and connects the specified `Callable[Variant]->void`
