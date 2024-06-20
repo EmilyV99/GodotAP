@@ -200,7 +200,7 @@ class ConsolePart: ## A base part, for all other parts to inherit from
 			window.position.x = roundi(c.global_position.x + hb.position.x)
 			window.position.y = roundi(c.global_position.y + hb.position.y + hb.size.y)
 			if diff:
-				if window.position.x > parent_window.size.x / 2:
+				if window.position.x > parent_window.size.x / 2.0:
 					window.position.x = max(0, window.position.x - diff)
 				if window.position.x + window.size.x > parent_window.size.x:
 					var diff2 = (window.position.x + window.size.x) - parent_window.size.x

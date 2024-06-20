@@ -1,7 +1,55 @@
-[gd_scene load_steps=2 format=3 uid="uid://cn7ah7d3ep4de"]
+[gd_scene load_steps=4 format=3 uid="uid://cn7ah7d3ep4de"]
 
 [ext_resource type="PackedScene" uid="uid://cgq7n1figlpu3" path="res://godot_ap/ui/base_client.tscn" id="1_i5jgm"]
+[ext_resource type="Script" path="res://godot_ap/ui/tracker_tab.gd" id="2_h31sw"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ov043"]
 
 [node name="ConsoleContainer" instance=ExtResource("1_i5jgm")]
+custom_minimum_size = Vector2(1366, 705)
+offset_bottom = 705.0
+
+[node name="Tabs" parent="." index="1"]
+custom_minimum_size = Vector2(1366, 705)
+
+[node name="Tracking" type="MarginContainer" parent="Tabs" index="3"]
+visible = false
+layout_mode = 2
+script = ExtResource("2_h31sw")
+
+[node name="BG" type="ColorRect" parent="Tabs/Tracking" index="0"]
+layout_mode = 2
+color = Color(0.174028, 0.174028, 0.174028, 1)
+
+[node name="Column" type="VBoxContainer" parent="Tabs/Tracking" index="1"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Margins" type="MarginContainer" parent="Tabs/Tracking/Column" index="0"]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 8
+
+[node name="Row" type="HBoxContainer" parent="Tabs/Tracking/Column/Margins" index="0"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Tabs/Tracking/Column/Margins/Row" index="0"]
+layout_mode = 2
+size_flags_horizontal = 0
+text = "Enable Tracking:"
+
+[node name="TrackingButton" type="CheckButton" parent="Tabs/Tracking/Column/Margins/Row" index="1"]
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_styles/focus = SubResource("StyleBoxEmpty_ov043")
+
+[node name="InfoLabel" type="Label" parent="Tabs/Tracking/Column/Margins/Row" index="2"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Hello This is some Text"
+horizontal_alignment = 1
 
 [editable path="Tabs/Hints/Console"]

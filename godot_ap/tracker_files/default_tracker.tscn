@@ -1,0 +1,26 @@
+[gd_scene load_steps=3 format=3 uid="uid://dn2rrlv4snbh"]
+
+[ext_resource type="Script" path="res://godot_ap/tracker_files/tracker_scene_default.gd" id="1_jc8ky"]
+[ext_resource type="PackedScene" uid="uid://c51q4vrwhlcl7" path="res://godot_ap/ui/console_tab.tscn" id="2_rlndu"]
+
+[node name="Control" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+script = ExtResource("1_jc8ky")
+
+[node name="Console" parent="." instance=ExtResource("2_rlndu")]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TypingBar" parent="Console" index="1"]
+visible = false
+focus_mode = 0
+
+[node name="StringBar" parent="Console/TypingBar" index="0"]
+offset_right = -1313.5
+
+[editable path="Console"]

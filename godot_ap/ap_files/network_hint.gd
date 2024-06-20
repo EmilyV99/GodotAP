@@ -6,7 +6,7 @@ enum Status {
 	NON_PRIORITY = 10,
 	AVOID = 20,
 	PRIORITY = 30,
-	NOT_FOUND = 9999999, # Deprecated by new hint status code https://github.com/ArchipelagoMW/Archipelago/pull/3506, still supported for now
+	NOT_FOUND = 2, # Deprecated by new hint status code https://github.com/ArchipelagoMW/Archipelago/pull/3506, still supported for now
 }
 
 static var status_names: Dictionary = {

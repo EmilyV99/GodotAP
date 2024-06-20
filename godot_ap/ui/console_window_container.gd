@@ -41,6 +41,8 @@ func _ready() -> void:
 	get_viewport().gui_embed_subwindows = true
 	update_cont_size()
 	
+	if Engine.is_editor_hint(): return
+	
 	var right_bar_ws: Array[float] = []
 	var register_bar_w: Callable = func(n):
 			if n is SliderBox:
@@ -57,9 +59,10 @@ func _ready() -> void:
 
 func update_cont_size() -> void:
 	position = Vector2.ZERO
-	var sz := get_window().size
-	custom_minimum_size = sz
-	tabs.custom_minimum_size = sz
+	var win := get_window()
+	if win:
+		custom_minimum_size = win.size
+		tabs.custom_minimum_size = win.size
 	reset_size()
 	queue_sort()
 

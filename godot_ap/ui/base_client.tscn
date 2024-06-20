@@ -27,9 +27,9 @@ outline_size = 6
 outline_color = Color(0, 0, 0, 1)
 
 [node name="WindowContainer" type="MarginContainer"]
-custom_minimum_size = Vector2(1366, 745)
+custom_minimum_size = Vector2(1366, 705)
 offset_right = 1366.0
-offset_bottom = 745.0
+offset_bottom = 705.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/margin_left = 0
@@ -43,7 +43,7 @@ layout_mode = 2
 color = Color(0.231373, 0.231373, 0.231373, 1)
 
 [node name="Tabs" type="TabContainer" parent="."]
-custom_minimum_size = Vector2(1366, 745)
+custom_minimum_size = Vector2(1366, 705)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_rud5c")
 theme_override_styles/tabbar_background = SubResource("StyleBoxFlat_5222u")
