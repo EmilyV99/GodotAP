@@ -229,6 +229,7 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 		var trim_pos: int
 		var old_hitbox := get_hitbox()
 		hitboxes.clear()
+		var space_only := true
 		while true:
 			if text_pos >= text.length():
 				break
@@ -242,21 +243,29 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 			var subtext := text.substr(text_pos,trim_pos-text_pos)
 			var str_sz := c.get_string_size(subtext, _font_flags)
 			while data.x < data.r and data.x + str_sz.x >= data.r and trim_pos > text_pos:
-				while trim_pos > text_pos and not text[trim_pos-1].lstrip(" \t"):
-					trim_pos -= 1
-				while trim_pos > text_pos and text[trim_pos-1].lstrip(" \t"):
-					trim_pos -= 1
+				if text[trim_pos-1].lstrip(" \t"):
+					while trim_pos > text_pos and text[trim_pos-1].lstrip(" \t"): # Trim non-WS
+						trim_pos -= 1
+						if not space_only: break # Allow breaking mid-word
+				else:
+					while trim_pos > text_pos and not text[trim_pos-1].lstrip(" \t"): # Trim WS
+						trim_pos -= 1
 				subtext = text.substr(text_pos,trim_pos-text_pos)
 				str_sz = c.get_string_size(subtext, _font_flags)
 			if trim_pos <= text_pos: # No space at all, window is too thin
 				if Util.approx_eq(data.x, data.l):
-					break # abort to avoid infinit loop
+					if space_only:
+						space_only = false
+						continue # Try again, allowing breaking mid-word
+					break # abort to avoid infinite loop
 				data.x = data.r # Force next line
 			if data.x >= data.r: # no space! next line!
 				data.newline(c)
 				while text_pos < text.length() and not text[text_pos].lstrip("\n"):
 					text_pos += 1
 				continue
+			# The string WILL be drawn if this line is reached
+			space_only = true # Reset space check mode
 			if subtext.lstrip(" \t"): #not all whitespace
 				str_sz = c.get_string_size(subtext, _font_flags)
 				_draw_string(c, subtext, data)
@@ -473,7 +482,7 @@ class HintPart extends ColumnsPart: ## A part representing a hint info
 		data.ensure_spacing(c, Vector2(0, vspc))
 		super(c, data)
 		for part in parts:
-			if part is TextPart:
+			if part is TextPart and not part.hitboxes.is_empty():
 				var top_hb = part.hitboxes.front()
 				top_hb.position.y -= vspc/2
 				top_hb.size.y += vspc/2
