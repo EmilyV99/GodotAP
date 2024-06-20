@@ -484,19 +484,19 @@ func _receive_item(index: int, item: NetworkItem) -> bool:
 
 #region LOCATIONS
 ## Emitted when a location should be cleared/deleted from the world, as it has been "already collected"
-signal _remove_location(loc_id: int)
+signal remove_location(loc_id: int)
 
 func _remove_loc(loc_id: int) -> void:
 	if conn and not conn.checked_locations.get(loc_id, false):
 		conn.checked_locations[loc_id] = true
-		_remove_location.emit(loc_id)
+		remove_location.emit(loc_id)
 ## Will call `proc` when the specified location id is "removed" (i.e. collected, either by the player or the server)
 ## If the location is already removed when you call this, `proc` will be called immediately.
 func on_removed_id(loc_id: int, proc: Callable) -> void:
 	if conn.checked_locations.get(loc_id, false):
 		proc.call()
 	else:
-		_remove_location.connect(func(id:int):
+		remove_location.connect(func(id:int):
 			if id == loc_id:
 				proc.call())
 ## Will call `proc` when the specified location name is "removed" (i.e. collected, either by the player or the server)

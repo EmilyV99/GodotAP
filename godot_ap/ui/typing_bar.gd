@@ -127,6 +127,7 @@ func _ready():
 	autofill_rect.clicked.connect(func(indx: int):
 		auto_complete(_tab_completions[indx]))
 	custom_minimum_size.y = calc_height()
+	show_bar(visible)
 func _process(_delta):
 	update_mouse()
 
@@ -156,6 +157,7 @@ func _draw():
 
 func _gui_input(event):
 	if Engine.is_editor_hint(): return
+	if disabled or not visible: return
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			var new_sel: bool = event.pressed and not mouse_down and not Input.is_key_pressed(KEY_SHIFT)
@@ -295,7 +297,7 @@ func auto_complete(msg: String):
 
 func _focus():
 	if Engine.is_editor_hint(): return
-	if disabled: return _unfocus()
+	if disabled or not visible: return _unfocus()
 	if not had_focus:
 		had_focus = true
 		update()
@@ -311,3 +313,7 @@ func set_pwd_mode(state: bool) -> void:
 	pwd_mode = state
 func set_show_pwd(state: bool) -> void:
 	pwd_mode = not state
+
+func show_bar(state: bool) -> void:
+	visible = state
+	focus_mode = Control.FOCUS_ALL if state else Control.FOCUS_NONE
