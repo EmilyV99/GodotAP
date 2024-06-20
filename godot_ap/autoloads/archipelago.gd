@@ -17,6 +17,14 @@ signal connected(conn: ConnectionInfo, json: Dictionary) ## Emitted when `Connec
 signal printjson(json: Dictionary, plaintext: String) ## Emitted when `PrintJSON` is received
 signal disconnected ## Emitted when the connection is lost
 #endregion
+#region Other signals
+signal status_updated ## Signals when 'status' changes
+signal all_datapacks_loaded ## Signals when all required datapacks have finished loading
+## Emitted when a location should be cleared/deleted from the world, as it has been "already collected"
+signal remove_location(loc_id: int)
+signal on_tag_change
+#endregion
+
 
 #region LOGGING (godot console, not richtext console)
 const AP_LOG_COMMUNICATION := false ## Enables additional logging
@@ -79,7 +87,6 @@ enum APStatus {
 	PLAYING, ## Authenticated and acively playing
 	DISCONNECTING, ## Attempting to disconnect from the server
 }
-signal status_updated ## Signals when 'status' changes
 var _queue_reconnect := false
 ## The current connection status
 var status: APStatus = APStatus.DISCONNECTED :
@@ -382,7 +389,6 @@ const READABLE_DATAPACK_FILES = true ## If true, datapackage local files will be
 const datapack_cached_fields = ["item_name_to_id","location_name_to_id","checksum"]
 var datapack_cache: Dictionary
 var datapack_pending: Array = []
-signal all_datapacks_loaded
 ## For each game (key) in the checksums dictionary, requests an update for its datapackage
 ## if the locally stored checksum does not match the given value
 func handle_datapackage_checksums(checksums: Dictionary) -> void:
@@ -483,9 +489,6 @@ func _receive_item(index: int, item: NetworkItem) -> bool:
 #endregion ITEMS
 
 #region LOCATIONS
-## Emitted when a location should be cleared/deleted from the world, as it has been "already collected"
-signal remove_location(loc_id: int)
-
 func _remove_loc(loc_id: int) -> void:
 	if conn and not conn.checked_locations.get(loc_id, false):
 		conn.checked_locations[loc_id] = true
@@ -526,7 +529,9 @@ func location_checked(loc_id: int, def := false) -> bool:
 	return conn.checked_locations.get(loc_id, def)
 ## Returns a list of all location ids
 func location_list() -> Array[int]:
-	return conn.checked_locations.keys()
+	var arr: Array[int] = []
+	arr.assign(conn.checked_locations.keys())
+	return arr
 #endregion LOCATIONS
 func _process(_delta):
 	_poll()
@@ -856,6 +861,7 @@ func _update_tags() -> void:
 		if tag == "TextOnly" or tag == "Tracker":
 			is_tracker_textclient = true
 			break
+	on_tag_change.emit()
 ## Sets a given Archipelago tag (on or off)
 func set_tag(tag: String, state := true) -> void:
 	if tag.is_empty(): return

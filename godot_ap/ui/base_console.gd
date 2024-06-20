@@ -192,8 +192,20 @@ class ConsolePart: ## A base part, for all other parts to inherit from
 			var hb := get_hitbox()
 			window.size.x = roundi(hb.size.x)
 			window.size.y = ceili(vbox.size.y)
+			var vbwid := ceili(vbox.size.x)
+			var diff := 0
+			if window.size.x < vbwid:
+				diff = vbwid - window.size.x
+				window.size.x = vbwid
 			window.position.x = roundi(c.global_position.x + hb.position.x)
 			window.position.y = roundi(c.global_position.y + hb.position.y + hb.size.y)
+			if diff:
+				if window.position.x > parent_window.size.x / 2:
+					window.position.x = max(0, window.position.x - diff)
+				if window.position.x + window.size.x > parent_window.size.x:
+					var diff2 = (window.position.x + window.size.x) - parent_window.size.x
+					window.position.x = max(0, window.position.x - diff2)
+					
 			if not window.visible: window.visible = true
 		hitbox_changed.connect(resize_window)
 		window.add_child(vbox)

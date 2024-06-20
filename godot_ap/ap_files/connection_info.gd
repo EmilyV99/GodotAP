@@ -66,8 +66,9 @@ var _hint_listening: bool = false
 func install_hint_listener() -> void:
 	if _hint_listening: return
 	_hint_listening = true
-	set_hint_notify(_load_hints_from_json)
-	retrieve("_read_hints_%d_%d" % [team_id, player_id], _load_hints_from_json)
+	var hint_str := "_read_hints_%d_%d" % [team_id, player_id]
+	set_notify(hint_str, _load_hints_from_json)
+	retrieve(hint_str, _load_hints_from_json)
 func _load_hints_from_json(new_hints: Array) -> void:
 	hints = []
 	for json in new_hints:
