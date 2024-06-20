@@ -43,8 +43,22 @@ static var trackers: Dictionary = {}
 static func get_tracker(game: String) -> TrackerPack_Base:
 	return trackers.get(game, trackers.get(""))
 
+static var locations: Dictionary = {}
+
+static func get_location(locid: int) -> TrackerLocation:
+	return locations.get(locid, TrackerLocation.nil())
+static func load_locations() -> void:
+	locations.clear()
+	if Archipelago.datapack_pending:
+		await Archipelago.all_datapacks_loaded
+	for loc in Archipelago.location_list():
+		locations[loc] = TrackerLocation.make(loc)
 static func _static_init():
+	# Set up default pack
 	var def_pack: TrackerPack_Scene = TrackerPack_Scene.new()
 	var scene: PackedScene = load("res://godot_ap/tracker_files/default_tracker.tscn")
 	def_pack.scene = scene
 	trackers[""] = def_pack
+	
+	# Set up location hook
+	Archipelago.connected.connect(func(_conn,_json): load_locations())
