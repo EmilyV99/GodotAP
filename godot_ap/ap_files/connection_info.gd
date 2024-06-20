@@ -16,6 +16,7 @@ var slots: Array[NetworkSlot]
 
 var checked_locations: Dictionary = {}
 var received_items: Array[NetworkItem] = []
+var hints: Array[NetworkHint] = []
 
 # Init / Getters
 
@@ -57,12 +58,37 @@ signal roomupdate(json: Dictionary) ## Emitted when a `RoomUpdate` packet is rec
 signal obtained_item(item: NetworkItem) ## Emitted for each item received
 signal obtained_items(items: Array[NetworkItem]) ## Emitted for each item *packet* received
 signal refresh_items(items: Array[NetworkItem]) ## Emitted when the server re-sends ALL obtained items
+signal on_hint_update(hints: Array[NetworkHint]) ## Emitted when hints relevant to this client change
 
 # Outgoing server packets
+var _notified_keys: Dictionary = {}
+var _hint_listening: bool = false
+func install_hint_listener() -> void:
+	if _hint_listening: return
+	_hint_listening = true
+	set_hint_notify(_load_hints_from_json)
+	retrieve("_read_hints_%d_%d" % [team_id, player_id], _load_hints_from_json)
+func _load_hints_from_json(new_hints: Array) -> void:
+	hints = []
+	for json in new_hints:
+		hints.append(NetworkHint.from(json))
+	hints.make_read_only()
+	on_hint_update.emit(hints)
+
+
+## Connects the specified `Callable[Array[NetworkHint]]->void` to be called every time 
+## hints are updated for this client. Will call immediately, if hints are already loaded;
+## else will immediately call for hints to be loaded, which will trigger an update.
+func set_hint_notify(proc: Callable) -> void:
+	on_hint_update.connect(proc)
+	if _hint_listening: proc.call(hints)
+	else: install_hint_listener()
 ## Sends a `SetNotify` packet, and connects the specified `Callable[Variant]->void`
 ## to be called every time the specified `key` is updated on the server.
 func set_notify(key: String, proc: Callable) -> void: ## 
-	Archipelago.send_command("SetNotify", {"keys": [key]})
+	if not _notified_keys.has(key):
+		Archipelago.send_command("SetNotify", {"keys": [key]})
+		_notified_keys[key] = true
 	setreply.connect(func(json):
 		if json["key"] == key:
 			proc.call(json.get("value")))

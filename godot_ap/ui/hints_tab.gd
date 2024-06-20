@@ -112,13 +112,13 @@ func sort_click(event: InputEventMouseButton, index: int) -> bool:
 						proc = func(state: bool):
 							recv_filters[s] = state
 							queue_refresh()
-					var hbox := _add_cbox_row(s, recv_filters.get(s, true), proc)
+					var hbox := GUI.make_cbox_row(s, recv_filters.get(s, true), proc)
 					vbox.add_child(hbox)
 			1: # Item
 				var arr: Array = [ITEMS_FILLER,ITEMS_TRAP,ITEMS_USEFUL,ITEMS_PROG]
 				arr.append_array(item_filters.keys().filter(func(s): return not s in arr))
 				for s in arr:
-					var hbox := _add_cbox_row(s, item_filters.get(s, true), func(state: bool):
+					var hbox := GUI.make_cbox_row(s, item_filters.get(s, true), func(state: bool):
 						item_filters[s] = state
 						queue_refresh())
 					vbox.add_child(hbox)
@@ -136,12 +136,12 @@ func sort_click(event: InputEventMouseButton, index: int) -> bool:
 						proc = func(state: bool):
 							finding_filters[s] = state
 							queue_refresh()
-					var hbox := _add_cbox_row(s, finding_filters.get(s, true), proc)
+					var hbox := GUI.make_cbox_row(s, finding_filters.get(s, true), proc)
 					vbox.add_child(hbox)
 			3: # Location
 				var arr: Array = loc_filters.keys()
 				for s in arr:
-					var hbox := _add_cbox_row(s, loc_filters.get(s, true), func(state: bool):
+					var hbox := GUI.make_cbox_row(s, loc_filters.get(s, true), func(state: bool):
 						loc_filters[s] = state
 						queue_refresh())
 					vbox.add_child(hbox)
@@ -149,7 +149,7 @@ func sort_click(event: InputEventMouseButton, index: int) -> bool:
 				var arr: Array = [FORCE_ALL]
 				arr.append_array(Util.reversed(NetworkHint.status_names.keys()).filter(_status_filter))
 				for s in arr:
-					var hbox := _add_cbox_row(s if s is String else NetworkHint.status_names[s],
+					var hbox := GUI.make_cbox_row(s if s is String else NetworkHint.status_names[s],
 						status_filters.get(s, true),
 						func(state: bool):
 							status_filters[s] = state
@@ -157,20 +157,6 @@ func sort_click(event: InputEventMouseButton, index: int) -> bool:
 					vbox.add_child(hbox)
 		return true
 	return false
-
-func _add_cbox_row(s: String, initial_state: bool, proc: Callable) -> HBoxContainer:
-	var hbox := HBoxContainer.new()
-	hbox.set_anchors_preset(PRESET_CENTER)
-	var cbox := CheckBox.new()
-	cbox.set_pressed_no_signal(initial_state)
-	cbox.toggled.connect(proc)
-	cbox.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
-	hbox.add_child(cbox)
-	var lbl := Label.new()
-	lbl.text = s
-	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-	hbox.add_child(lbl)
-	return hbox
 
 func reset_hints_to_empty() -> void:
 	recv_filters = {
@@ -186,12 +172,10 @@ func reset_hints_to_empty() -> void:
 		ITEMS_FILLER: item_filters.get(ITEMS_FILLER, true),
 	}
 	loc_filters = {}
-	load_hints_from_json([])
+	load_hints([])
 func _ready():
 	Archipelago.connected.connect(func(conn: ConnectionInfo, _j: Dictionary):
-		var hint_key := "_read_hints_%d_%d" % [Archipelago.conn.team_id, Archipelago.conn.player_id]
-		conn.set_notify(hint_key, self.load_hints_from_json)
-		conn.retrieve(hint_key, self.load_hints_from_json))
+		conn.set_hint_notify(self.load_hints))
 	Archipelago.disconnected.connect(reset_hints_to_empty)
 	var header := BaseConsole.ColumnsPart.new()
 	headings.append(header.add(hint_console.make_c_text("Receiving Player"), 500))
@@ -215,10 +199,8 @@ func queue_refresh() -> void:
 	_queued_refresh_hints = true
 
 var _stored_hints: Array[NetworkHint] = []
-func load_hints_from_json(hints: Array) -> void:
-	_stored_hints.clear()
-	for json in hints:
-		_stored_hints.append(NetworkHint.from(json))
+func load_hints(hints: Array[NetworkHint]) -> void:
+	_stored_hints.assign(hints)
 	refresh_hints()
 func refresh_hints():
 	_sort_index_data.clear()

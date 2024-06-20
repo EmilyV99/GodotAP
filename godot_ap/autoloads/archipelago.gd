@@ -524,6 +524,9 @@ func location_exists(loc_id: int) -> bool:
 ## Returns if the location was checked or not. `def` is returned if the location does not exist in the slot.
 func location_checked(loc_id: int, def := false) -> bool:
 	return conn.checked_locations.get(loc_id, def)
+## Returns a list of all location ids
+func location_list() -> Array[int]:
+	return conn.checked_locations.keys()
 #endregion LOCATIONS
 func _process(_delta):
 	_poll()

@@ -140,6 +140,7 @@ class ConsoleDrawData:
 			y = max(y, r_y + spacing.y) # max to avoid reducing space
 class ConsolePart: ## A base part, for all other parts to inherit from
 	var on_click: Callable # Callable[InputEventMouseButton]->bool
+	var hidden: bool = false
 	signal hitbox_changed
 	func draw(_c: BaseConsole, _data: ConsoleDrawData) -> void:
 		pass
@@ -201,6 +202,8 @@ class ConsolePart: ## A base part, for all other parts to inherit from
 		c.add_child.call_deferred(window) # Defer adding it, to allow caller to add things to the vbox
 		vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
 		return vbox
+	func dont_draw() -> bool:
+		return hidden
 class TextPart extends ConsolePart: ## A part that displays text, with opt color+tooltip
 	var text: String = ""
 	var tooltip: String = ""
@@ -225,6 +228,7 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 		if underline:
 			c.draw_rect(Rect2(hb.position.x, hb.position.y + str_sz.y, hb.size.x, 1), _get_color(c))
 	func draw(c: BaseConsole, data: ConsoleDrawData) -> void:
+		if dont_draw(): return
 		var text_pos = 0
 		var trim_pos: int
 		var old_hitbox := get_hitbox()
@@ -355,18 +359,21 @@ class CenterTextPart extends TextPart:
 		if underline:
 			c.draw_rect(Rect2(pos.x, data.y + str_sz.y, str_sz.x, 1), _get_color(c))
 	func draw(c: BaseConsole, data: ConsoleDrawData) -> void:
+		if dont_draw(): return
 		data.ensure_line(c)
 		super(c, data)
 
 class LineBreakPart extends ConsolePart: ## A part that breaks a line
 	var break_count: int = 1
 	func draw(c: BaseConsole, data: ConsoleDrawData) -> void:
+		if dont_draw(): return
 		data.newline(c, break_count)
 class SpacingPart extends ConsolePart: ## A part that adds spacing
 	var spacing := Vector2.ZERO
 	var reset_line := true
 	var from_reset_y := false
 	func draw(c: BaseConsole, data: ConsoleDrawData) -> void:
+		if dont_draw(): return
 		if reset_line:
 			data.ensure_line(c)
 		if from_reset_y:
@@ -386,6 +393,7 @@ class IteratorPart extends ConsolePart: ## A base part, for parts that contain p
 	func iter_parts() -> Array[ConsolePart]:
 		return []
 	func draw(c: BaseConsole, data: ConsoleDrawData) -> void:
+		if dont_draw(): return
 		for p in iter_parts():
 			p.draw(c,data)
 	func draw_hover(c: BaseConsole, data: ConsoleDrawData) -> void:
@@ -430,6 +438,7 @@ class ColumnsPart extends ContainerPart:
 		widths.append(w)
 		return part
 	func draw(c: BaseConsole, data: ConsoleDrawData) -> void:
+		if dont_draw(): return
 		# Ensure we're at line start
 		data.ensure_line(c)
 		# Cache data vals
@@ -476,6 +485,7 @@ class ColumnsPart extends ContainerPart:
 class HintPart extends ColumnsPart: ## A part representing a hint info
 	var hint: NetworkHint
 	func draw(c: BaseConsole, data: ConsoleDrawData) -> void:
+		if dont_draw(): return
 		if parts.is_empty():
 			refresh(c)
 		var vspc = c.get_line_height()/4

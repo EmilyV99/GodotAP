@@ -120,6 +120,7 @@ func _ready():
 		timer.timeout.connect(func():
 			showing_cursor = not showing_cursor)
 		timer.start()
+		show_bar(visible)
 	# Add autofill rect
 	autofill_rect = load("res://godot_ap/ui/stringbar.tscn").instantiate()
 	add_child(autofill_rect)
@@ -127,7 +128,6 @@ func _ready():
 	autofill_rect.clicked.connect(func(indx: int):
 		auto_complete(_tab_completions[indx]))
 	custom_minimum_size.y = calc_height()
-	show_bar(visible)
 func _process(_delta):
 	update_mouse()
 

@@ -39,7 +39,7 @@ theme_override_constants/margin_bottom = 8
 layout_mode = 2
 
 [node name="Console" type="Control" parent="Cont/ConsoleMargin/Row" node_paths=PackedStringArray("scroll_bar")]
-custom_minimum_size = Vector2(30, 0)
+custom_minimum_size = Vector2(150, 150)
 layout_mode = 2
 size_flags_horizontal = 3
 focus_next = NodePath("../../../../TypingBar")

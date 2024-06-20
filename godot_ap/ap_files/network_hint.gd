@@ -45,11 +45,17 @@ static func from(json: Dictionary) -> NetworkHint:
 func is_local() -> bool:
 	return item.is_local()
 
-func make_status(c: BaseConsole) -> BaseConsole.CenterTextPart:
+func make_status(c: BaseConsole) -> BaseConsole.TextPart:
+	return NetworkHint.make_hint_status(c, status)
+
+static func make_hint_status(c: BaseConsole, status: Status) -> BaseConsole.TextPart:
 	var txt = NetworkHint.status_names.get(status, "Unknown")
 	var colname = NetworkHint.status_colors.get(status, "red")
 	return c.make_text(txt, "", Archipelago.rich_colors[colname])
 
+static func update_hint_status(status: Status, part: BaseConsole.TextPart):
+	part.text = NetworkHint.status_names.get(status, "Unknown")
+	part.color = NetworkHint.status_colors.get(status, "red")
 
 func _to_string():
 	return "HINT(%d %d %d %d %d)" % [item.src_player_id,item.id,item.dest_player_id,item.loc_id,status]
