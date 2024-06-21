@@ -2,7 +2,7 @@ class_name APLocation
 
 var id: int
 var name: String
-var status: NetworkHint.Status
+var hint_status: NetworkHint.Status
 
 var loaded_tracker_loc: TrackerLocation
 
@@ -17,7 +17,7 @@ static func nil() -> APLocation:
 	var ret := APLocation.new()
 	ret.id = -9999
 	ret.name = "INVALID"
-	ret.status = NetworkHint.Status.UNSPECIFIED
+	ret.hint_status = NetworkHint.Status.UNSPECIFIED
 	ret.loaded_tracker_loc = TrackerLocation.new()
 	return ret
 func reset_tracker_loc() -> void:
@@ -26,7 +26,7 @@ func reset_tracker_loc() -> void:
 	else: loaded_tracker_loc = TrackerLocation.make_id(id)
 
 func refresh() -> void:
-	var s := NetworkHint.Status.NOT_FOUND
+	var s := NetworkHint.Status.UNSPECIFIED
 	if Archipelago.location_checked(id):
 		s = NetworkHint.Status.FOUND
 	else:
@@ -38,10 +38,10 @@ func refresh() -> void:
 					s = NetworkHint.Status.AVOID
 				else: s = hint.status
 				break
-	status = s
+	hint_status = s
 
-## Returns true if the location is accessible
-func can_access() -> bool:
+## Returns the location's accessibility as a string
+func get_status() -> String:
 	if loaded_tracker_loc:
-		return loaded_tracker_loc.can_access()
-	return TrackerTab.default_access
+		return loaded_tracker_loc.get_status()
+	return "Reachable" if TrackerTab.default_access else "Unreachable"

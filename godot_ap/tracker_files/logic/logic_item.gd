@@ -20,9 +20,6 @@ func can_access() -> bool:
 	for item in Archipelago.conn.received_items:
 		if item.id == id:
 			found += 1
-			if "_flower" in identifier:
-				print("AAAAA")
-				print("%d / %d" % [found,count])
 			if found >= count:
 				return true
 	return false

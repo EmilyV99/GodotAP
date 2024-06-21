@@ -7,8 +7,15 @@ func _to_string() -> String:
 	return JSON.stringify(_to_dict(), "", false)
 func _to_dict() -> Dictionary:
 	return {"type": "DEFAULT"}
+func _to_json_val() -> Variant:
+	return _to_dict()
 
 const DEFAULT_NODE_STRING = "{DEFNODE: DEFAULT}"
+static func from_json_val(val: Variant) -> TrackerLogicNode:
+	if val is Dictionary: return from_dict(val)
+	if val is bool:
+		return TrackerLogicBool.from_json_val(val)
+	return null
 static func from_dict(vals: Dictionary) -> TrackerLogicNode:
 	match vals.get("type"):
 		"DEFAULT":

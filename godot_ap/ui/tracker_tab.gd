@@ -56,6 +56,7 @@ static func get_tracker(game: String) -> TrackerPack_Base:
 	return trackers.get(game, trackers.get(""))
 
 static var named_rules: Dictionary = {}
+static var statuses: Array[LocationStatus]
 static var locations: Dictionary = {}
 static var locs_by_name: Dictionary = {}
 
@@ -83,6 +84,8 @@ static func load_tracker_locations(locs: Array[TrackerLocation]) -> void:
 		loc.get_loc().loaded_tracker_loc = loc
 static func load_named_rules(rules: Dictionary) -> void:
 	named_rules = rules
+static func load_statuses(status_array: Array[LocationStatus]):
+	statuses = status_array
 static func _static_init():
 	# Set up default pack
 	var def_pack: TrackerPack_Scene = TrackerPack_Scene.new()
@@ -165,5 +168,6 @@ static func load_tracker_packs() -> void:
 		AP.log("No TrackerPacks Found")
 		console.add_line("No TrackerPacks Found", "Add packs to `./tracker_packs/` and relaunch to load!", console.COLOR_UI_MSG)
 	
-	#for t in trackers.values():
-		#t.resave()
+	if false:
+		for t in trackers.values():
+			t.resave()

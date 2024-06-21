@@ -493,7 +493,9 @@ class ColumnsPart extends ContainerPart:
 		data.r = dr
 		data.y = by
 		data.newline(c)
-
+	func clear() -> void:
+		super()
+		widths.clear()
 class HintPart extends ColumnsPart: ## A part representing a hint info
 	var hint: NetworkHint
 	func draw(c: BaseConsole, data: ConsoleDrawData) -> void:
@@ -565,9 +567,9 @@ func make_c_text(text: String, ttip := "", col := Color.TRANSPARENT) -> CenterTe
 func add_c_text(text: String, ttip := "", col := Color.TRANSPARENT) -> CenterTextPart:
 	return add(make_c_text(text, ttip, col))
 
-func make_line(text: String, ttip := "", col := Color.TRANSPARENT) -> TextPart:
+func make_line(text, ttip := "", col := Color.TRANSPARENT) -> TextPart:
 	return make_text(text+"\n", ttip, col)
-func add_line(text: String, ttip := "", col := Color.TRANSPARENT) -> TextPart:
+func add_line(text, ttip := "", col := Color.TRANSPARENT) -> TextPart:
 	return add(make_line(text, ttip, col))
 
 func make_linebreak(count := 1) -> LineBreakPart:
