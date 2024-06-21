@@ -12,6 +12,7 @@ var sort_ascending := [true,false]
 var sort_cols := [1,0]
 
 var accessibility_proc: Callable ## Callable[int]->bool, takes locid returns true if accessible
+var labeltext := "No game-specific tracker found. Showing default tracker."
 
 const ACCESSIBLE_ONLY = "[Only Reachable]"
 
@@ -21,9 +22,9 @@ var status_filters: Dictionary = {
 }
 
 class LocationPart extends BaseConsole.ColumnsPart: ## A part representing a hint info
-	var loc: TrackerLocation
+	var loc: APLocation
 	
-	func _init(tracker_loc: TrackerLocation):
+	func _init(tracker_loc: APLocation):
 		loc = tracker_loc
 	func draw(c: BaseConsole, data: ConsoleDrawData) -> void:
 		if dont_draw(): return
@@ -152,7 +153,8 @@ func on_resize() -> void:
 
 ## Refresh due to item collection
 func on_items_get(_items: Array[NetworkItem]) -> void:
-	pass # Optionally override this function
+	if accessibility_proc:
+		refresh_tracker() # Accessibility can change
 
 ## Refresh due to location being checked
 func on_loc_checked(_locid: int) -> void:
@@ -182,4 +184,4 @@ func do_sort(a: LocationPart, b: LocationPart) -> bool:
 #endregion
 
 func _update_label() -> void:
-	_linked_label.text = "No game-specific tracker found. Showing default tracker."
+	_linked_label.text = labeltext

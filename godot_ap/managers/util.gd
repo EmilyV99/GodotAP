@@ -147,3 +147,23 @@ static func reversed(arr: Array) -> Array:
 	var dup := arr.duplicate()
 	dup.reverse()
 	return dup
+
+static func find_break_paren(s: String) -> int:
+	var paren := 0
+	var bracket := 0
+	var brace := 0
+	for q in s.length():
+		match s[q]:
+			"(": paren += 1
+			"[": bracket += 1
+			"{": brace += 1
+			")":
+				paren -= 1
+				if paren < 0: return q
+			"]":
+				bracket -= 1
+				if bracket < 0: return q
+			"}":
+				brace -= 1
+				if brace < 0: return q
+	return s.length()
