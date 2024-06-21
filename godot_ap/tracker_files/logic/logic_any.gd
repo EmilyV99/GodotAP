@@ -2,11 +2,15 @@ class_name TrackerLogicAny extends TrackerLogicNode
 
 var rules: Array[TrackerLogicNode] = []
 
-func can_access() -> bool:
+func can_access() -> Variant:
+	var ret = false
 	for rule in rules:
-		if rule.can_access():
+		var v = rule.can_access()
+		if v == null:
+			ret = null
+		elif v:
 			return true
-	return false
+	return ret
 
 func add(rule: TrackerLogicNode) -> TrackerLogicAny:
 	rules.append(rule)
@@ -25,7 +29,7 @@ static func from_dict(vals: Dictionary) -> TrackerLogicNode:
 	if vals.get("type") != "ANY": return TrackerLogicNode.from_dict(vals)
 	var ret := TrackerLogicAny.new()
 	for data in vals.get("rules", []):
-		var node := TrackerLogicNode.from_dict(data)
+		var node := TrackerLogicNode.from_json_val(data)
 		if node:
 			ret.add(node)
 	return ret

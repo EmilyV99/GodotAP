@@ -621,7 +621,7 @@ func load_console(console_scene: Node, as_child := true) -> bool:
 	if as_child: add_child(console_scene)
 	console_scene.ready.connect(func():
 		output_console = output_console_container.console
-		output_console.send_text.connect(cmd_manager.call_cmd)
+		output_console_container.typing_bar.send_text.connect(cmd_manager.call_cmd)
 		output_console.tree_exiting.connect(close_console)
 		output_console_container.typing_bar.cmd_manager = cmd_manager
 		on_attach_console.emit())
@@ -775,6 +775,28 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 			.add_help("", "Prints out your connection tags")
 			.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, _msg: String):
 				mgr.console.add_line(str(AP_GAME_TAGS), "", mgr.console.COLOR_UI_MSG)))
+		cmd_manager.register_command(ConsoleCommand.new("/track_out_db").debug()
+			.add_help("", "Outputs trackerpack debug info")
+			.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, _msg: String):
+				var named_rules = TrackerTab.named_rules.keys()
+				if not named_rules.is_empty():
+					mgr.console.add_line("[ NAMED RULES ]", "", mgr.console.COLOR_UI_MSG)
+					for rulename in named_rules:
+						mgr.console.add_text(rulename+": ", "", mgr.console.COLOR_UI_MSG)
+						var b = TrackerTab.get_named_rule(rulename).can_access()
+						var s = "Unknown"
+						var c = "white"
+						if b != null:
+							s = str(b)
+							c = "green" if b else "red"
+						mgr.console.add_line(str(b), "", Archipelago.rich_colors[c])
+				var vars = TrackerTab.variables.keys()
+				if not vars.is_empty():
+					mgr.console.add_line("[ VARIABLES ]", "", mgr.console.COLOR_UI_MSG)
+					for varname in vars:
+						mgr.console.add_text(varname+": ", "", )
+						var val = TrackerTab.variables.get(varname)
+						mgr.console.add_line(str(val), "", Archipelago.rich_colors["plum"])))
 		cmd_manager.setup_debug_commands()
 func _init():
 	init_command_manager(true)

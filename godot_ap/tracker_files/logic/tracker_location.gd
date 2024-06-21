@@ -13,18 +13,23 @@ func get_loc() -> APLocation:
 
 func get_status() -> String:
 	if status_rules.is_empty():
-		return "Reachable" if TrackerTab.default_access else "Unreachable"
+		return "Unknown"
 	var statuses_in_order
 	if pack is TrackerPack_Data:
 		statuses_in_order = pack.statuses
 	else:
-		statuses_in_order = [LocationStatus.ACCESS_FOUND,LocationStatus.ACCESS_UNREACHABLE,LocationStatus.ACCESS_LOGIC_BREAK,LocationStatus.ACCESS_REACHABLE]
+		statuses_in_order = [LocationStatus.ACCESS_UNKNOWN,LocationStatus.ACCESS_FOUND,LocationStatus.ACCESS_UNREACHABLE,LocationStatus.ACCESS_LOGIC_BREAK,LocationStatus.ACCESS_REACHABLE]
+	var found_something := false
 	for status in statuses_in_order:
 		var rule: TrackerLogicNode = status_rules.get(status.text)
-		if rule and rule.can_access():
-			return status
-	if TrackerTab.default_access and status_rules.keys() == ["Found"]:
-		return "Reachable"
+		if not rule: continue
+		var v = rule.can_access()
+		if v == null: continue
+		if status.text != "Found":
+			found_something = true
+		if v: return status.text
+	if not found_something:
+		return "Unknown"
 	return "Unreachable"
 
 func add_rule(name: String, rule: TrackerLogicNode):

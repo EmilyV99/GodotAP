@@ -14,7 +14,7 @@ static func make_name(name: String, item_count := 1) -> TrackerLogicItem:
 	ret.count = item_count
 	return ret
 
-func can_access() -> bool:
+func can_access() -> Variant:
 	var id: int = identifier if identifier is int else Archipelago.conn.get_gamedata_for_player().get_item_id(identifier)
 	var found := 0
 	for item in Archipelago.conn.received_items:

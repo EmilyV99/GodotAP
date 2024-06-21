@@ -16,6 +16,7 @@ func make_c_text(c: BaseConsole) -> BaseConsole.CenterTextPart:
 func add_c_text(c: BaseConsole) -> BaseConsole.CenterTextPart:
 	return c.add(make_c_text(c))
 
+static var ACCESS_UNKNOWN := LocationStatus.new("Unknown", "", "white")
 static var ACCESS_FOUND := LocationStatus.new("Found", "Already found", "green")
 static var ACCESS_UNREACHABLE := LocationStatus.new("Unreachable", "Cannot be accessed", "red")
 static var ACCESS_LOGIC_BREAK := LocationStatus.new("Out of Logic", "Reachable, but not currently expected of you, and might require glitches/tricks or be exceedingly difficult.", "orange")

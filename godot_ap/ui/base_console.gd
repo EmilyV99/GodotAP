@@ -35,8 +35,6 @@ class FontFlags:
 		scroll_bar.scrolling.connect(update_scroll)
 		scroll_bar.value_changed.connect(_update_scroll2)
 
-signal send_text(msg: String)
-
 var font_bold: SystemFont :
 	get:
 		if font_bold: return font_bold
@@ -766,10 +764,6 @@ func close() -> void:
 		p = p.get_parent()
 	if p:
 		p.close()
-
-func send_msg(msg: String):
-	send_text.emit(msg)
-	scroll_by_abs(_draw_data.max_scroll())
 
 func clear() -> void:
 	parts.clear()

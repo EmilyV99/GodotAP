@@ -15,6 +15,7 @@ func refr_tags():
 	init_tracker()
 		
 func _ready():
+	TrackerTab.initialize_stuff()
 	info_part = info_console.add_c_text("")
 	Archipelago.on_tag_change.connect(refr_tags)
 	Archipelago.connected.connect(func(_conn, _json): refr_tags())
@@ -28,7 +29,6 @@ func init_tracker():
 	if tracker:
 		tracker.queue_free()
 		tracker = null
-	default_access = true
 	TrackerTab.load_tracker_locations([])
 	TrackerTab.load_named_rules({})
 	
@@ -49,8 +49,6 @@ func init_tracker():
 	tracker.link_to_label(info_part)
 	column.add_child(tracker)
 
-static var default_access := true
-
 static var trackers: Dictionary = {}
 static func get_tracker(game: String) -> TrackerPack_Base:
 	return trackers.get(game, trackers.get(""))
@@ -59,6 +57,7 @@ static var named_rules: Dictionary = {}
 static var statuses: Array[LocationStatus]
 static var locations: Dictionary = {}
 static var locs_by_name: Dictionary = {}
+static var variables: Dictionary = {}
 
 static func get_location(locid: int) -> APLocation:
 	return locations.get(locid, APLocation.nil())
@@ -86,7 +85,11 @@ static func load_named_rules(rules: Dictionary) -> void:
 	named_rules = rules
 static func load_statuses(status_array: Array[LocationStatus]):
 	statuses = status_array
-static func _static_init():
+static var did_init := false
+static func initialize_stuff():
+	if did_init: return
+	if not Archipelago: return
+	did_init = true
 	# Set up default pack
 	var def_pack: TrackerPack_Scene = TrackerPack_Scene.new()
 	var scene: PackedScene = load("res://godot_ap/tracker_files/default_tracker.tscn")

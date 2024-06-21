@@ -1,7 +1,7 @@
 class_name TrackerLogicNode
 
-func can_access() -> bool:
-	return TrackerTab.default_access
+func can_access() -> Variant:
+	return null
 
 func _to_string() -> String:
 	return JSON.stringify(_to_dict(), "", false)
@@ -15,6 +15,8 @@ static func from_json_val(val: Variant) -> TrackerLogicNode:
 	if val is Dictionary: return from_dict(val)
 	if val is bool:
 		return TrackerLogicBool.from_json_val(val)
+	if val is String:
+		return TrackerLogicNamedRule.from_json_val(val)
 	return null
 static func from_dict(vals: Dictionary) -> TrackerLogicNode:
 	match vals.get("type"):
@@ -28,4 +30,6 @@ static func from_dict(vals: Dictionary) -> TrackerLogicNode:
 			return TrackerLogicItem.from_dict(vals)
 		"NAMED_RULE":
 			return TrackerLogicNamedRule.from_dict(vals)
+		"VAR":
+			return TrackerLogicVariable.from_dict(vals)
 	return null

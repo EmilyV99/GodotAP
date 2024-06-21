@@ -17,6 +17,7 @@ var hint_status_filters: Dictionary = {
 }
 var status_filters: Dictionary = {}
 
+signal item_register(name: String)
 class LocationPart extends BaseConsole.ColumnsPart: ## A part representing a hint info
 	var loc: APLocation
 	var datapack: TrackerPack_Data
@@ -45,17 +46,17 @@ class LocationPart extends BaseConsole.ColumnsPart: ## A part representing a hin
 		clear()
 		var data := Archipelago.conn.get_gamedata_for_player()
 		
-		var widths := [1000, 500]
+		var width_arr := [1000, 500]
 		if datapack:
-			widths[0] = 750
-			widths.append(500)
-		add(Archipelago.out_location(c, loc.id, data, false).centered(), widths[0])
-		add(NetworkHint.make_hint_status(c, loc.hint_status).centered(), widths[1])
+			width_arr[0] = 750
+			width_arr.append(500)
+		add(Archipelago.out_location(c, loc.id, data, false).centered(), width_arr[0])
+		add(NetworkHint.make_hint_status(c, loc.hint_status).centered(), width_arr[1])
 		if datapack:
 			var stat: String = TrackerTab.get_location(loc.id).get_status()
 			var stats: Array = TrackerTab.statuses.filter(func(s): return s.text == stat)
 			if stats:
-				add(stats[0].make_c_text(c), widths[2])
+				add(stats[0].make_c_text(c), width_arr[2])
 		
 
 func sort_click(event: InputEventMouseButton, index: int) -> bool:
@@ -121,12 +122,12 @@ func sort_click(event: InputEventMouseButton, index: int) -> bool:
 	return false
 
 func _ready() -> void:
-	var widths := [1000, 500]
+	var width_arr := [1000, 500]
 	var titles := ["Location Name", "Hint Status"]
 	
 	if datapack:
-		widths[0] = 750
-		widths.append(500)
+		width_arr[0] = 750
+		width_arr.append(500)
 		titles.append("Status")
 		sort_ascending.append(false)
 		sort_cols.push_front(2)
@@ -134,8 +135,8 @@ func _ready() -> void:
 	titles[sort_cols[0]] += " ↓"
 	
 	var header := BaseConsole.ColumnsPart.new()
-	for q in widths.size():
-		headings.append(header.add(console.make_c_text(titles[q]), widths[q]))
+	for q in width_arr.size():
+		headings.append(header.add(console.make_c_text(titles[q]), width_arr[q]))
 	for q in headings.size():
 		headings[q].on_click = func(evt): return sort_click(evt,q)
 	console.add(header)
@@ -143,6 +144,11 @@ func _ready() -> void:
 	super()
 	Archipelago.remove_location.connect(func(_id): queue_refresh())
 	Archipelago.conn.set_hint_notify(func(_hints): queue_refresh())
+	
+	for itm in Archipelago.conn.received_items:
+		item_register.emit(itm.get_name())
+	Archipelago.conn.obtained_item.connect(func(itm: NetworkItem):
+		item_register.emit(itm.get_name()))
 
 ## Refresh due to general status update (refresh everything)
 ## if `fresh_connection` is true, the tracker is just initializing
@@ -196,7 +202,7 @@ func sort_by_loc_status(a: LocationPart, b: LocationPart) -> int:
 	var ai := -1
 	var bi := -1
 	var astat: String = a.loc.get_status()
-	var bstat: String = a.loc.get_status()
+	var bstat: String = b.loc.get_status()
 	for q in datapack.statuses.size():
 		if datapack.statuses[q].text == astat:
 			ai = q

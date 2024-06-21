@@ -44,4 +44,4 @@ func refresh() -> void:
 func get_status() -> String:
 	if loaded_tracker_loc:
 		return loaded_tracker_loc.get_status()
-	return "Reachable" if TrackerTab.default_access else "Unreachable"
+	return "Unknown"

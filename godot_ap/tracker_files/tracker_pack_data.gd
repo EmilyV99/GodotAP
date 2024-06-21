@@ -6,7 +6,7 @@ var locations: Array[TrackerLocation] = []
 var named_rules: Dictionary = {}
 var statuses: Array[LocationStatus] = []
 var statuses_by_name: Dictionary = {}
-var default_access := true
+var starting_variables: Dictionary = {}
 
 var description_bar: String = ""
 var description_ttip: String = ""
@@ -14,6 +14,9 @@ var description_ttip: String = ""
 func instantiate() -> TrackerScene_Base:
 	var scene: TrackerScene_Default = load("res://godot_ap/tracker_files/default_tracker.tscn").instantiate()
 	scene.datapack = self
+	scene.item_register.connect(register_item)
+	TrackerTab.variables.clear()
+	TrackerTab.variables.merge(starting_variables)
 	if description_bar.is_empty():
 		scene.labeltext = "Showing DataTracker for '%s'" % game
 	else:
@@ -24,8 +27,11 @@ func instantiate() -> TrackerScene_Base:
 	TrackerTab.load_tracker_locations(locations)
 	TrackerTab.load_named_rules(named_rules)
 	TrackerTab.load_statuses(statuses)
-	TrackerTab.default_access = default_access
 	return scene
+
+signal _item_register(name: String)
+func register_item(name: String) -> void:
+	_item_register.emit(name)
 
 func save_as(path: String) -> Error:
 	if not path.ends_with(".json"):
@@ -47,7 +53,6 @@ func _save_json_file(data: Dictionary) -> Error:
 		stat_vals.append(stat.save_dict())
 	data["description_bar"] = description_bar
 	data["description_ttip"] = description_ttip
-	data["default"] = default_access
 	data["statuses"] = stat_vals
 	data["locations"] = loc_vals
 	var rules_dict = {}
@@ -62,7 +67,6 @@ func _load_file(_file: FileAccess) -> Error:
 func _load_json_file(json: Dictionary) -> Error:
 	var err := super(json)
 	if err: return err
-	default_access = json.get("default_access", true)
 	description_bar = json.get("description_bar", "")
 	description_ttip = json.get("description_ttip", "")
 	setup_statuses(json.get("statuses", []))
@@ -74,7 +78,33 @@ func _load_json_file(json: Dictionary) -> Error:
 	named_rules.clear()
 	var dict: Dictionary = json.get("named_rules", {})
 	for name in dict.keys():
-		named_rules[name] = TrackerLogicNode.from_dict(dict[name])
+		named_rules[name] = TrackerLogicNode.from_json_val(dict[name])
+	
+	dict = json.get("variables", {})
+	for varname in dict.keys():
+		var varvals: Dictionary = dict[varname]
+		starting_variables[varname] = varvals.get("value", 0)
+		var itemtrigs: Dictionary = varvals.get("item_triggers", {})
+		for iname in itemtrigs.keys():
+			var op: Dictionary = itemtrigs[iname]
+			match op.get("type"):
+				"+":
+					_item_register.connect(func(name):
+						if name == iname:
+							TrackerTab.variables[varname] += op.get("value", 0))
+				"-":
+					_item_register.connect(func(name):
+						if name == iname:
+							TrackerTab.variables[varname] -= op.get("value", 0))
+				"*":
+					_item_register.connect(func(name):
+						if name == iname:
+							TrackerTab.variables[varname] *= op.get("value", 1))
+				"/":
+					_item_register.connect(func(name):
+						if name == iname:
+							TrackerTab.variables[varname] /= op.get("value", 1))
+		
 	return OK
 
 func get_or_create_loc(identifier) -> TrackerLocation:
@@ -98,7 +128,7 @@ func _to_string():
 func setup_statuses(status_json: Array) -> void:
 	statuses.clear()
 	statuses_by_name.clear()
-	var pre_add = [LocationStatus.ACCESS_FOUND, LocationStatus.ACCESS_UNREACHABLE]
+	var pre_add = [LocationStatus.ACCESS_UNKNOWN, LocationStatus.ACCESS_FOUND, LocationStatus.ACCESS_UNREACHABLE]
 	var post_add = [LocationStatus.ACCESS_LOGIC_BREAK, LocationStatus.ACCESS_REACHABLE]
 	for stat in status_json:
 		for v in pre_add:

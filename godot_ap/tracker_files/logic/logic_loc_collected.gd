@@ -10,14 +10,14 @@ static func make_name(name: String) -> TrackerLogicLocCollected:
 	var ret := TrackerLogicLocCollected.new()
 	ret.identifier = name
 	return ret
-static func make(identifier: Variant) -> TrackerLogicLocCollected:
-	if identifier is int:
-		return make_id(identifier)
-	if identifier is String:
-		return make_name(identifier)
+static func make(iden: Variant) -> TrackerLogicLocCollected:
+	if iden is int:
+		return make_id(iden)
+	if iden is String:
+		return make_name(iden)
 	return null
 
-func can_access() -> bool:
+func can_access() -> Variant:
 	var id: int = identifier if identifier is int else Archipelago.conn.get_gamedata_for_player().get_loc_id(identifier)
 	return Archipelago.location_checked(id)
 
