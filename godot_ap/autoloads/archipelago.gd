@@ -678,6 +678,39 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 		cmd_manager.register_command(ConsoleCommand.new("/disconnect")
 			.add_help("", "Kills the connection to the Archipelago server")
 			.set_call(func(_mgr: CommandManager, _cmd: ConsoleCommand, _msg: String): ap_disconnect()))
+	cmd_manager.register_command(ConsoleCommand.new("/locations")
+		.add_help("[filter]", "Lists all locations (optionally matching a filter) for the current slot.")
+		.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, msg: String):
+			if not _ensure_connected(mgr.console): return
+			var filt := msg.substr(11)
+			var data := Archipelago.conn.get_gamedata_for_player()
+			var headstr := "Locations"
+			if filt:
+				headstr += " matching '%s'" % filt
+			mgr.console.add_line(headstr+":")
+
+			for loc in Archipelago.conn.checked_locations.keys():
+				var lname := data.get_loc_name(loc)
+				if not filt or (filt.to_lower() in lname.to_lower()):
+					Archipelago.out_location(mgr.console, loc, data).tooltip = "Location %d" % loc
+					mgr.console.add_ensure_newline()
+			))
+	cmd_manager.register_command(ConsoleCommand.new("/items")
+		.add_help("[filter]", "Lists all items (optionally matching a filter) for the current slot.")
+		.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, msg: String):
+			if not _ensure_connected(mgr.console): return
+			var filt := msg.substr(11)
+			var data := Archipelago.conn.get_gamedata_for_player()
+			var headstr := "Items"
+			if filt:
+				headstr += " matching '%s'" % filt
+			mgr.console.add_line(headstr+":")
+
+			for itm_name in data.item_name_to_id.keys():
+				var iid = data.get_item_id(itm_name)
+				if not filt or (filt.to_lower() in itm_name.to_lower()):
+					mgr.console.add_line(itm_name, "Item %d" % iid, Archipelago.rich_colors[AP.COLORNAME_ITEM])
+			))
 	if server_autofills: # Autofill for some AP commands
 		cmd_manager.register_command(ConsoleCommand.new("!hint_location")
 			.set_autofill(_autofill_locs)
