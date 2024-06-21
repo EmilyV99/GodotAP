@@ -27,20 +27,15 @@ func can_access() -> bool:
 func _to_dict() -> Dictionary:
 	return {
 		"type": "ITEM",
-		"is_name": not identifier is int,
 		"count": count,
 		"value": identifier,
 	}
 
 static func from_dict(vals: Dictionary) -> TrackerLogicNode:
 	if vals.get("type") != "ITEM": return TrackerLogicNode.from_dict(vals)
-	var is_name: bool = vals.get("is_name", true)
 	
 	var ret := TrackerLogicItem.new()
-	if is_name:
-		ret.identifier = str(vals.get("value"))
-	else:
-		ret.identifier = int(vals.get("value"))
+	ret.identifier = str(vals.get("value"))
 	ret.count = vals.get("count", 1)
 		
 	return ret
