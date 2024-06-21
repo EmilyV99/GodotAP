@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3 uid="uid://cn7ah7d3ep4de"]
+[gd_scene load_steps=5 format=3 uid="uid://cn7ah7d3ep4de"]
 
 [ext_resource type="PackedScene" uid="uid://cgq7n1figlpu3" path="res://godot_ap/ui/base_client.tscn" id="1_i5jgm"]
 [ext_resource type="Script" path="res://godot_ap/ui/tracker_tab.gd" id="2_h31sw"]
+[ext_resource type="PackedScene" uid="uid://bwamxuo3s7c8n" path="res://godot_ap/ui/plain_console.tscn" id="3_0ejly"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ov043"]
 
@@ -41,10 +42,13 @@ layout_mode = 2
 size_flags_horizontal = 0
 theme_override_styles/focus = SubResource("StyleBoxEmpty_ov043")
 
-[node name="InfoLabel" type="Label" parent="Tabs/Tracking/Column/Margins/Row" index="2"]
+[node name="InfoLabel" parent="Tabs/Tracking/Column/Margins/Row" index="2" instance=ExtResource("3_0ejly")]
+custom_minimum_size = Vector2(0, 0)
 layout_mode = 2
-size_flags_horizontal = 3
-text = "Hello This is some Text"
-horizontal_alignment = 1
+focus_next = NodePath("")
+focus_previous = NodePath("")
+focus_mode = 0
+
+[connection signal="sort_children" from="Tabs/Tracking/Column/Margins/Row" to="Tabs/Tracking/Column/Margins/Row/InfoLabel" method="queue_redraw"]
 
 [editable path="Tabs/Hints/Console"]

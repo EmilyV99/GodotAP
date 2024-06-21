@@ -8,6 +8,8 @@ var named_rules: Dictionary = {}
 var default_access := true
 
 var description_bar: String = ""
+var description_ttip: String = ""
+
 func instantiate() -> TrackerScene_Base:
 	var scene: TrackerScene_Default = load("res://godot_ap/tracker_files/default_tracker.tscn").instantiate()
 	scene.accessibility_proc = access_rule
@@ -15,6 +17,8 @@ func instantiate() -> TrackerScene_Base:
 		scene.labeltext = "Showing DataTracker for '%s'" % game
 	else:
 		scene.labeltext = description_bar
+	if not description_ttip.is_empty():
+		scene.labelttip = description_ttip
 	
 	TrackerTab.load_tracker_locations(locations)
 	TrackerTab.load_named_rules(named_rules)
@@ -40,6 +44,7 @@ func _save_json_file(data: Dictionary) -> Error:
 	for loc in locations:
 		loc_vals.append(loc.save_dict())
 	data["description_bar"] = description_bar
+	data["description_ttip"] = description_ttip
 	data["default"] = default_access
 	data["locations"] = loc_vals
 	var rules_dict = {}
@@ -56,6 +61,7 @@ func _load_json_file(json: Dictionary) -> Error:
 	if err: return err
 	default_access = json.get("default_access", true)
 	description_bar = json.get("description_bar", "")
+	description_ttip = json.get("description_ttip", "")
 	var vals: Array[Dictionary] = []
 	vals.assign(json.get("locations", []))
 	locations.clear()

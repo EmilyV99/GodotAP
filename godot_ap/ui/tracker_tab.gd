@@ -1,10 +1,11 @@
 class_name TrackerTab extends MarginContainer
 
 @onready var tracker_button: CheckButton = $Column/Margins/Row/TrackingButton
-@onready var infolabel: Label = $Column/Margins/Row/InfoLabel
+@onready var info_console: BaseConsole = $Column/Margins/Row/InfoLabel
 @onready var column: VBoxContainer = $Column
 
 var tracker: TrackerScene_Base = null
+var info_part: BaseConsole.TextPart = null
 
 var tracking: bool = false
 
@@ -14,6 +15,7 @@ func refr_tags():
 	init_tracker()
 		
 func _ready():
+	info_part = info_console.add_c_text("")
 	Archipelago.on_tag_change.connect(refr_tags)
 	Archipelago.connected.connect(func(_conn, _json): refr_tags())
 	Archipelago.disconnected.connect(refr_tags)
@@ -31,17 +33,20 @@ func init_tracker():
 	TrackerTab.load_named_rules({})
 	
 	if not tracking:
-		infolabel.text = "Tracking Disabled"
+		info_part.text = "Tracking Disabled"
+		info_console.queue_redraw()
 		return
 	if Archipelago.is_not_connected():
-		infolabel.text = "Not Connected"
+		info_part.text = "Not Connected"
+		info_console.queue_redraw()
 		return
-	infolabel.text = "Loading"
+	info_part.text = "Loading"
+	info_console.queue_redraw()
 	var game := Archipelago.conn.get_game_for_player()
 	var pack := TrackerTab.get_tracker(game)
 	tracker = pack.instantiate()
 	tracker.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	tracker.link_to_label(infolabel)
+	tracker.link_to_label(info_part)
 	column.add_child(tracker)
 
 static var default_access := true
@@ -84,6 +89,17 @@ static func _static_init():
 	var scene: PackedScene = load("res://godot_ap/tracker_files/default_tracker.tscn")
 	def_pack.scene = scene
 	trackers[""] = def_pack
+	
+	# Set up hook
+	Archipelago.connected.connect(func(_conn,_json): load_locations())
+	if Archipelago.AP_ALLOW_TRACKERPACKS:
+		if Archipelago.output_console:
+			load_tracker_packs()
+		else:
+			Archipelago.on_attach_console.connect(load_tracker_packs, CONNECT_ONE_SHOT)
+
+static func load_tracker_packs() -> void:
+	AP.log("Loading Tracker Packs...")
 	var dir := DirAccess.open("tracker_packs/")
 	if not dir:
 		dir = DirAccess.open("./")
@@ -93,17 +109,61 @@ static func _static_init():
 			else:
 				dir = DirAccess.open("tracker_packs/")
 	
-	if dir:
-		var file_names: Array[String] = []
-		file_names.assign(dir.get_files())
-		file_names.assign(file_names.map(func(s: String): return "tracker_packs/%s" % s))
-		
-		for fname in file_names:
-			var pack := TrackerPack_Base.load_from(fname)
-			if pack and not pack.game.is_empty():
-				pack.saved_path = fname
-				trackers[pack.game] = pack
-	trackers.get("An Untitled Story").resave()
+	if not dir: 
+		AP.log("Failed to load or make `./tracker_packs/` directory!")
+		return
+	var file_names: Array[String] = []
+	file_names.assign(dir.get_files())
+	file_names.assign(file_names.map(func(s: String): return "tracker_packs/%s" % s))
 	
-	# Set up location hook
-	Archipelago.connected.connect(func(_conn,_json): load_locations())
+	var console: BaseConsole = Archipelago.output_console
+	
+	var failcount := 0
+	var successcount := 0
+	var games: Dictionary = {}
+	var errors: Dictionary = {}
+	for fname in file_names:
+		var pack := TrackerPack_Base.load_from(fname)
+		match TrackerPack_Base.load_error:
+			"": # Valid
+				pass
+			"Unrecognized Extension": # Bad filetype, skip
+				continue
+			var err: # Print out any other error
+				failcount += 1
+				AP.log("TrackerPack error: %s" % err)
+				errors[fname] = err
+				continue
+		if pack and not pack.game.is_empty():
+			successcount += 1
+			pack.saved_path = fname
+			trackers[pack.game] = pack
+			games[pack.game] = fname
+		else:
+			failcount += 1
+	if failcount+successcount:
+		var loadstatus := "Loaded %d/%d Tracker Packs successfully!" % [successcount, failcount+successcount]
+		AP.log(loadstatus)
+		if console:
+			if successcount:
+				var success_games: Array[String] = []
+				success_games.assign(games.keys())
+				success_games.sort_custom(func(a, b): return a.naturalnocasecmp_to(b))
+				var success_ttip: String = ""
+				for g in success_games:
+					success_ttip += "%s: %s\n" % [g, games[g]]
+				console.add_line(loadstatus, success_ttip.strip_edges(), Archipelago.rich_colors["green" if not failcount else "orange"])
+			if failcount:
+				var err_ttip := ""
+				var err_files: Array[String] = []
+				err_files.assign(errors.keys())
+				err_files.sort_custom(func(a, b): return a.naturalnocasecmp_to(b))
+				for f in err_files:
+					err_ttip += "%s: %s\n" % [f, errors[f]]
+				console.add_line("Failed loading %d/%d TrackerPacks" % [failcount, failcount+successcount], err_ttip.strip_edges(), Archipelago.rich_colors["red"])
+	else:
+		AP.log("No TrackerPacks Found")
+		console.add_line("No TrackerPacks Found", "Add packs to `./tracker_packs/` and relaunch to load!", console.COLOR_UI_MSG)
+	
+	#for t in trackers.values():
+		#t.resave()

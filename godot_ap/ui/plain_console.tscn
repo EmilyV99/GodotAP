@@ -1,0 +1,31 @@
+[gd_scene load_steps=3 format=3 uid="uid://bwamxuo3s7c8n"]
+
+[ext_resource type="Script" path="res://godot_ap/ui/base_console.gd" id="1_3bobc"]
+[ext_resource type="SystemFont" uid="uid://73rjoc23d4ub" path="res://godot_ap/ui/console_font.tres" id="2_w3f10"]
+
+[node name="Console" type="Control"]
+custom_minimum_size = Vector2(150, 150)
+layout_mode = 3
+anchors_preset = 0
+size_flags_horizontal = 3
+focus_next = NodePath("../../../../TypingBar")
+focus_previous = NodePath("../../../../TypingBar")
+focus_mode = 2
+mouse_filter = 1
+script = ExtResource("1_3bobc")
+font = ExtResource("2_w3f10")
+
+[node name="TooltipBG" type="ColorRect" parent="."]
+visible = false
+z_index = 1000
+layout_mode = 2
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+color = Color(0.150075, 0.150075, 0.150075, 1)
+
+[node name="Tooltip" type="Label" parent="TooltipBG"]
+layout_mode = 0
+offset_right = 1.0
+offset_bottom = 23.0
+autowrap_mode = 2

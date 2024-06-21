@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3 uid="uid://c51q4vrwhlcl7"]
 
 [ext_resource type="Script" path="res://godot_ap/ui/console_container.gd" id="1_wya3j"]
-[ext_resource type="Script" path="res://godot_ap/ui/base_console.gd" id="2_ilcwq"]
+[ext_resource type="PackedScene" uid="uid://bwamxuo3s7c8n" path="res://godot_ap/ui/plain_console.tscn" id="2_qsx70"]
 [ext_resource type="SystemFont" uid="uid://73rjoc23d4ub" path="res://godot_ap/ui/console_font.tres" id="3_iispj"]
 [ext_resource type="Script" path="res://godot_ap/ui/typing_bar.gd" id="4_gp0g4"]
 [ext_resource type="PackedScene" uid="uid://cm123kfw5gslb" path="res://godot_ap/ui/stringbar.tscn" id="5_6p6ej"]
@@ -38,31 +38,9 @@ theme_override_constants/margin_bottom = 8
 [node name="Row" type="HBoxContainer" parent="Cont/ConsoleMargin"]
 layout_mode = 2
 
-[node name="Console" type="Control" parent="Cont/ConsoleMargin/Row" node_paths=PackedStringArray("scroll_bar")]
-custom_minimum_size = Vector2(150, 150)
+[node name="Console" parent="Cont/ConsoleMargin/Row" node_paths=PackedStringArray("scroll_bar") instance=ExtResource("2_qsx70")]
 layout_mode = 2
-size_flags_horizontal = 3
-focus_next = NodePath("../../../../TypingBar")
-focus_previous = NodePath("../../../../TypingBar")
-focus_mode = 2
-mouse_filter = 1
-script = ExtResource("2_ilcwq")
-font = ExtResource("3_iispj")
 scroll_bar = NodePath("../ScrollBar")
-
-[node name="TooltipBG" type="ColorRect" parent="Cont/ConsoleMargin/Row/Console"]
-visible = false
-layout_mode = 2
-offset_right = 40.0
-offset_bottom = 40.0
-mouse_filter = 2
-color = Color(0.150075, 0.150075, 0.150075, 1)
-
-[node name="Tooltip" type="Label" parent="Cont/ConsoleMargin/Row/Console/TooltipBG"]
-layout_mode = 0
-offset_right = 1.0
-offset_bottom = 23.0
-autowrap_mode = 2
 
 [node name="ScrollBar" type="VScrollBar" parent="Cont/ConsoleMargin/Row"]
 layout_mode = 2
@@ -89,5 +67,3 @@ offset_left = -219.5
 offset_top = 99.0
 offset_right = -219.5
 offset_bottom = 66.0
-
-[connection signal="send_text" from="TypingBar" to="Cont/ConsoleMargin/Row/Console" method="send_msg"]

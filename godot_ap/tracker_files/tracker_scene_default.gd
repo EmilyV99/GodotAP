@@ -13,6 +13,7 @@ var sort_cols := [1,0]
 
 var accessibility_proc: Callable ## Callable[int]->bool, takes locid returns true if accessible
 var labeltext := "No game-specific tracker found. Showing default tracker."
+var labelttip := ""
 
 const ACCESSIBLE_ONLY = "[Only Reachable]"
 
@@ -185,3 +186,4 @@ func do_sort(a: LocationPart, b: LocationPart) -> bool:
 
 func _update_label() -> void:
 	_linked_label.text = labeltext
+	_linked_label.tooltip = labelttip

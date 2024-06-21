@@ -337,8 +337,8 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 			c.tooltip_bg.position.x -= 1
 		while c.tooltip_bg.position.y < 0:
 			c.tooltip_bg.position.y += 1
-		while c.tooltip_bg.position.y + c.tooltip_bg.size.y >= data.b:
-			c.tooltip_bg.position.y -= 1
+		#while c.tooltip_bg.position.y + c.tooltip_bg.size.y >= data.b:
+			#c.tooltip_bg.position.y -= 1
 		#endregion Bound tooltip in-window
 	func needs_hover() -> bool:
 		return not tooltip.is_empty()
@@ -624,7 +624,7 @@ var scroll: float = 0 :
 	set(val):
 		if scroll_bar: scroll_bar.value = val
 		else: scroll = val
-var is_max_scroll := true
+var is_max_scroll := false
 var has_mouse := false
 
 func _init():
@@ -666,14 +666,14 @@ func update_hover(part: ConsolePart, hb: Rect2) -> void:
 func refocus_part():
 	if Engine.is_editor_hint(): return
 	var pos := _get_mouse_pos()
+	var found := false
 	if has_mouse:
-		var found := false
 		for part in parts:
 			if part.try_hover(self, pos):
 				found = true
 				break
-		if not found:
-			update_hover(null, Rect2())
+	if not found:
+		update_hover(null, Rect2())
 
 var _draw_data := ConsoleDrawData.new()
 func _draw():

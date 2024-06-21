@@ -8,6 +8,7 @@ var AP_ITEM_HANDLING := ItemHandling.ALL ## The ItemHandling to use when connect
 var AP_PRINT_ITEMS_ON_CONNECT := false ## Prints what items have been previously collected when reconnecting to a slot
 var AP_HIDE_NONLOCAL_ITEMSENDS := true ## Hide item send messages that don't involve the client
 const AP_AUTO_OPEN_CONSOLE := false ## Automatically opens a default AP text console
+const AP_ALLOW_TRACKERPACKS := true ## Allow loading custom tracker packs
 
 #region Connection packets
 # See `ConnectionInfo` (Archipelago.conn) for more signals
@@ -23,6 +24,7 @@ signal all_datapacks_loaded ## Signals when all required datapacks have finished
 ## Emitted when a location should be cleared/deleted from the world, as it has been "already collected"
 signal remove_location(loc_id: int)
 signal on_tag_change
+signal on_attach_console
 #endregion
 
 
@@ -621,7 +623,8 @@ func load_console(console_scene: Node, as_child := true) -> bool:
 		output_console = output_console_container.console
 		output_console.send_text.connect(cmd_manager.call_cmd)
 		output_console.tree_exiting.connect(close_console)
-		output_console_container.typing_bar.cmd_manager = cmd_manager)
+		output_console_container.typing_bar.cmd_manager = cmd_manager
+		on_attach_console.emit())
 	return true
 ## Opens a default Archipelago text console popup
 func open_console() -> void:

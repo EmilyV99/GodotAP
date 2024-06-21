@@ -44,14 +44,28 @@ func _save_json_file(data: Dictionary) -> Error:
 	return OK
 	
 
+static var load_error := ""
 static func load_from(path: String) -> TrackerPack_Base:
 	var file := FileAccess.open(path, FileAccess.READ)
 	if not file: return null
 	return load_file(file)
 static func load_file_json(file: FileAccess) -> TrackerPack_Base:
+	load_error = ""
 	var text := file.get_as_text()
-	var json = JSON.parse_string(text)
-	if not json is Dictionary: return null
+	var json_parser := JSON.new()
+	var json = null
+	if json_parser.parse(text):
+		load_error = "Invalid JSON: Line %d, %s" % [json_parser.get_error_line(), json_parser.get_error_message()]
+		return null
+	else:
+		json = json_parser.data
+	
+	if not json is Dictionary:
+		if not json:
+			load_error = "Invalid JSON"
+		else:
+			load_error = "JSON root is not object"
+		return null
 	if json.get("game", "").is_empty(): return null
 	var type: String = json.get("type", "")
 	var ret := _make_type(type)
@@ -60,11 +74,21 @@ static func load_file_json(file: FileAccess) -> TrackerPack_Base:
 			return null
 	return ret
 static func load_file(file: FileAccess) -> TrackerPack_Base:
-	if file.get_line() != FILE_KEY: return load_file_json(file)
+	load_error = ""
+	var path := file.get_path()
+	if path.ends_with(".json"):
+		return load_file_json(file)
+	elif not path.ends_with(".godotap_tracker"):
+		load_error = "Unrecognized Extension"
+		return null
+	if file.get_line() != FILE_KEY:
+		load_error = "Invalid File Header"
+		return null
 	var type := file.get_line()
 	var ret := _make_type(type)
 	if ret:
 		if ret._load_file(file):
+			load_error = "File load error"
 			return null
 	return ret
 static func _make_type(type: String) -> TrackerPack_Base:

@@ -37,8 +37,8 @@ func on_items_get(_items: Array[NetworkItem]) -> void:
 func on_loc_checked(_locid: int) -> void:
 	pass # Optionally override this function
 
-var _linked_label: Label ## A label to display information about the pack in
-func link_to_label(label: Label) -> void:
+var _linked_label: BaseConsole.TextPart ## A label to display information about the pack in
+func link_to_label(label: BaseConsole.TextPart) -> void:
 	_linked_label = label
 	if not is_node_ready():
 		await ready
