@@ -1,8 +1,24 @@
 class_name TrackerLocation
 
 var identifier ## int id or String name
+var descriptive_name: String = ""
 var status_rules: Dictionary
+var map_spots: Array[MapSpot] = []
+
 var pack: TrackerPack_Base
+
+class MapSpot:
+	var id: String
+	var x: int
+	var y: int
+	func _to_dict() -> Dictionary:
+		return {"id": id, "x": x, "y": y}
+	static func from_dict(dict: Dictionary) -> MapSpot:
+		var ret := MapSpot.new()
+		ret.id = dict.get("id", "")
+		ret.x = dict.get("x", 0)
+		ret.y = dict.get("y", 0)
+		return ret
 
 func get_loc() -> APLocation:
 	if identifier is int:
@@ -45,7 +61,12 @@ static func make_name(name: String) -> TrackerLocation:
 	return ret
 
 func save_dict() -> Dictionary:
-	var data: Dictionary = {"id": identifier}
+	var data: Dictionary = {"id": identifier,"visname": descriptive_name}
+	if map_spots:
+		var spots: Array = []
+		for spot in map_spots:
+			spots.append(spot._to_dict())
+		data["map_spots"] = spots
 	for k in status_rules.keys():
 		if k == "Found": continue
 		data[k] = status_rules[k]._to_json_val()
@@ -59,6 +80,10 @@ static func load_dict(s: Dictionary, parent: TrackerPack_Base) -> TrackerLocatio
 	elif id is String:
 		ret = make_name(id)
 	if ret:
+		ret.descriptive_name = s.get("visname", "")
+		var spots: Array = s.get("map_spots", [])
+		for dict in spots:
+			ret.map_spots.append(MapSpot.from_dict(dict))
 		ret.pack = parent
 		if parent is TrackerPack_Data:
 			for status in parent.statuses_by_name.keys():

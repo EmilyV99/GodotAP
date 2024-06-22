@@ -45,3 +45,9 @@ func get_status() -> String:
 	if loaded_tracker_loc:
 		return loaded_tracker_loc.get_status()
 	return "Unknown"
+
+## Returns a descriptive display name, or an empty string if none exists.
+func get_display_name() -> String:
+	if loaded_tracker_loc:
+		return loaded_tracker_loc.descriptive_name
+	return ""

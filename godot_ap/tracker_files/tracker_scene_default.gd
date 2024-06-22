@@ -50,7 +50,11 @@ class LocationPart extends BaseConsole.ColumnsPart: ## A part representing a hin
 		if datapack:
 			width_arr[0] = 750
 			width_arr.append(500)
-		add(Archipelago.out_location(c, loc.id, data, false).centered(), width_arr[0])
+		var locpart: BaseConsole.TextPart = add(Archipelago.out_location(c, loc.id, data, false).centered(),width_arr[0])
+		var dispname := loc.get_display_name()
+		if dispname:
+			locpart.tooltip = ("%s\n%s" % [locpart.text, locpart.tooltip]).strip_edges()
+			locpart.text = dispname
 		add(NetworkHint.make_hint_status(c, loc.hint_status).centered(), width_arr[1])
 		if datapack:
 			var stat: String = TrackerTab.get_location(loc.id).get_status()

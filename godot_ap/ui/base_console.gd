@@ -718,6 +718,10 @@ func _draw():
 	#var mpos = _get_mouse_pos()
 	#draw_rect(Rect2(mpos.x-1,mpos.y-1,2,2), Color.REBECCA_PURPLE)
 
+func scroll_bottom() -> void:
+	scroll_by_abs(_draw_data.max_scroll())
+func scroll_top() -> void:
+	scroll_by_abs(-scroll)
 func scroll_by(amount: float) -> void:
 	scroll_by_abs(amount * SCROLL_MULT)
 func scroll_by_abs(amount: float) -> void:
