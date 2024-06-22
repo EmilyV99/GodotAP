@@ -1,0 +1,1290 @@
+{
+	"game": "An Untitled Story",
+	"type": "DATA_PACK",
+	"description_bar": "An Untitled Story (WIP) Tracker",
+	"description_ttip": "A WIP tracker for AUS, built for GodotAP clients.",
+	"statuses": [
+		{
+			"name": "Found",
+			"ttip": "Already found",
+			"color": "green",
+		},
+		{
+			"name": "Unreachable",
+			"ttip": "Cannot be accessed",
+			"color": "red",
+		},
+		{
+			"name": "Out of Logic",
+			"ttip": "Reachable, but not currently expected of you, and might require glitches/tricks or be exceedingly difficult.",
+			"color": "orange",
+		},
+		{
+			"name": "Reachable",
+			"ttip": "Currently reachable within logic",
+			"color": "plum",
+		},
+	],
+	"locations": [
+		{
+			"id": "Blackcastle_boss_17",
+			"visname": "BlackCastle Ninja 2",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 412,
+					"y": 277
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessBlackCastleInner",
+					"FIRE",
+				]
+			},
+		},
+		{
+			"id": "Blackcastle_end_flower",
+			"visname": "BlackCastle Top Save",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 412,
+					"y": 307
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessBlackCastleInner",
+					"FIRE",
+				]
+			},
+		},
+		{
+			"id": "Blackcastle_top_mid",
+			"visname": "BlackCastle Hidden Heart Under Red Blocks",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 412,
+					"y": 322
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessBlackCastleInner",
+					"FIRE",
+				]
+			},
+		},
+		
+		{
+			"id": "Blancland_boss",
+			"visname": "BlancLand Top Save",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 97,
+					"y": 232
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessBlancLandLowerLeft",
+					"RED",
+					"FIRE",
+				]
+			},
+		},
+		{
+			"id": "Blancland_boss_16",
+			"visname": "BlancLand Boss",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 112,
+					"y": 232
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessBlancLandLowerLeft",
+					"RED",
+					"FIRE",
+				]
+			},
+		},
+		{
+			"id": "Blancland_bottom_left",
+			"visname": "BlancLand Bottoom Left Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 52,
+					"y": 262
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessBlancLandLowerLeft",
+					"RED",
+					"ICE",
+				]
+			},
+			"Out of Logic": {
+				"type": "ALL",
+				"rules": [
+					"AccessBlancLandLowerLeft",
+					"ICE",
+				]
+			},
+		},
+		{
+			"id": "Blancland_entrance_flower",
+			"visname": "BlancLand Entrance Save",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 157,
+					"y": 262
+				}
+			],
+			"Reachable": "AccessBlancLand",
+		},
+		{
+			"id": "Blancland_top_left_kill",
+			"visname": "BlancLand Top Left Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 67,
+					"y": 232
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessBlancLandLowerLeft",
+					"RED",
+					"FIRE",
+					"SLIDE",
+				]
+			},
+		},
+		
+		{
+			"id": "Bonus_1",
+			"visname": "Bonus 1",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 127,
+					"y": 187
+				}
+			],
+			"Reachable": "AccessFireCageInner",
+			"Out of Logic": "AccessFireCageInnerOutOfLogic",
+		},
+		{
+			"id": "Bonus_2",
+			"visname": "Bonus 2",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 127,
+					"y": 187
+				}
+			],
+			"Reachable": "AccessFireCageInner",
+			"Out of Logic": "AccessFireCageInnerOutOfLogic",
+		},
+		
+		{
+			"id": "Bottom_flower",
+			"visname": "Bottom Save",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 7,
+					"y": 367
+				}
+			],
+			"Reachable": "AccessBottom",
+		},
+		{
+			"id": "Bottom_heart",
+			"visname": "Bottom Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 7,
+					"y": 352
+				}
+			],
+			"Reachable": "AccessBottom",
+		},
+		
+		{
+			"id": "Cloudrun_boss",
+			"visname": "CloudRun Gold Orb",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 217,
+					"y": 352
+				}
+			],
+			"Reachable": "AccessCloudRunRight",
+		},
+		{
+			"id": "Cloudrun_boss_11",
+			"visname": "CloudRun Boss",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 202,
+					"y": 352
+				}
+			],
+			"Reachable": "AccessCloudRunRight",
+		},
+		{
+			"id": "Cloudrun_far_right",
+			"visname": "CloudRun Far Right Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 232,
+					"y": 352
+				}
+			],
+			"Reachable": "AccessCloudRunRight",
+		},
+		{
+			"id": "Cloudrun_left_under",
+			"visname": "CloudRun Underside Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 52,
+					"y": 352
+				}
+			],
+			"Reachable": "AccessCloudRun",
+		},
+		{
+			"id": "Cloudrun_mid_save",
+			"visname": "CloudRun Middle Save",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 127,
+					"y": 352
+				}
+			],
+			"Reachable": "AccessCloudRunMiddle",
+		},
+		{
+			"id": "Cloudrun_start_flower",
+			"visname": "CloudRun Left Save",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 22,
+					"y": 352
+				}
+			],
+			"Reachable": "AccessCloudRun",
+		},
+		
+		{
+			"id": "Coldkeep_boss_3",
+			"visname": "ColdKeep Boss",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 112,
+					"y": 127
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessColdKeep",
+					{
+						"type": "VAR",
+						"name": "JumpHeight",
+						"op": ">=",
+						"value": 5
+					}
+				]
+			},
+		},
+		{
+			"id": "Coldkeep_boss",
+			"visname": "ColdKeep Stick",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 112,
+					"y": 127
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessColdKeep",
+					{
+						"type": "VAR",
+						"name": "JumpHeight",
+						"op": ">=",
+						"value": 5
+					}
+				]
+			},
+		},
+		{
+			"id": "Coldkeep_cannon_heart",
+			"visname": "ColdKeep Frozen Cannon Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 97,
+					"y": 142
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessColdKeep",
+					"ICE"
+				]
+			},
+		},
+		{
+			"id": "Coldkeep_high_branch",
+			"visname": "ColdKeep Higher Branch",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 112,
+					"y": 142
+				}
+			],
+			"Reachable": "AccessColdKeep",
+		},
+		{
+			"id": "Coldkeep_low_branch",
+			"visname": "ColdKeep Lower Branch",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 112,
+					"y": 157
+				}
+			],
+			"Reachable": "AccessColdKeep",
+		},
+		
+		{
+			"id": "Curtain_boss",
+			"visname": "The Curtain Upper Save",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 307,
+					"y": 7
+				}
+			],
+			"Reachable": "AccessTheCurtainUpper",
+		},
+		{
+			"id": "Curtain_boss_14",
+			"visname": "The Curtain Ninja 1",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 292,
+					"y": 7
+				}
+			],
+			"Reachable": "AccessTheCurtainUpper",
+		},
+		{
+			"id": "Curtain_break",
+			"visname": "The Curtain Cannon Screen Divebomb Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 277,
+					"y": 52
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessTheCurtainUpper",
+					"DIVEBOMB"
+				]
+			},
+		},
+		{
+			"id": "Curtain_kill_4",
+			"visname": "The Curtain Floating Enemies Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 277,
+					"y": 37
+				}
+			],
+			"Reachable": "AccessTheCurtainUpper",
+		},
+		{
+			"id": "Curtain_start_flower",
+			"visname": "The Curtain Lower Save",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 262,
+					"y": 82
+				}
+			],
+			"Reachable": "AccessTheCurtain",
+		},
+		
+		{
+			"id": "Darkgrotto_bot_right_flower",
+			"visname": "Dark Grotto Exit Save",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 277,
+					"y": 172
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessDarkGrottoPostBoss",
+					"FIRE"
+				]
+			},
+			"Out of Logic": "AccessDarkGrottoPostBoss",
+		},
+		{
+			"id": "Darkgrotto_boss_13",
+			"visname": "Dark Grotto Boss",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 262,
+					"y": 172
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessDarkGrottoPostBoss",
+					"FIRE"
+				]
+			},
+			"Out of Logic": "AccessDarkGrottoPostBoss",
+		},
+		{
+			"id": "Darkgrotto_boss",
+			"visname": "Dark Grotto Gold Orb",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 262,
+					"y": 172
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessDarkGrottoPostBoss",
+					"FIRE"
+				]
+			},
+			"Out of Logic": "AccessDarkGrottoPostBoss",
+		},
+		{
+			"id": "Darkgrotto_boss_torch",
+			"visname": "Dark Grotto Boss Torch Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 262,
+					"y": 172
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessDarkGrottoPostBoss",
+					"FIRE"
+				]
+			},
+			"Out of Logic": "AccessDarkGrottoPostBoss",
+		},
+		{
+			"id": "Darkgrotto_mid_right",
+			"visname": "Dark Grotto Heart Above Campsite",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 262,
+					"y": 157
+				}
+			],
+			"Reachable": "AccessDarkGrotto",
+		},
+		{
+			"id": "Darkgrotto_top_left",
+			"visname": "Dark Grotto Upper Save",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 247,
+					"y": 142
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessDarkGrotto",
+					"YELLOW",
+					{
+						"type": "VAR",
+						"name": "JumpHeight",
+						"op": ">=",
+						"value": 7
+					}
+				]
+			},
+		},
+		
+		{
+			"id": "Deepdive_boss",
+			"visname": "DeepDive Right Save",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 292,
+					"y": 232
+				}
+			],
+			"Reachable": "AccessDeepDiveRight",
+		},
+		{
+			"id": "Deepdive_boss_flower",
+			"visname": "DeepDive Right Flower",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 292,
+					"y": 232
+				}
+			],
+			"Reachable": "AccessDeepDiveRight",
+		},
+		{
+			"id": "Deepdive_boss_12",
+			"visname": "DeepDive Boss",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 277,
+					"y": 232
+				}
+			],
+			"Reachable": "AccessDeepDiveRight",
+		},
+		{
+			"id": "Deepdive_exit_heart_mid",
+			"visname": "DeepDive Exit Fish Platform Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 292,
+					"y": 217
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessDeepDiveRight",
+					"ICE"
+				]
+			},
+		},
+		{
+			"id": "Deepdive_exit_heart_top",
+			"visname": "DeepDive Exit Heart Hidden Inside Block",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 292,
+					"y": 202
+				}
+			],
+			"Reachable": "AccessDeepDiveRight",
+		},
+		{
+			"id": "Deepdive_far_right",
+			"visname": "DeepDive Top Right Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 307,
+					"y": 187
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessDeepDiveRight",
+					{
+						"type": "ITEM",
+						"count": 3,
+						"value": "Jump Upgrade"
+					}
+				]
+			},
+		},
+		{
+			"id": "Deepdive_left",
+			"visname": "DeepDive Left",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 187,
+					"y": 232
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessDeepDive",
+					{
+						"type": "ITEM",
+						"count": 3,
+						"value": "Double Jump Upgrade"
+					}
+				]
+			},
+		},
+		{
+			"id": "Deepdive_left_ceiling",
+			"visname": "DeepDive Left Ceiling",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 187,
+					"y": 232
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessDeepDive",
+					{
+						"type": "ITEM",
+						"count": 3,
+						"value": "Double Jump Upgrade"
+					}
+				]
+			},
+		},
+		{
+			"id": "Deepdive_chest",
+			"visname": "DeepDive Left Chest",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 187,
+					"y": 232
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessDeepDive",
+					{
+						"type": "ITEM",
+						"count": 3,
+						"value": "Double Jump Upgrade"
+					}
+				]
+			},
+		},
+		{
+			"id": "Deepdive_right_path",
+			"visname": "DeepDive SS Eternity Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 262,
+					"y": 232
+				}
+			],
+			"Reachable": "AccessDeepDiveRight",
+		},
+		{
+			"id": "Deepdive_shaft",
+			"visname": "DeepDive Central Extra Air Upgrade",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 232,
+					"y": 217
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessDeepDive",
+					"ICE",{
+						"type": "VAR",
+						"name": "JumpHeight",
+						"op": ">=",
+						"value": 8
+					},
+				]
+			},
+		},
+		{
+			"id": "Deepdive_shaft_bot_right",
+			"visname": "DeepDive Bottom Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 247,
+					"y": 262
+				}
+			],
+			"Reachable": "AccessDeepDive",
+		},
+		{
+			"id": "Deepdive_shaft_mid_right",
+			"visname": "DeepDive Ice Shot Upgrade",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 247,
+					"y": 217
+				}
+			],
+			"Reachable": "AccessDeepDive",
+		},
+		{
+			"id": "Deepdive_shaft_top",
+			"visname": "DeepDive Shaft Top",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 232,
+					"y": 187
+				}
+			],
+			"Reachable": "AccessDeepDive",
+		},
+		{
+			"id": "Deepdive_shaft_top_right",
+			"visname": "DeepDive Single Yellow Fish Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 247,
+					"y": 202
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessDeepDive",
+					"ICE"
+				]
+			},
+		},
+		
+	],
+	"named_rules": {
+		"AccessBlackCastle": "AccessLongBeach",
+		"AccessBlancLand": "AccessDeepDive",
+		"AccessBottom": {
+			"type": "ALL",
+			"rules": [
+				"AccessFarFallLowerLeft",
+				"SLIDE"
+			]
+		},
+		"AccessCloudRun": "AccessBottom",
+		"AccessColdKeep": "AccessDeepTower",
+		"AccessTheCurtain": {
+			"type": "ALL",
+			"rules": [
+				"AccessHighLands",
+				"SLIDE",
+				"YELLOW",
+			]
+		},
+		"AccessDarkGrotto": {
+			"type": "ALL",
+			"rules": [
+				"AccessHighLands",
+				"DIVEBOMB"
+			]
+		},
+		"AccessDeepDive": {
+			"type": "ALL",
+			"rules": [
+				"AccessGrottoUpper",
+				"DIVEBOMB"
+			]
+		},
+		"AccessDeepTower": {
+			"type": "VAR",
+			"name": "JumpHeight",
+			"op": ">=",
+			"value": 4
+		},
+		"AccessFarFall": "AccessSkyTown",
+		"AccessFireCage": {
+			"type": "ALL",
+			"rules": [
+				"AccessGrottoUpper",
+				"DIVEBOMB"
+			]
+		},
+		"AccessGrotto": {
+			"type": "VAR",
+			"name": "JumpHeight",
+			"op": ">=",
+			"value": 4
+		},
+		"AccessHighLands": {
+			"type": "ALL",
+			"rules": [
+				"AccessGrottoUpper",
+				"RED",
+				"ICE",
+			]
+		},
+		"AccessIceCastle": "AccessTheCurtainUpper",
+		"AccessLibrary": "AccessTheCurtainUpper",
+		"AccessLongBeach": {
+			"type": "ANY",
+			"rules": [
+				"AccessDeepDiveRight",
+				"AccessDarkGrotto",
+				"AccessTheCurtainUpper"
+			]
+		},
+		"AccessMountSide": {
+			"type": "ALL",
+			"rules": [
+				"AccessGrottoUpper",
+				"RED",
+			]
+		},
+		"AccessNightClimb": {
+			"type": "ALL",
+			"rules": [
+				"AccessColdKeep",
+				{
+					"type": "VAR",
+					"name": "JumpHeight",
+					"op": ">=",
+					"value": 5
+				},
+				"FIRE",
+			]
+		},
+		"AccessNightWalk": true,
+		"AccessRainbowDive": "AccessTheCurtainUpper",
+		"AccessSkyLands": "AccessTheCurtainUpper",
+		"AccessSkySand": "AccessNightClimb",
+		"AccessSkyTown": "AccessColdKeep",
+		"AccessStaircase": "AccessNightWalkUpper",
+		"AccessStoneCastle": "AccessFarFall",
+		"AccessStrangeCastle": "AccessFarFallLowerLeft",
+		"AccessUnderTomb": {
+			"type": "ALL",
+			"rules": [
+				"AccessLongBeach",
+				"DIVEBOMB"
+			]
+		},
+
+		"AccessBlackCastleInner": {
+			"type": "ALL",
+			"rules": [
+				"AccessBlackCastle",
+				"DIVEBOMB",
+				"RED",
+				"SLIDE",
+				{
+					"type": "ITEM",
+					"count": 3,
+					"value": "Double Jump Upgrade"
+				},
+				{
+					"type": "ITEM",
+					"count": 7,
+					"value": "Gold Orb"
+				},
+			]
+		},
+		"AccessBlancLandLowerLeft": {
+			"type": "ALL",
+			"rules": [
+				"AccessBlancLand",
+				{
+					"type": "Any",
+					"rules": [
+						"RED",
+						"ICE",
+					]
+				}
+			]
+		},
+		"AccessCloudRunMiddle": {
+			"type": "ALL",
+			"rules": [
+				"AccessCloudRun",
+				{
+					"type": "VAR",
+					"name": "JumpHeight",
+					"op": ">=",
+					"value": 8
+				},
+				"FIRE",
+			]
+		},
+		"AccessCloudRunRight": {
+			"type": "ALL",
+			"rules": [
+				"AccessCloudRunMiddle",
+				"ICE",
+			]
+		},
+		"AccessDarkGrottoPostBoss": {
+			"type": "ALL",
+			"rules": [
+				"AccessDarkGrotto",
+				"ICE",
+			]
+		},
+		"AccessDeepDiveRight": {
+			"type": "ALL",
+			"rules": [
+				"AccessDeepDive",
+				{
+					"type": "VAR",
+					"name": "JumpHeight",
+					"op": ">=",
+					"value": 7
+				}
+			]
+		},
+		"AccessFarFallLower": {
+			"type": "ALL",
+			"rules": [
+				"AccessFarFall",
+				"DIVEBOMB"
+			]
+		},
+		"AccessFarFallLowerLeft": {
+			"type": "ALL",
+			"rules": [
+				"AccessFarFallLower",
+				{
+					"type": "ITEM",
+					"value": "Hatch"
+				},
+				"RED",
+			]
+		},
+		"AccessFarFallLowerRight": {
+			"type": "ALL",
+			"rules": [
+				"AccessFarFallLower",
+				"RED",
+			]
+		},
+		"AccessFireCageInner": {
+			"type": "ALL",
+			"rules": [
+				"AccessFireCage",
+				"STICK",
+				{
+					"type": "ANY",
+					"rules": [
+						"RED",
+						{
+							"type": "ITEM",
+							"count": 3,
+							"value": "Double Jump Upgrade"
+						},
+					]
+				}
+
+			]
+		},
+		"AccessFireCageInnerOutOfLogic": {
+			"type": "ALL",
+			"rules": [
+				"AccessFireCage",
+				"RED",
+				{
+					"type": "ITEM",
+					"count": 2,
+					"value": "Jump Upgrade"
+				},
+				{
+					"type": "ITEM",
+					"count": 3,
+					"value": "Double Jump Upgrade"
+				},
+			]
+		},
+		"AccessGrottoUpper": {
+			"type": "ALL",
+			"rules": [
+				{
+					"type": "ITEM",
+					"value": "Hatch"
+				},
+				{
+					"type": "ANY",
+					"rules": [
+						{
+							"type": "ALL",
+							"rules": [
+								{
+									"type": "ITEM",
+									"value": "Duck"
+								},
+								"RED",
+								{
+									"type": "VAR",
+									"name": "JumpHeight",
+									"op": ">=",
+									"value": 6
+								},
+							]
+						},
+						{
+							"type": "VAR",
+							"name": "JumpHeight",
+							"op": ">=",
+							"value": 8
+						},
+					]
+				}
+			]
+		},
+		"AccessIceCastleBoss": {
+			"type": "ALL",
+			"rules": [
+				"AccessIceCastle",
+				"DIVEBOMB",
+			]
+		},
+		"AccessNightWalkUpper": "AccessTheCurtainUpper",
+		"AccessSkyLandsRight": "AccessIceCastleBoss",
+		"AccessSkySandInner": {
+			"type": "ALL",
+			"rules": [
+				"AccessSkySand",
+				"ICE",
+			]
+		},
+		"AccessSkySandMiddle": {
+			"type": "ALL",
+			"rules": [
+				"AccessSkySandInner",
+				"SLIDE",
+				"RED",
+				{
+					"type": "ITEM",
+					"count": 2,
+					"value": "Jump Upgrade"
+				},
+				{
+					"type": "ITEM",
+					"count": 2,
+					"value": "Double Jump Upgrade"
+				},
+			]
+		},
+		"AccessStoneCastleUpper": {
+			"type": "ALL",
+			"rules": [
+				"AccessStoneCastle",
+				"RED",
+				"YELLOW",
+				{
+					"type": "VAR",
+					"name": "JumpHeight",
+					"op": ">=",
+					"value": 7
+				}
+			]
+		},
+		"AccessTheCurtainUpper": {
+			"type": "ALL",
+			"rules": [
+				"AccessTheCurtain",
+				{
+					"type": "VAR",
+					"name": "JumpHeight",
+					"op": ">=",
+					"value": 8
+				}
+			]
+		},
+
+		"CanLightTorches": {
+			"type": "ANY",
+			"rules": [
+				"FIRE",
+				"DIVEBOMB",
+			]
+		},
+		"CanBuyEverythingInShop": {
+			"type": "VAR",
+			"name": "Crystals",
+			"op": ">",
+			"value": 1167
+		},
+		
+		"FIRE": {
+			"type": "ITEM",
+			"value": "Progressive Fire Shot"
+		},
+		"DIVEBOMB": {
+			"type": "ITEM",
+			"value": "Smash"
+		},
+		"YELLOW": {
+			"type": "ITEM",
+			"value": "Yellow Energy"
+		},
+		"RED": {
+			"type": "ITEM",
+			"value": "Red Energy"
+		},
+		"ICE": {
+			"type": "ITEM",
+			"value": "Ice Shot"
+		},
+		"STICK": {
+			"type": "ITEM",
+			"value": "Progressive Ceiling Stick"
+		},
+		"SLIDE": {
+			"type": "ITEM",
+			"count": 2,
+			"value": "Progressive Ceiling Stick"
+		},
+		
+	},
+	"variables": {
+		"JumpHeight": {
+			"value": 2,
+			"item_triggers": {
+				"Jump Upgrade": {
+					"type": "+",
+					"value": 1
+				},
+				"Double Jump Upgrade": {
+					"type": "+",
+					"value": 1
+				},
+			}
+		},
+		"Crystals": {
+			"value": 0,
+			"item_triggers": {
+				"10 Crystals": {
+					"type": "+",
+					"value": 10
+				},
+				"100 Crystals": {
+					"type": "+",
+					"value": 100
+				},
+				"110 Crystals": {
+					"type": "+",
+					"value": 110
+				},
+				"125 Crystals": {
+					"type": "+",
+					"value": 125
+				},
+				"150 Crystals": {
+					"type": "+",
+					"value": 150
+				},
+				"180 Crystals": {
+					"type": "+",
+					"value": 180
+				},
+				"200 Crystals": {
+					"type": "+",
+					"value": 200
+				},
+				"235 Crystals": {
+					"type": "+",
+					"value": 235
+				},
+				"245 Crystals": {
+					"type": "+",
+					"value": 245
+				},
+				"25 Crystals": {
+					"type": "+",
+					"value": 25
+				},
+				"270 Crystals": {
+					"type": "+",
+					"value": 270
+				},
+				"300 Crystals": {
+					"type": "+",
+					"value": 300
+				},
+				"35 Crystals": {
+					"type": "+",
+					"value": 35
+				},
+				"400 Crystals": {
+					"type": "+",
+					"value": 400
+				},
+				"50 Crystals": {
+					"type": "+",
+					"value": 50
+				},
+				"65 Crystals": {
+					"type": "+",
+					"value": 65
+				},
+				"75 Crystals": {
+					"type": "+",
+					"value": 75
+				},
+			}
+		},
+	}
+}
