@@ -3,6 +3,9 @@ class_name CommonClientMain extends ColorRect
 ## Used for standalone client applications
 
 func _ready():
+	if OS.is_debug_build():
+		Archipelago.cmd_manager.debug_hidden = false
+	
 	Archipelago.AP_CLIENT_VERSION = Version.val(0,0,3) # GodotAP CommonClient version
 	Archipelago.set_tags(["TextOnly"])
 	Archipelago.AP_ITEM_HANDLING = Archipelago.ItemHandling.ALL

@@ -3,6 +3,14 @@
 	"type": "DATA_PACK",
 	"description_bar": "Description Here",
 	"description_ttip": "Longer description here",
+	"GUI": {
+		"type": "Column",
+		"children": [
+			{
+				"type": "LocationConsole"
+			}
+		]
+	},
 	"statuses": [
 		{
 			"name": "Found",

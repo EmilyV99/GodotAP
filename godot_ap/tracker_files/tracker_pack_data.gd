@@ -1,5 +1,7 @@
 class_name TrackerPack_Data extends TrackerPack_Base
 
+static var DEFAULT_GUI = {"type": "Column", "children": [{"type": "LocationConsole"}]}
+
 func get_type() -> String: return "DATA_PACK"
 # TODO set up a structure for listing location reqs, map images, etc etc
 var locations: Array[TrackerLocation] = []
@@ -7,6 +9,8 @@ var named_rules: Dictionary = {}
 var statuses: Array[LocationStatus] = []
 var statuses_by_name: Dictionary = {}
 var starting_variables: Dictionary = {}
+
+var gui_layout: Dictionary = TrackerPack_Data.DEFAULT_GUI.duplicate(true)
 
 var _variable_ops: Dictionary = {}
 
@@ -48,6 +52,7 @@ func _save_file(data: Dictionary) -> Error:
 		stat_vals.append(stat.save_dict())
 	data["description_bar"] = description_bar
 	data["description_ttip"] = description_ttip
+	data["GUI"] = gui_layout
 	data["statuses"] = stat_vals
 	data["locations"] = loc_vals
 	var rules_dict = {}
@@ -57,11 +62,41 @@ func _save_file(data: Dictionary) -> Error:
 	data["variables"] = _variable_ops
 	return OK
 
+func validate_gui_element(elem: Dictionary) -> bool:
+	var type = elem.get("type")
+	match type:
+		"Column", "Row":
+			if not TrackerPack_Base._expect_keys(elem, ["children","type"]):
+				return false
+			var children = elem.get("children")
+			if not children is Array:
+				TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected 'children' to be 'Array'!" % type)
+				return false
+			for child in children:
+				if not validate_gui_element(child):
+					return false
+			return true
+		"LocationConsole":
+			if not TrackerPack_Base._expect_keys(elem, ["type"]):
+				return false
+			return true
+		_:
+			if type == null:
+				TrackerPack_Base._output_error("No Type Specified", "Object requires 'type' field!")
+			else:
+				TrackerPack_Base._output_error("Unrecognized Type", "Type '%s' is not recognized as a valid GUI object type!" % type)
+			return false
+func validate_gui() -> bool:
+	return validate_gui_element(gui_layout)
 func _load_file(json: Dictionary) -> Error:
 	var err := super(json)
 	if err: return err
+	var ret := OK
 	description_bar = json.get("description_bar", "")
 	description_ttip = json.get("description_ttip", "")
+	gui_layout = json.get("GUI", TrackerPack_Data.DEFAULT_GUI)
+	if not validate_gui():
+		ret = ERR_INVALID_DATA
 	setup_statuses(json.get("statuses", []))
 	var vals: Array[Dictionary] = []
 	vals.assign(json.get("locations", []))
@@ -99,7 +134,7 @@ func _load_file(json: Dictionary) -> Error:
 						if name == iname:
 							TrackerTab.variables[varname] /= op.get("value", 1))
 		
-	return OK
+	return ret
 
 func get_or_create_loc(identifier) -> TrackerLocation:
 	for loc in locations:

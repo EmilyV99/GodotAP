@@ -118,7 +118,6 @@ static func initialize_stuff():
 			Archipelago.on_attach_console.connect(load_tracker_packs, CONNECT_ONE_SHOT)
 
 static func load_tracker_packs() -> void:
-	AP.log("Loading Tracker Packs...")
 	var dir := DirAccess.open("tracker_packs/")
 	if not dir:
 		dir = DirAccess.open("./")
@@ -131,6 +130,11 @@ static func load_tracker_packs() -> void:
 	if not dir: 
 		AP.log("Failed to load or make `./tracker_packs/` directory!")
 		return
+	var was_tracking := tracking
+	tracking = false
+	trackers.clear()
+	AP.log("Loading Tracker Packs...")
+	
 	var file_names: Array[String] = []
 	file_names.assign(dir.get_files())
 	file_names.assign(file_names.map(func(s: String): return "tracker_packs/%s" % s))
@@ -197,7 +201,7 @@ static func load_tracker_packs() -> void:
 	else:
 		AP.log("No TrackerPacks Found")
 		console.add_line("No TrackerPacks Found", "Add packs to `./tracker_packs/` and relaunch to load!", console.COLOR_UI_MSG)
-	
+	tracking = was_tracking
 
 static func sort_by_location_status(a: String, b: String) -> int:
 	var ai = -1

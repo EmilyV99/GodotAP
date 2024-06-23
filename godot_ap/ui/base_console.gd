@@ -85,6 +85,8 @@ class ConsoleDrawData:
 		get: return win_r - win_l
 	var win_cx: float :
 		get: return win_l + win_w/2
+	var win_h: float:
+		get: return b
 	
 	var l: float
 	var t: float
@@ -798,16 +800,18 @@ func ensure_newline(parts_arr: Array[ConsolePart]): ## Returns SpacingPart | nul
 		if last_part is SpacingPart:
 			if last_part.reset_line or last_part.from_reset_y:
 				return #already ensured
-	return make_header_spacing(0)
+	var part := make_header_spacing(0)
+	parts_arr.append(part)
+	return part
 func add_ensure_newline(): ## Returns SpacingPart | null
-	add(ensure_newline(parts))
+	ensure_newline(parts)
+	queue_redraw()
 
 func make_indented_block(s: String, indent: float, color := Color.TRANSPARENT) -> ContainerPart:
 	var c := ContainerPart.new()
 	var spl = s.split("\n")
 	var indent_depth: int = 0
 	for line in spl:
-		
 		var sz: int = line.length()
 		line = line.lstrip("\t")
 		sz -= line.length()
@@ -817,7 +821,7 @@ func make_indented_block(s: String, indent: float, color := Color.TRANSPARENT) -
 			c._add(make_indent(indent * depth))
 			indent_depth += depth
 		c._add(make_text(line, "", color))
-		ensure_newline(c.parts)
+		c._add(ensure_newline(c.parts))
 	if indent_depth:
 		c._add(make_indent(indent * -indent_depth)) # Reset indent
 	return c

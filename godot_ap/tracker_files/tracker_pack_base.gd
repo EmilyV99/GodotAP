@@ -140,3 +140,19 @@ func _load_file(json: Dictionary) -> Error:
 	game = json.get("game", "")
 	if game.is_empty(): return ERR_INVALID_DATA
 	return OK
+
+static func _output_error(s: String, ttip: String = "") -> void:
+	if not (Archipelago.config.verbose_trackerpack and Archipelago.output_console):
+		return
+	Archipelago.output_console.add_line(s, ttip, Archipelago.rich_colors["red"])
+	AP.log(s)
+	if not ttip.is_empty():
+		AP.log(ttip)
+static func _expect_keys(dict: Dictionary, expected: Array[String]):
+	var found: Array[String] = []
+	found.assign(dict.keys())
+	found.sort()
+	if found != expected:
+		_output_error("Invalid Keys", "Type '%s' expected keys %s, not %s!" % [dict.get("type", "NULL"), expected, found])
+		return false
+	return true

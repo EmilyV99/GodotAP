@@ -104,6 +104,9 @@ var status: APStatus = APStatus.DISCONNECTED :
 				_queue_reconnect = false
 				ap_reconnect()
 
+## Returns true if there is an active Archipelago connection
+func is_ap_connected() -> bool:
+	return status == APStatus.PLAYING
 ## Returns true if there is no active Archipelago connection
 func is_not_connected() -> bool:
 	return status != APStatus.PLAYING
@@ -685,13 +688,13 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 						ipport.append("38281")
 					ap_connect(ipport[0],ipport[1],command_args[2],command_args[3])))
 		cmd_manager.register_command(ConsoleCommand.new("/reconnect")
-			.add_help("", "Refreshes the connection to the Archipelago server")
+			.add_help_cond("", "Refreshes the connection to the Archipelago server", is_ap_connected)
 			.set_call(func(_mgr: CommandManager, _cmd: ConsoleCommand, _msg: String): ap_reconnect()))
 		cmd_manager.register_command(ConsoleCommand.new("/disconnect")
-			.add_help("", "Kills the connection to the Archipelago server")
+			.add_help_cond("", "Kills the connection to the Archipelago server", is_ap_connected)
 			.set_call(func(_mgr: CommandManager, _cmd: ConsoleCommand, _msg: String): ap_disconnect()))
 	cmd_manager.register_command(ConsoleCommand.new("/locations")
-		.add_help("[filter]", "Lists all locations (optionally matching a filter) for the current slot's game.")
+		.add_help_cond("[filter]", "Lists all locations (optionally matching a filter) for the current slot's game.", is_ap_connected)
 		.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, msg: String):
 			if not _ensure_connected(mgr.console): return
 			var filt := msg.substr(11)
@@ -731,7 +734,7 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 					columns.add(2, mgr.console.make_text(loc_status.text, loc_status.tooltip, rich_colors[loc_status.colorname]))
 			))
 	cmd_manager.register_command(ConsoleCommand.new("/items")
-		.add_help("[filter]", "Lists all items (optionally matching a filter) for the current slot's game.")
+		.add_help_cond("[filter]", "Lists all items (optionally matching a filter) for the current slot's game.", is_ap_connected)
 		.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, msg: String):
 			if not _ensure_connected(mgr.console): return
 			var filt := msg.substr(7)
@@ -811,6 +814,68 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 			.add_disable(is_not_connected))
 		cmd_manager.register_command(ConsoleCommand.new("!players")
 			.add_disable(is_not_connected))
+	if AP_ALLOW_TRACKERPACKS:
+		cmd_manager.register_command(ConsoleCommand.new("/tracker")
+			.add_help_cond("vars", "Outputs trackerpack debug info", is_ap_connected)
+			.add_help_cond("locations [filter]", "Outputs trackerpack location debug info, optionally filtered", is_ap_connected)
+			.add_help("refresh", "Reloads tracker packs")
+			.set_autofill(_autofill_track)
+			.set_call(func(mgr: CommandManager, cmd: ConsoleCommand, msg: String):
+				var args = msg.split(" ", true, 2)
+				if args.size() < 2:
+					cmd.output_usage(mgr.console)
+					return
+				match args[1].to_lower():
+					"locations":
+						if not _ensure_connected(mgr.console): return
+						var filt: String = args[2].to_lower() if args.size() > 2 else ""
+						var locs: Array[APLocation] = []
+						
+						locs.assign(conn.slot_locations.keys() \
+							.map(func(locid: int): return TrackerTab.get_location(locid)) \
+							.filter(func(v: APLocation): return v.loaded_tracker_loc != null and (filt.is_empty() or v.name.to_lower().contains(filt))))
+						if not locs.is_empty():
+							mgr.console.add_header_spacing()
+							mgr.console.add_line("[ LOCATIONS ]", "", mgr.console.COLOR_UI_MSG)
+							for loc in locs:
+								var tloc: TrackerLocation = loc.loaded_tracker_loc
+								mgr.console.add_line(loc.name+":", "", rich_colors[AP.COLORNAME_LOCATION])
+								for stat in tloc.status_rules.keys():
+									if stat == "Found": continue
+									var stat_obj := TrackerTab.get_status(stat)
+									mgr.console.add_line("'%s':" % stat, stat_obj.tooltip, rich_colors[stat_obj.colorname])
+									var cont: BaseConsole.ContainerPart = mgr.console.add_indented_block(
+										tloc.status_rules[stat].get_repr(1), 25, mgr.console.COLOR_UI_MSG)
+									cont.textpart_replace("true", "true", true, "", rich_colors["green"])
+									cont.textpart_replace("false", "false", true, "", rich_colors["red"])
+						mgr.console.add_header_spacing()
+					"refresh":
+						TrackerTab.load_tracker_packs()
+					"vars":
+						if not _ensure_connected(mgr.console): return
+						var named_rules = TrackerTab.named_rules.keys()
+						if not named_rules.is_empty():
+							mgr.console.add_header_spacing()
+							mgr.console.add_line("[ NAMED RULES ]", "", mgr.console.COLOR_UI_MSG)
+							for rulename in named_rules:
+								mgr.console.add_text(rulename+": ", "", mgr.console.COLOR_UI_MSG)
+								var b = TrackerTab.get_named_rule(rulename).can_access()
+								var s = "Unknown"
+								var c = "white"
+								if b != null:
+									s = str(b)
+									c = "green" if b else "red"
+								mgr.console.add_line(s, "", Archipelago.rich_colors[c])
+						var vars = TrackerTab.variables.keys()
+						if not vars.is_empty():
+							mgr.console.add_header_spacing()
+							mgr.console.add_line("[ VARIABLES ]", "", mgr.console.COLOR_UI_MSG)
+							for varname in vars:
+								mgr.console.add_text(varname+": ", "", mgr.console.COLOR_UI_MSG)
+								var val = TrackerTab.variables.get(varname)
+								mgr.console.add_line(str(val), "", Archipelago.rich_colors["plum"])
+						mgr.console.add_header_spacing()
+				))
 	cmd_manager.setup_basic_commands()
 	if OS.is_debug_build():
 		cmd_manager.register_command(ConsoleCommand.new("/send").debug()
@@ -886,55 +951,25 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 			.add_help("", "Prints out your connection tags")
 			.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, _msg: String):
 				mgr.console.add_line(str(AP_GAME_TAGS), "", mgr.console.COLOR_UI_MSG)))
-		cmd_manager.register_command(ConsoleCommand.new("/track_out_db").debug()
-			.add_help("", "Outputs trackerpack debug info")
-			.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, _msg: String):
-				var named_rules = TrackerTab.named_rules.keys()
-				if not named_rules.is_empty():
-					mgr.console.add_header_spacing()
-					mgr.console.add_line("[ NAMED RULES ]", "", mgr.console.COLOR_UI_MSG)
-					for rulename in named_rules:
-						mgr.console.add_text(rulename+": ", "", mgr.console.COLOR_UI_MSG)
-						var b = TrackerTab.get_named_rule(rulename).can_access()
-						var s = "Unknown"
-						var c = "white"
-						if b != null:
-							s = str(b)
-							c = "green" if b else "red"
-						mgr.console.add_line(s, "", Archipelago.rich_colors[c])
-				var vars = TrackerTab.variables.keys()
-				if not vars.is_empty():
-					mgr.console.add_header_spacing()
-					mgr.console.add_line("[ VARIABLES ]", "", mgr.console.COLOR_UI_MSG)
-					for varname in vars:
-						mgr.console.add_text(varname+": ", "", mgr.console.COLOR_UI_MSG)
-						var val = TrackerTab.variables.get(varname)
-						mgr.console.add_line(str(val), "", Archipelago.rich_colors["plum"])
-				mgr.console.add_header_spacing()))
-		cmd_manager.register_command(ConsoleCommand.new("/track_loc_db").debug()
-			.add_help("[filter]", "Outputs trackerpack location debug info")
-			.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, msg: String):
-				var filt := msg.substr(14).to_lower()
-				var locs: Array[APLocation] = []
-				locs.assign(conn.slot_locations.keys() \
-					.map(func(locid: int): return TrackerTab.get_location(locid)) \
-					.filter(func(v: APLocation): return v.name.to_lower().contains(filt) and v.loaded_tracker_loc != null))
-				if not locs.is_empty():
-					mgr.console.add_header_spacing()
-					mgr.console.add_line("[ LOCATIONS ]", "", mgr.console.COLOR_UI_MSG)
-					for loc in locs:
-						var tloc: TrackerLocation = loc.loaded_tracker_loc
-						mgr.console.add_line(loc.name+":", "", rich_colors[AP.COLORNAME_LOCATION])
-						for stat in tloc.status_rules.keys():
-							if stat == "Found": continue
-							var stat_obj := TrackerTab.get_status(stat)
-							mgr.console.add_line("'%s':" % stat, stat_obj.tooltip, rich_colors[stat_obj.colorname])
-							var cont: BaseConsole.ContainerPart = mgr.console.add_indented_block(
-								tloc.status_rules[stat].get_repr(1), 25, mgr.console.COLOR_UI_MSG)
-							cont.textpart_replace("true", "true", true, "", rich_colors["green"])
-							cont.textpart_replace("false", "false", true, "", rich_colors["red"])
-				mgr.console.add_header_spacing()))
 		cmd_manager.setup_debug_commands()
+
+func _autofill_track(msg: String) -> Array[String]:
+	var args = msg.split(" ", true, 2)
+	if args.size() <= 2:
+		var fills: Array[String] = ["locations", "refresh", "vars"]
+		if not conn:
+			fills.erase("locations")
+			fills.erase("vars")
+		fills.assign(fills.map(func(s: String):
+			return "%s %s" % [args[0],s]))
+		if args.size() < 2:
+			return fills
+		var new_fills: Array[String] = []
+		for s in fills:
+			if s.to_lower().begins_with(msg.to_lower()):
+				new_fills.append(s)
+		return new_fills
+	return []
 func _init():
 	init_command_manager(true)
 	_socket.inbound_buffer_size = 65535*8

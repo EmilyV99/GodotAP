@@ -82,7 +82,11 @@ func setup_basic_commands() -> void:
 		.add_help("", "Displays this message")
 		.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, _msg: String):
 			mgr.console.add_header_spacing()
-			mgr.console.add_line("Command Help:", "", mgr.console.COLOR_UI_MSG)
+			mgr.console.add_line("Command Help (Contextual):",
+				"Commands shown may vary based on various conditions, such as if you are" +
+				" connected to an Archipelago server or not.", mgr.console.COLOR_UI_MSG) \
+				.underline = true
+			mgr.console.add_header_spacing()
 			for cmd in mgr.get_commands().filter(func(cmd):
 				return not (cmd.is_disabled() or cmd.is_debug())):
 				cmd.output_helptext(mgr.console)

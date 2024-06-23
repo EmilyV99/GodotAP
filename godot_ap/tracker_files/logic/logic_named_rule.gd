@@ -29,4 +29,31 @@ func get_repr(indent := 0) -> String:
 	var rule := TrackerTab.get_named_rule(name)
 	if not rule:
 		return "\t".repeat(indent) + "ERROR"
-	return "\t".repeat(indent) + "NAMED '%s':\n%s" % [name, rule.get_repr(indent+1)]
+	if rule is TrackerLogicNamedRule:
+		return rule._get_joint_repr({name: rule}, indent)
+	var rule_repr: String = rule.get_repr(indent)
+	var name_repr: String = " NAMED '%s'" % name
+	var first_nl = rule_repr.find("\n")
+	if first_nl < 0:
+		return rule_repr + name_repr
+	return rule_repr.insert(first_nl, name_repr)
+
+func _get_joint_repr(dict, indent := 0):
+	var repeated = name in dict.keys()
+	var rule := TrackerTab.get_named_rule(name)
+	if rule and not repeated: dict[name] = rule
+	var names: Array[String] = []
+	names.assign(dict.keys())
+	names.sort()
+	if repeated:
+		return "\t".repeat(indent) + "NAMED %s -> SELF-LOOP" % names
+	if not rule:
+		return "\t".repeat(indent) + "NAMED %s -> ERROR" % names
+	if rule is TrackerLogicNamedRule:
+		return rule._get_joint_repr(dict, indent)
+	var rule_repr: String = rule.get_repr(indent)
+	var name_repr: String = " NAMED [%s]" % (", ".join(names))
+	var first_nl = rule_repr.find("\n")
+	if first_nl < 0:
+		return rule_repr + name_repr
+	return rule_repr.insert(first_nl, name_repr)

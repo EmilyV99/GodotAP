@@ -5,6 +5,7 @@ const HELPTEXT_INDENT = 20
 class CmdHelpText:
 	var args: String = ""
 	var text: String = ""
+	var cond: Callable #Callable[]->bool
 
 var text: String = ""
 var help_text: Array[CmdHelpText] = []
@@ -30,6 +31,10 @@ func add_help(args: String, helptxt: String) -> ConsoleCommand:
 	ht.text = helptxt
 	help_text.append(ht)
 	return self
+func add_help_cond(args: String, helptxt: String, cond: Callable) -> ConsoleCommand:
+	add_help(args, helptxt)
+	help_text.back().cond = cond
+	return self
 func add_disable(proc: Callable) -> ConsoleCommand:
 	disabled_procs.append(proc)
 	return self
@@ -44,10 +49,12 @@ func is_debug() -> bool:
 func get_helptext() -> String:
 	var s := ""
 	for ht in help_text:
+		if ht.cond and not ht.cond.call(): continue
 		s += "%s %s\n    %s\n" % [text,ht.args,ht.text.replace("\n","\n    ")]
 	return s
 func output_helptext(console: BaseConsole) -> void:
 	for ht in help_text:
+		if ht.cond and not ht.cond.call(): continue
 		console.add_line("%s %s" % [text,ht.args], "", console.COLOR_UI_MSG)
 		console.add_indent(HELPTEXT_INDENT)
 		console.add_line(ht.text, "", console.COLOR_UI_MSG)
