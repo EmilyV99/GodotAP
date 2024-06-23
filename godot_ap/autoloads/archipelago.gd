@@ -77,6 +77,8 @@ var aplock: APLock = null
 
 var _socket := WebSocketPeer.new()
 
+var config := APConfigManager.new()
+
 #region CONNECTION
 var conn: ConnectionInfo ## The active Archipelago connection
 
@@ -144,9 +146,10 @@ func ap_disconnect() -> void:
 		var part := output_console.add_line("Disconnecting...","%s:%s %s" % [creds.ip,creds.port,creds.slot],output_console.COLOR_UI_MSG)
 		while status != APStatus.DISCONNECTED:
 			await status_updated
-		part.text = "Disconnected from AP.\n"
+		part.text = "Disconnected from AP."
 #endregion CONNECTION
 
+#region LOGGING TO FILE
 static var logging_file = null
 ## Opens the GodotAP logging file, if it isn't already open
 static func open_logger() -> void:
@@ -171,6 +174,7 @@ static func comm_log(pref: String, s: Variant) -> void:
 static func dblog(s: Variant) -> void:
 	if not OS.is_debug_build(): return
 	AP.log(s)
+#endregion
 
 func _poll():
 	if status == APStatus.DISCONNECTED:
@@ -200,7 +204,7 @@ func _poll():
 						status = APStatus.DISCONNECTING
 						AP.log("Connection to '%s' failed too much! Giving up!" % get_url())
 						if output_console and _connecting_part:
-							_connecting_part.text = "Connection Failed!\n"
+							_connecting_part.text = "Connection Failed!"
 							_connecting_part.tooltip += "\nFailed connecting too many times. Check your connection details, or '/reconnect' to try again."
 							_connecting_part = null
 					else:
@@ -246,7 +250,7 @@ func _handle_command(json: Dictionary) -> void:
 		"RoomInfo":
 			status = APStatus.CONNECTED
 			if output_console and _connecting_part:
-				_connecting_part.text = "Authenticating...\n"
+				_connecting_part.text = "Authenticating..."
 			conn = ConnectionInfo.new()
 			conn.serv_version = Version.from(json["version"])
 			conn.gen_version = Version.from(json["generator_version"])
@@ -262,7 +266,7 @@ func _handle_command(json: Dictionary) -> void:
 		"ConnectionRefused":
 			var err_str := str(json["errors"])
 			if output_console and _connecting_part:
-				_connecting_part.text = "Connection Refused!\n"
+				_connecting_part.text = "Connection Refused!"
 				_connecting_part.tooltip += "\nERROR(S): "+err_str
 				_connecting_part = null
 			AP.log("Connection errors: %s" % err_str)
@@ -281,7 +285,7 @@ func _handle_command(json: Dictionary) -> void:
 			if aplock:
 				var lock_err := aplock.lock(conn)
 				if lock_err:
-					_connecting_part.text = "Connection Mismatch! Wrong slot for this save!\n"
+					_connecting_part.text = "Connection Mismatch! Wrong slot for this save!"
 					for s in lock_err:
 						_connecting_part.tooltip += "\n%s" % s
 						_connecting_part = null
@@ -311,7 +315,7 @@ func _handle_command(json: Dictionary) -> void:
 			
 			status = APStatus.PLAYING
 			if output_console and _connecting_part:
-				_connecting_part.text = "Connected Successfully!\n"
+				_connecting_part.text = "Connected Successfully!"
 				_connecting_part = null
 			
 			if AP_PRINT_ITEMS_ON_CONNECT:

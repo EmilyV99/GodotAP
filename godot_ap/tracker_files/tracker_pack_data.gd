@@ -67,7 +67,8 @@ func _load_file(json: Dictionary) -> Error:
 	vals.assign(json.get("locations", []))
 	locations.clear()
 	for v in vals:
-		locations.append(TrackerLocation.load_dict(v, self))
+		var loc := TrackerLocation.load_dict(v, self)
+		if loc: locations.append(loc)
 	named_rules.clear()
 	var dict: Dictionary = json.get("named_rules", {})
 	for name in dict.keys():
@@ -105,7 +106,7 @@ func get_or_create_loc(identifier) -> TrackerLocation:
 		if loc.identifier == identifier:
 			return loc
 	var ret := TrackerLocation.make_id(identifier) if identifier is int else TrackerLocation.make_name(identifier)
-	locations.append(ret)
+	if ret: locations.append(ret)
 	return ret
 
 func set_named_rule(name: String, rule: TrackerLogicNode) -> void:

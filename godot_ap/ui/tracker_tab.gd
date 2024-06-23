@@ -7,10 +7,15 @@ class_name TrackerTab extends MarginContainer
 var tracker: TrackerScene_Base = null
 var info_part: BaseConsole.TextPart = null
 
-static var tracking: bool = false
+static var tracking: bool = false :
+	set(val):
+		if Archipelago.config:
+			Archipelago.config.is_tracking = val
+		tracking = val
+		Archipelago.set_tag("Tracker", val)
 
 func refr_tags():
-	TrackerTab.tracking = "Tracker" in Archipelago.AP_GAME_TAGS
+	TrackerTab.tracking = "Tracker" in Archipelago.AP_GAME_TAGS or Archipelago.config.is_tracking
 	tracker_button.set_pressed_no_signal(TrackerTab.tracking)
 	init_tracker()
 		
@@ -137,7 +142,21 @@ static func load_tracker_packs() -> void:
 	var games: Dictionary = {}
 	var errors: Dictionary = {}
 	for fname in file_names:
+		var tpack_verbose_part
+		if Archipelago.config.verbose_trackerpack:
+			var txt := "Loading TrackerPack from '%s'..." % fname
+			if Archipelago.output_console:
+				tpack_verbose_part = Archipelago.output_console.add_text(txt, "", Archipelago.output_console.COLOR_UI_MSG)
+				Archipelago.output_console.add_ensure_newline()
+			AP.log(txt)
 		var pack := TrackerPack_Base.load_from(fname)
+		if Archipelago.config.verbose_trackerpack:
+			var txt: String= "%s loading TrackerPack '%s'" % ["Success" if pack else "Failure", fname]
+			if Archipelago.output_console and tpack_verbose_part:
+				tpack_verbose_part.text = txt
+				tpack_verbose_part.color = Archipelago.rich_colors["green" if pack else "red"]
+				tpack_verbose_part.tooltip = pack.game if pack else TrackerPack_Base.load_error
+			AP.log(txt)
 		match TrackerPack_Base.load_error:
 			"": # Valid
 				pass
@@ -179,9 +198,6 @@ static func load_tracker_packs() -> void:
 		AP.log("No TrackerPacks Found")
 		console.add_line("No TrackerPacks Found", "Add packs to `./tracker_packs/` and relaunch to load!", console.COLOR_UI_MSG)
 	
-	if false:
-		for t in trackers.values():
-			t.resave()
 
 static func sort_by_location_status(a: String, b: String) -> int:
 	var ai = -1

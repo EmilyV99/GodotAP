@@ -7,23 +7,28 @@
 		{
 			"name": "Found",
 			"ttip": "Already found",
-			"color": "green",
+			"color": "green"
+		},
+		{
+			"name": "Unknown",
+			"ttip": "",
+			"color": "white"
 		},
 		{
 			"name": "Unreachable",
 			"ttip": "Cannot be accessed",
-			"color": "red",
+			"color": "red"
 		},
 		{
 			"name": "Out of Logic",
 			"ttip": "Reachable, but not currently expected of you, and might require glitches/tricks or be exceedingly difficult.",
-			"color": "orange",
+			"color": "orange"
 		},
 		{
 			"name": "Reachable",
 			"ttip": "Currently reachable within logic",
-			"color": "plum",
-		},
+			"color": "plum"
+		}
 	],
 	"locations": [
 		{
@@ -34,8 +39,8 @@
 				"rules": [
 					{
 						"type": "ITEM",
-						"count": 2,
-						"value": "L2 Small Key"
+						"value": "L2 Small Key",
+						"count": 2
 					},
 					{
 						"type": "ANY",
@@ -48,14 +53,14 @@
 						]
 					}
 				]
-			},
+			}
 		},
 		{
 			"id": "name_in_ap",
 			"visname": "Name to Show Users",
 			"Reachable": "SomeNamedRule",
-			"Out of Logic": true,
-		},
+			"Out of Logic": true
+		}
 	],
 	"named_rules": {
 		"SomeNamedRule": {
@@ -63,7 +68,7 @@
 			"name": "Money",
 			"op": ">=",
 			"value": 500
-		},
+		}
 	},
 	"variables": {
 		"Money": {
@@ -76,8 +81,8 @@
 				"50 Money": {
 					"type": "+",
 					"value": 50
-				},
+				}
 			}
-		},
+		}
 	}
 }

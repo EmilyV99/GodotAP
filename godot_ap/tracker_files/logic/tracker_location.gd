@@ -59,10 +59,12 @@ func add_rule(name: String, rule: TrackerLogicNode):
 	status_rules[name] = rule
 
 static func make_id(id: int) -> TrackerLocation:
+	if id < 0: return null
 	var ret := TrackerLocation.new()
 	ret.identifier = id
 	return ret
 static func make_name(name: String) -> TrackerLocation:
+	if name.is_empty(): return null
 	var ret := TrackerLocation.new()
 	ret.identifier = name
 	return ret
@@ -93,16 +95,40 @@ static func load_dict(s: Dictionary, parent: TrackerPack_Base) -> TrackerLocatio
 			ret.map_spots.append(MapSpot.from_dict(dict))
 		ret.pack = parent
 		if parent is TrackerPack_Data:
+			var dict := s.duplicate()
+			dict.erase("id")
+			dict.erase("visname")
+			dict.erase("map_spots")
 			for status in parent.statuses_by_name.keys():
-				if status in ["Found","Unreachable"]: continue
-				var rule = TrackerLogicNode.from_json_val(s.get(status))
+				if status in ["Found","Unreachable","Not Found"]: continue
+				var rule = TrackerLogicNode.from_json_val(dict.get(status))
 				if rule:
+					dict.erase(status)
 					ret.add_rule(status, rule)
 			ret.add_rule("Found", TrackerLogicLocCollected.make(ret.identifier))
+			if dict and Archipelago.config.verbose_trackerpack:
+				var src: String = "Location '%s' will ignore its' rule for this status!" % ret.identifier
+				for e in dict.keys():
+					var txt: String = "Status '%s' has not been defined in the 'statuses' section!" % str(e)
+					AP.log(txt)
+					if Archipelago.output_console:
+						Archipelago.output_console.add_line(txt, src, Archipelago.rich_colors["orange"])
+					AP.log("\t"+src)
+	else:
+		if Archipelago.config.verbose_trackerpack:
+			var txt: String = "Error loading location!"
+			var src: String = "Must include 'id' of type 'int' >=0 or 'String' non-empty!\n" + JSON.stringify(s, "    ", false)
+			AP.log(txt)
+			if Archipelago.output_console:
+				Archipelago.output_console.add_line(txt, src, Archipelago.rich_colors["orange"])
+			AP.log(("    "+src).replace("\n", "\n    "))
 	return ret
 
 func _to_string():
 	return "%s (reqs %s)" % [identifier, status_rules]
 
 func get_loc_name() -> String:
-	return TrackerTab.get_location(identifier).get_display_name()
+	var disp_name := TrackerTab.get_location(identifier).get_display_name()
+	if disp_name.is_empty():
+		return identifier if identifier is String else Archipelago.get_gamedata_for_player().get_loc_name(identifier)
+	return disp_name

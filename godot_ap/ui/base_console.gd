@@ -290,8 +290,8 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 		else:
 			c.tooltip_bg.position.y = c.hovered_hitbox.position.y + c.hovered_hitbox.size.y
 		#region Add border
-		const HMARGIN = 2
-		const VMARGIN = 2
+		const HMARGIN = 6
+		const VMARGIN = 4
 		c.tooltip_label.position.x = HMARGIN
 		c.tooltip_label.position.y = VMARGIN
 		c.tooltip_bg.size.x += 2*HMARGIN
@@ -758,10 +758,10 @@ func make_c_text(text: String, ttip := "", col := Color.TRANSPARENT) -> CenterTe
 func add_c_text(text: String, ttip := "", col := Color.TRANSPARENT) -> CenterTextPart:
 	return add(make_c_text(text, ttip, col))
 
-func make_line(text, ttip := "", col := Color.TRANSPARENT) -> TextPart:
-	return make_text(text+"\n", ttip, col)
 func add_line(text, ttip := "", col := Color.TRANSPARENT) -> TextPart:
-	return add(make_line(text, ttip, col))
+	var ret := add_text(text, ttip, col)
+	add_ensure_newline()
+	return ret
 
 func make_spacing(spacing: Vector2, reset_line := true, from_reset_y := false) -> SpacingPart:
 	var part = SpacingPart.new()
@@ -816,7 +816,8 @@ func make_indented_block(s: String, indent: float, color := Color.TRANSPARENT) -
 		if depth: # Update the indent when it changes
 			c._add(make_indent(indent * depth))
 			indent_depth += depth
-		c._add(make_line(line, "", color))
+		c._add(make_text(line, "", color))
+		ensure_newline(c.parts)
 	if indent_depth:
 		c._add(make_indent(indent * -indent_depth)) # Reset indent
 	return c

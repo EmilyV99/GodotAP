@@ -1,0 +1,20 @@
+[gd_scene load_steps=5 format=3 uid="uid://cn2jx75qawc6k"]
+
+[ext_resource type="Script" path="res://godot_ap/ui/setting_entry.gd" id="1_dqtke"]
+[ext_resource type="SystemFont" uid="uid://73rjoc23d4ub" path="res://godot_ap/ui/console_font.tres" id="2_kuoo6"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ek07r"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_vttdd"]
+font = ExtResource("2_kuoo6")
+
+[node name="Entry" type="HBoxContainer"]
+script = ExtResource("1_dqtke")
+
+[node name="CBox" type="CheckBox" parent="."]
+layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_ek07r")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+label_settings = SubResource("LabelSettings_vttdd")

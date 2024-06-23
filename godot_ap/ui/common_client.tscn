@@ -1,8 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://cn7ah7d3ep4de"]
+[gd_scene load_steps=7 format=3 uid="uid://cn7ah7d3ep4de"]
 
 [ext_resource type="PackedScene" uid="uid://cgq7n1figlpu3" path="res://godot_ap/ui/base_client.tscn" id="1_i5jgm"]
 [ext_resource type="Script" path="res://godot_ap/ui/tracker_tab.gd" id="2_h31sw"]
 [ext_resource type="PackedScene" uid="uid://bwamxuo3s7c8n" path="res://godot_ap/ui/plain_console.tscn" id="3_0ejly"]
+[ext_resource type="Script" path="res://godot_ap/ui/SettingsTab.gd" id="4_h5bt6"]
+[ext_resource type="PackedScene" uid="uid://cn2jx75qawc6k" path="res://godot_ap/ui/settings_cbox_entry.tscn" id="5_7ypwu"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ov043"]
 
@@ -49,6 +51,39 @@ focus_next = NodePath("")
 focus_previous = NodePath("")
 focus_mode = 0
 
+[node name="Settings" type="MarginContainer" parent="Tabs" index="4"]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
+script = ExtResource("4_h5bt6")
+
+[node name="BG" type="ColorRect" parent="Tabs/Settings" index="0"]
+layout_mode = 2
+color = Color(0.174028, 0.174028, 0.174028, 1)
+
+[node name="Margin" type="MarginContainer" parent="Tabs/Settings" index="1"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="Row" type="HBoxContainer" parent="Tabs/Settings/Margin" index="0"]
+layout_mode = 2
+
+[node name="Col1" type="VBoxContainer" parent="Tabs/Settings/Margin/Row" index="0"]
+layout_mode = 2
+
+[node name="TrackVerbose" parent="Tabs/Settings/Margin/Row/Col1" index="0" instance=ExtResource("5_7ypwu")]
+layout_mode = 2
+
+[node name="Label" parent="Tabs/Settings/Margin/Row/Col1/TrackVerbose" index="1"]
+text = "Verbose TrackerPack Output"
+
 [connection signal="sort_children" from="Tabs/Tracking/Column/Margins/Row" to="Tabs/Tracking/Column/Margins/Row/InfoLabel" method="queue_redraw"]
 
 [editable path="Tabs/Hints/Console"]
+[editable path="Tabs/Settings/Margin/Row/Col1/TrackVerbose"]
