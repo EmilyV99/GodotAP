@@ -36,7 +36,7 @@ func get_status() -> String:
 	else:
 		statuses_in_order = [LocationStatus.ACCESS_UNKNOWN,LocationStatus.ACCESS_FOUND,LocationStatus.ACCESS_UNREACHABLE,LocationStatus.ACCESS_LOGIC_BREAK,LocationStatus.ACCESS_REACHABLE]
 	var found_something := false
-	for status in statuses_in_order:
+	for status in Util.reversed(statuses_in_order):
 		var rule: TrackerLogicNode = status_rules.get(status.text)
 		if not rule: continue
 		var v = rule.can_access()
