@@ -8,15 +8,9 @@ func instantiate() -> TrackerScene_Base:
 	if scene and scene.can_instantiate():
 		return scene.instantiate()
 	return super()
+	
+func _save_file(_data: Dictionary) -> Error:
+	return ERR_UNAVAILABLE
 
-func save_file(file: FileAccess) -> Error:
-	var err := super(file)
-	if err: return err
-	file.store_var(scene, true)
-	return file.get_error()
-
-func _load_file(file: FileAccess) -> Error:
-	var err := super(file)
-	if err: return err
-	scene = file.get_var(true)
-	return file.get_error()
+func _load_file(_data: Dictionary) -> Error:
+	return ERR_UNAVAILABLE

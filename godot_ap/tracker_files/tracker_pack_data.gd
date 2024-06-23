@@ -33,16 +33,7 @@ signal _item_register(name: String)
 func register_item(name: String) -> void:
 	_item_register.emit(name)
 
-func save_as(path: String) -> Error:
-	if not path.ends_with(".json"):
-		path += ".json"
-	var file := FileAccess.open(path, FileAccess.WRITE)
-	if not file: return FileAccess.get_open_error()
-	return save_file(file)
-
-func save_file(file: FileAccess) -> Error:
-	return save_json_file(file)
-func _save_json_file(data: Dictionary) -> Error:
+func _save_file(data: Dictionary) -> Error:
 	var err := super(data)
 	if err: return err
 	var loc_vals: Array[Dictionary] = []
@@ -61,10 +52,7 @@ func _save_json_file(data: Dictionary) -> Error:
 	data["named_rules"] = rules_dict
 	return OK
 
-func _load_file(_file: FileAccess) -> Error:
-	return ERR_INVALID_DATA
-
-func _load_json_file(json: Dictionary) -> Error:
+func _load_file(json: Dictionary) -> Error:
 	var err := super(json)
 	if err: return err
 	description_bar = json.get("description_bar", "")
