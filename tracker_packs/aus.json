@@ -2043,8 +2043,738 @@
 				]
 			},
 		},
+		{
+			"id": "Skylands_heart_gate",
+			"visname": "SkyLands Heart Door",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 427,
+					"y": 142
+				}
+			],
+			"Reachable": "AccessSkyLandsRight",
+		},
+		{
+			"id": "Skylands_portal",
+			"visname": "SkyLands Portal From NightWalk",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 412,
+					"y": 127
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessGrottoUpper",
+					"RED"
+				]
+			},
+		},
+		{
+			"id": "Skylands_toll_gate",
+			"visname": "SkyLands Tollgate",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 352,
+					"y": 142
+				}
+			],
+			"Reachable": "AccessSkyLands",
+		},
+		{
+			"id": "Skylands_underhang",
+			"visname": "SkyLands Upper Right Underhang Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 442,
+					"y": 67
+				}
+			],
+			"Reachable": "AccessSkyLandsRight",
+		},
 		
+		{
+			"id": "Skysand_boss",
+			"visname": "SkySand Gold Orb",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 37,
+					"y": 22
+				}
+			],
+			"Reachable": "AccessSkySandMiddle",
+		},
+		{
+			"id": "Skysand_boss_10",
+			"visname": "SkySand Boss",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 37,
+					"y": 37
+				}
+			],
+			"Reachable": "AccessSkySandMiddle",
+		},
+		{
+			"id": "Skysand_bot_left",
+			"visname": "SkySand Lower Save",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 22,
+					"y": 112
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessSkySandInner",
+					"STICK",
+					"RED"
+				]
+			},
+		},
+		{
+			"id": "Skysand_left_outside",
+			"visname": "SkySand Lower Outside",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 22,
+					"y": 112
+				}
+			],
+			"Reachable": "AccessSkySandMiddle",
+		},
+		{
+			"id": "Skysand_left_roof",
+			"visname": "SkySand Upper Save",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 22,
+					"y": 82
+				}
+			],
+			"Reachable": "AccessSkySandMiddle",
+		},
+		{
+			"id": "Skysand_right_roof_chest",
+			"visname": "SkySand Right Roof Chest",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 52,
+					"y": 82
+				}
+			],
+			"Reachable": "AccessSkySandMiddle",
+		},
+		{
+			"id": "Skysand_right_heart_door",
+			"visname": "SkySand Lower Heart Door",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 52,
+					"y": 82
+				}
+			],
+			"Reachable": "AccessSkySandMiddle",
+		},
+		{
+			"id": "Skysand_top_heart_door",
+			"visname": "SkySand Upper Heart Door",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 37,
+					"y": 52
+				}
+			],
+			"Reachable": "AccessSkySandMiddle",
+		},
+		{
+			"id": "Skysand_top",
+			"visname": "SkySand Upper Yellow Energy",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 37,
+					"y": 52
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessSkySandMiddle",
+					"YELLOW",
+					{
+						"type": "ITEM",
+						"count": 3,
+						"value": "Double Jump Upgrade"
+					}
+				]
+			},
+		},
 		
+		{
+			"id": "Skytown_flower",
+			"visname": "Sky Town Entrance Flower",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 67,
+					"y": 142
+				}
+			],
+			"Reachable": "AccessSkyTown",
+		},
+		{
+			"id": "Skytown_tower_heart",
+			"visname": "Sky Town Tower Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 67,
+					"y": 142
+				}
+			],
+			"Reachable": "AccessSkySand",
+		},
+		{
+			"id": "Skytown_pit_left",
+			"visname": "Sky Town Pit Left",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 67,
+					"y": 157
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessSkyTown",
+					"FIRE",
+					{
+						"type": "VAR",
+						"name": "JumpHeight",
+						"op": ">=",
+						"value": 5
+					}
+				]
+			},
+		},
+		{
+			"id": "Skytown_pit_right",
+			"visname": "Sky Town Pit Right",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 97,
+					"y": 157
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessSkyTown",
+					{
+						"type": "ITEM",
+						"count": 3,
+						"value": "Jump Upgrade"
+					},
+					{
+						"type": "ITEM",
+						"value": "Double Jump Upgrade"
+					}
+				]
+			},
+		},
+		{
+			"id": "Skytown_red_heart",
+			"visname": "Sky Town Red Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 37,
+					"y": 142
+				}
+			],
+			"Reachable": {
+				"type": "ANY",
+				"rules": [
+					"AccessSkySandInner",
+					{
+						"type": "ALL",
+						"rules": [
+							"AccessSkyTown",
+							"RED"
+						]
+					}
+				]
+			},
+		},
+		{
+			"id": "Skytown_shop_1",
+			"visname": "Sky Town Shop 1",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 37,
+					"y": 142
+				}
+			],
+			"Reachable": "AccessSkyTown",
+		},
+		{
+			"id": "Skytown_shop_2",
+			"visname": "Sky Town Shop 2",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 37,
+					"y": 142
+				}
+			],
+			"Reachable": "AccessSkyTown",
+		},
+		{
+			"id": "Skytown_shop_3",
+			"visname": "Sky Town Shop 3",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 37,
+					"y": 142
+				}
+			],
+			"Reachable": "AccessSkyTown",
+		},
+		{
+			"id": "Skytown_shop_4",
+			"visname": "Sky Town Shop 4",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 37,
+					"y": 142
+				}
+			],
+			"Reachable": "CanBuyEverythingInShop",
+			"Out of Logic": "AccessSkyTown",
+		},
+		{
+			"id": "Skytown_shop_5",
+			"visname": "Sky Town Shop 5",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 37,
+					"y": 142
+				}
+			],
+			"Reachable": "AccessSkyTown",
+		},
+		{
+			"id": "Skytown_shop_6",
+			"visname": "Sky Town Shop 6",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 37,
+					"y": 142
+				}
+			],
+			"Reachable": "CanBuyEverythingInShop",
+			"Out of Logic": "AccessSkyTown",
+		},
+		{
+			"id": "Skytown_shop_7",
+			"visname": "Sky Town Shop 7",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 37,
+					"y": 142
+				}
+			],
+			"Reachable": "CanBuyEverythingInShop",
+			"Out of Logic": "AccessSkyTown",
+		},
+		{
+			"id": "Skytown_shop_8",
+			"visname": "Sky Town Shop 8",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 37,
+					"y": 142
+				}
+			],
+			"Reachable": "CanBuyEverythingInShop",
+			"Out of Logic": "AccessSkyTown",
+		},
+		{
+			"id": "Skytown_yellow_heart",
+			"visname": "Sky Town Edge",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 22,
+					"y": 142
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessSkyTown",
+					"YELLOW",
+					{
+						"type": "ITEM",
+						"value": "Double Jump Upgrade"
+					}
+				]
+			},
+		},
+		
+		{
+			"id": "5_flowers",
+			"visname": "5 Flowers",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 142,
+					"y": 7
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessStaircase",
+					{
+						"type": "ITEM",
+						"count": 5,
+						"value": "Secret Flower"
+					}
+				]
+			},
+		},
+		{
+			"id": "10_flowers",
+			"visname": "10 Flowers",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 142,
+					"y": 7
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessStaircase",
+					{
+						"type": "ITEM",
+						"count": 10,
+						"value": "Secret Flower"
+					}
+				]
+			},
+		},
+		{
+			"id": "15_flowers",
+			"visname": "15 Flowers",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 142,
+					"y": 7
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessStaircase",
+					{
+						"type": "ITEM",
+						"count": 15,
+						"value": "Secret Flower"
+					}
+				]
+			},
+		},
+		{
+			"id": "20_flowers",
+			"visname": "20 Flowers",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 142,
+					"y": 7
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessStaircase",
+					{
+						"type": "ITEM",
+						"count": 20,
+						"value": "Secret Flower"
+					}
+				]
+			},
+		},
+		
+		{
+			"id": "Stonecastle_boss_5",
+			"visname": "StoneCastle Rock Boss",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 67,
+					"y": 202
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessStoneCastle",
+					"RED"
+				]
+			},
+		},
+		{
+			"id": "Stonecastle_boss_9",
+			"visname": "StoneCastle Eye Boss",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 82,
+					"y": 187
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessStoneCastleUpper",
+					"DIVEBOMB",
+					"SLIDE"
+				]
+			},
+			"Out Of Logic": {
+				"type": "ALL",
+				"rules": [
+					"AccessStoneCastleUpper",
+					"DIVEBOMB"
+				]
+			},
+		},
+		{
+			"id": "Stonecastle_eye_boss",
+			"visname": "StoneCastle Gold Orb",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 97,
+					"y": 187
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessStoneCastleUpper",
+					"DIVEBOMB",
+					"SLIDE"
+				]
+			},
+			"Out Of Logic": {
+				"type": "ALL",
+				"rules": [
+					"AccessStoneCastleUpper",
+					"DIVEBOMB"
+				]
+			},
+		},
+		{
+			"id": "Stonecastle_flower",
+			"visname": "StoneCastle Entry Flower",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 37,
+					"y": 202
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessStoneCastle",
+					{
+						"type": "VAR",
+						"name": "JumpHeight",
+						"op": ">=",
+						"value": 5
+					}
+				]
+			},
+		},
+		{
+			"id": "Stonecastle_heart_door",
+			"visname": "StoneCastle Heart Door",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 52,
+					"y": 202
+				}
+			],
+			"Reachable": "AccessStoneCastle",
+		},
+		{
+			"id": "Stonecastle_hidden_heart",
+			"visname": "StoneCastle Hidden Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 52,
+					"y": 202
+				}
+			],
+			"Reachable": "AccessStoneCastle",
+		},
+		{
+			"id": "Stonecastle_rock_boss",
+			"visname": "StoneCastle Divebomb Upgrade",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 82,
+					"y": 202
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessStoneCastle",
+					"RED",
+					"DIVEBOMB"
+				]
+			},
+			"Out of Logic": {
+				"type": "ALL",
+				"rules": [
+					"AccessStoneCastle",
+					"RED"
+				]
+			},
+		},
+		{
+			"id": "Stonecastle_top_heart",
+			"visname": "StoneCastle Upper Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 52,
+					"y": 172
+				}
+			],
+			"Reachable": "AccessStoneCastleUpper",
+		},
+		
+		{
+			"id": "Strangecastle",
+			"visname": "Strangecastle",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 67,
+					"y": 307
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessStrangeCastle",
+					"FIRE",
+					{
+						"type": "ITEM",
+						"count": 2,
+						"value": "Jump Upgrade"
+					}
+				]
+			},
+			"Out of Logic": "AccessStrangeCastle",
+		},
+		{
+			"id": "Strangecastle_heart_door",
+			"visname": "Strangecastle Heart Door",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 67,
+					"y": 307
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessStrangeCastle",
+					"FIRE",
+					{
+						"type": "ITEM",
+						"count": 2,
+						"value": "Jump Upgrade"
+					}
+				]
+			},
+		},
+		
+		{
+			"id": "Undertomb_left",
+			"visname": "UnderTomb Left",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 337,
+					"y": 217
+				}
+			],
+			"Reachable": "AccessUnderTomb",
+		},
+		{
+			"id": "Undertomb_left_heart_door",
+			"visname": "UnderTomb Left Heart Door",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 337,
+					"y": 217
+				}
+			],
+			"Reachable": "AccessUnderTomb",
+		},
+		{
+			"id": "Undertomb_right_heart_door",
+			"visname": "UnderTomb Right Heart Door",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 367,
+					"y": 202
+				}
+			],
+			"Reachable": "AccessUnderTomb",
+		},
 	],
 	"named_rules": {
 		"AccessBlackCastle": "AccessLongBeach",
@@ -2397,10 +3127,16 @@
 			]
 		},
 		"CanBuyEverythingInShop": {
-			"type": "VAR",
-			"name": "Crystals",
-			"op": ">",
-			"value": 1167
+			"type": "ALL",
+			"rules": [
+				"AccessSkyTown",
+				{
+					"type": "VAR",
+					"name": "Crystals",
+					"op": ">",
+					"value": 1167
+				}
+			]
 		},
 		
 		"FIRE": {
