@@ -155,7 +155,7 @@ static func load_tracker_packs() -> void:
 			if Archipelago.output_console and tpack_verbose_part:
 				tpack_verbose_part.text = txt
 				tpack_verbose_part.color = Archipelago.rich_colors["green" if pack else "red"]
-				tpack_verbose_part.tooltip = pack.game if pack else TrackerPack_Base.load_error
+				tpack_verbose_part.tooltip = ("TrackerPack for '%s'" % pack.game) if pack else TrackerPack_Base.load_error
 			AP.log(txt)
 		match TrackerPack_Base.load_error:
 			"": # Valid
