@@ -7,23 +7,28 @@
 		{
 			"name": "Found",
 			"ttip": "Already found",
-			"color": "green",
+			"color": "green"
+		},
+		{
+			"name": "Unknown",
+			"ttip": "",
+			"color": "white"
 		},
 		{
 			"name": "Unreachable",
 			"ttip": "Cannot be accessed",
-			"color": "red",
+			"color": "red"
 		},
 		{
 			"name": "Out of Logic",
 			"ttip": "Reachable, but not currently expected of you, and might require glitches/tricks or be exceedingly difficult.",
-			"color": "orange",
+			"color": "orange"
 		},
 		{
 			"name": "Reachable",
 			"ttip": "Currently reachable within logic",
-			"color": "plum",
-		},
+			"color": "plum"
+		}
 	],
 	"locations": [
 		{
@@ -40,9 +45,9 @@
 				"type": "ALL",
 				"rules": [
 					"AccessBlackCastleInner",
-					"FIRE",
+					"FIRE"
 				]
-			},
+			}
 		},
 		{
 			"id": "Blackcastle_end_flower",
@@ -58,9 +63,9 @@
 				"type": "ALL",
 				"rules": [
 					"AccessBlackCastleInner",
-					"FIRE",
+					"FIRE"
 				]
-			},
+			}
 		},
 		{
 			"id": "Blackcastle_top_mid",
@@ -76,11 +81,10 @@
 				"type": "ALL",
 				"rules": [
 					"AccessBlackCastleInner",
-					"FIRE",
+					"FIRE"
 				]
-			},
+			}
 		},
-		
 		{
 			"id": "Blancland_boss",
 			"visname": "BlancLand Top Save",
@@ -96,9 +100,9 @@
 				"rules": [
 					"AccessBlancLandLowerLeft",
 					"RED",
-					"FIRE",
+					"FIRE"
 				]
-			},
+			}
 		},
 		{
 			"id": "Blancland_boss_16",
@@ -115,9 +119,9 @@
 				"rules": [
 					"AccessBlancLandLowerLeft",
 					"RED",
-					"FIRE",
+					"FIRE"
 				]
-			},
+			}
 		},
 		{
 			"id": "Blancland_bottom_left",
@@ -134,16 +138,16 @@
 				"rules": [
 					"AccessBlancLandLowerLeft",
 					"RED",
-					"ICE",
+					"ICE"
 				]
 			},
 			"Out of Logic": {
 				"type": "ALL",
 				"rules": [
 					"AccessBlancLandLowerLeft",
-					"ICE",
+					"ICE"
 				]
-			},
+			}
 		},
 		{
 			"id": "Blancland_entrance_flower",
@@ -155,7 +159,7 @@
 					"y": 262
 				}
 			],
-			"Reachable": "AccessBlancLand",
+			"Reachable": "AccessBlancLand"
 		},
 		{
 			"id": "Blancland_top_left_kill",
@@ -173,11 +177,10 @@
 					"AccessBlancLandLowerLeft",
 					"RED",
 					"FIRE",
-					"SLIDE",
+					"SLIDE"
 				]
-			},
+			}
 		},
-		
 		{
 			"id": "Bonus_1",
 			"visname": "Bonus 1",
@@ -189,7 +192,7 @@
 				}
 			],
 			"Reachable": "AccessFireCageInner",
-			"Out of Logic": "AccessFireCageInnerOOL",
+			"Out of Logic": "AccessFireCageInnerOOL"
 		},
 		{
 			"id": "Bonus_2",
@@ -202,9 +205,8 @@
 				}
 			],
 			"Reachable": "AccessFireCageInner",
-			"Out of Logic": "AccessFireCageInnerOOL",
+			"Out of Logic": "AccessFireCageInnerOOL"
 		},
-		
 		{
 			"id": "Bottom_flower",
 			"visname": "Bottom Flower",
@@ -215,7 +217,7 @@
 					"y": 367
 				}
 			],
-			"Reachable": "AccessBottom",
+			"Reachable": "AccessBottom"
 		},
 		{
 			"id": "Bottom_heart",
@@ -227,9 +229,8 @@
 					"y": 352
 				}
 			],
-			"Reachable": "AccessBottom",
+			"Reachable": "AccessBottom"
 		},
-		
 		{
 			"id": "Cloudrun_boss",
 			"visname": "CloudRun Gold Orb",
@@ -240,7 +241,7 @@
 					"y": 352
 				}
 			],
-			"Reachable": "AccessCloudRunRight",
+			"Reachable": "AccessCloudRunRight"
 		},
 		{
 			"id": "Cloudrun_boss_11",
@@ -252,7 +253,7 @@
 					"y": 352
 				}
 			],
-			"Reachable": "AccessCloudRunRight",
+			"Reachable": "AccessCloudRunRight"
 		},
 		{
 			"id": "Cloudrun_far_right",
@@ -264,7 +265,7 @@
 					"y": 352
 				}
 			],
-			"Reachable": "AccessCloudRunRight",
+			"Reachable": "AccessCloudRunRight"
 		},
 		{
 			"id": "Cloudrun_left_under",
@@ -276,7 +277,7 @@
 					"y": 352
 				}
 			],
-			"Reachable": "AccessCloudRun",
+			"Reachable": "AccessCloudRun"
 		},
 		{
 			"id": "Cloudrun_mid_save",
@@ -288,7 +289,7 @@
 					"y": 352
 				}
 			],
-			"Reachable": "AccessCloudRunMiddle",
+			"Reachable": "AccessCloudRunMiddle"
 		},
 		{
 			"id": "Cloudrun_start_flower",
@@ -300,9 +301,8 @@
 					"y": 352
 				}
 			],
-			"Reachable": "AccessCloudRun",
+			"Reachable": "AccessCloudRun"
 		},
-		
 		{
 			"id": "Coldkeep_boss_3",
 			"visname": "ColdKeep Boss",
@@ -324,7 +324,7 @@
 						"value": 5
 					}
 				]
-			},
+			}
 		},
 		{
 			"id": "Coldkeep_boss",
@@ -347,7 +347,7 @@
 						"value": 5
 					}
 				]
-			},
+			}
 		},
 		{
 			"id": "Coldkeep_cannon_heart",
@@ -365,7 +365,7 @@
 					"AccessColdKeep",
 					"ICE"
 				]
-			},
+			}
 		},
 		{
 			"id": "Coldkeep_high_branch",
@@ -377,7 +377,7 @@
 					"y": 142
 				}
 			],
-			"Reachable": "AccessColdKeep",
+			"Reachable": "AccessColdKeep"
 		},
 		{
 			"id": "Coldkeep_low_branch",
@@ -389,9 +389,8 @@
 					"y": 157
 				}
 			],
-			"Reachable": "AccessColdKeep",
+			"Reachable": "AccessColdKeep"
 		},
-		
 		{
 			"id": "Curtain_boss",
 			"visname": "The Curtain Upper Save",
@@ -402,7 +401,7 @@
 					"y": 7
 				}
 			],
-			"Reachable": "AccessTheCurtainUpper",
+			"Reachable": "AccessTheCurtainUpper"
 		},
 		{
 			"id": "Curtain_boss_14",
@@ -414,7 +413,7 @@
 					"y": 7
 				}
 			],
-			"Reachable": "AccessTheCurtainUpper",
+			"Reachable": "AccessTheCurtainUpper"
 		},
 		{
 			"id": "Curtain_break",
@@ -432,7 +431,7 @@
 					"AccessTheCurtainUpper",
 					"DIVEBOMB"
 				]
-			},
+			}
 		},
 		{
 			"id": "Curtain_kill_4",
@@ -444,7 +443,7 @@
 					"y": 37
 				}
 			],
-			"Reachable": "AccessTheCurtainUpper",
+			"Reachable": "AccessTheCurtainUpper"
 		},
 		{
 			"id": "Curtain_start_flower",
@@ -456,9 +455,8 @@
 					"y": 82
 				}
 			],
-			"Reachable": "AccessTheCurtain",
+			"Reachable": "AccessTheCurtain"
 		},
-		
 		{
 			"id": "Darkgrotto_bot_right_flower",
 			"visname": "Dark Grotto Flower",
@@ -476,7 +474,7 @@
 					"FIRE"
 				]
 			},
-			"Out of Logic": "AccessDarkGrottoPostBoss",
+			"Out of Logic": "AccessDarkGrottoPostBoss"
 		},
 		{
 			"id": "Darkgrotto_boss_13",
@@ -495,7 +493,7 @@
 					"FIRE"
 				]
 			},
-			"Out of Logic": "AccessDarkGrottoPostBoss",
+			"Out of Logic": "AccessDarkGrottoPostBoss"
 		},
 		{
 			"id": "Darkgrotto_boss",
@@ -514,7 +512,7 @@
 					"FIRE"
 				]
 			},
-			"Out of Logic": "AccessDarkGrottoPostBoss",
+			"Out of Logic": "AccessDarkGrottoPostBoss"
 		},
 		{
 			"id": "Darkgrotto_boss_torch",
@@ -533,7 +531,7 @@
 					"FIRE"
 				]
 			},
-			"Out of Logic": "AccessDarkGrottoPostBoss",
+			"Out of Logic": "AccessDarkGrottoPostBoss"
 		},
 		{
 			"id": "Darkgrotto_mid_right",
@@ -545,7 +543,7 @@
 					"y": 157
 				}
 			],
-			"Reachable": "AccessDarkGrotto",
+			"Reachable": "AccessDarkGrotto"
 		},
 		{
 			"id": "Darkgrotto_top_left",
@@ -569,9 +567,8 @@
 						"value": 7
 					}
 				]
-			},
+			}
 		},
-		
 		{
 			"id": "Deepdive_boss",
 			"visname": "DeepDive Right Save",
@@ -582,7 +579,7 @@
 					"y": 232
 				}
 			],
-			"Reachable": "AccessDeepDiveRight",
+			"Reachable": "AccessDeepDiveRight"
 		},
 		{
 			"id": "Deepdive_boss_flower",
@@ -594,7 +591,7 @@
 					"y": 232
 				}
 			],
-			"Reachable": "AccessDeepDiveRight",
+			"Reachable": "AccessDeepDiveRight"
 		},
 		{
 			"id": "Deepdive_boss_12",
@@ -606,7 +603,7 @@
 					"y": 232
 				}
 			],
-			"Reachable": "AccessDeepDiveRight",
+			"Reachable": "AccessDeepDiveRight"
 		},
 		{
 			"id": "Deepdive_exit_heart_mid",
@@ -624,7 +621,7 @@
 					"AccessDeepDiveRight",
 					"ICE"
 				]
-			},
+			}
 		},
 		{
 			"id": "Deepdive_exit_heart_top",
@@ -636,7 +633,7 @@
 					"y": 202
 				}
 			],
-			"Reachable": "AccessDeepDiveRight",
+			"Reachable": "AccessDeepDiveRight"
 		},
 		{
 			"id": "Deepdive_far_right",
@@ -654,11 +651,11 @@
 					"AccessDeepDiveRight",
 					{
 						"type": "ITEM",
-						"count": 3,
-						"value": "Jump Upgrade"
+						"value": "Jump Upgrade",
+						"count": 3
 					}
 				]
-			},
+			}
 		},
 		{
 			"id": "Deepdive_left",
@@ -676,11 +673,11 @@
 					"AccessDeepDive",
 					{
 						"type": "ITEM",
-						"count": 3,
-						"value": "Double Jump Upgrade"
+						"value": "Double Jump Upgrade",
+						"count": 3
 					}
 				]
-			},
+			}
 		},
 		{
 			"id": "Deepdive_left_ceiling",
@@ -698,11 +695,11 @@
 					"AccessDeepDive",
 					{
 						"type": "ITEM",
-						"count": 3,
-						"value": "Double Jump Upgrade"
+						"value": "Double Jump Upgrade",
+						"count": 3
 					}
 				]
-			},
+			}
 		},
 		{
 			"id": "Deepdive_chest",
@@ -720,11 +717,11 @@
 					"AccessDeepDive",
 					{
 						"type": "ITEM",
-						"count": 3,
-						"value": "Double Jump Upgrade"
+						"value": "Double Jump Upgrade",
+						"count": 3
 					}
 				]
-			},
+			}
 		},
 		{
 			"id": "Deepdive_right_path",
@@ -736,7 +733,7 @@
 					"y": 232
 				}
 			],
-			"Reachable": "AccessDeepDiveRight",
+			"Reachable": "AccessDeepDiveRight"
 		},
 		{
 			"id": "Deepdive_shaft",
@@ -752,14 +749,15 @@
 				"type": "ALL",
 				"rules": [
 					"AccessDeepDive",
-					"ICE",{
+					"ICE",
+					{
 						"type": "VAR",
 						"name": "JumpHeight",
 						"op": ">=",
 						"value": 8
-					},
+					}
 				]
-			},
+			}
 		},
 		{
 			"id": "Deepdive_shaft_bot_right",
@@ -771,7 +769,7 @@
 					"y": 262
 				}
 			],
-			"Reachable": "AccessDeepDive",
+			"Reachable": "AccessDeepDive"
 		},
 		{
 			"id": "Deepdive_shaft_mid_right",
@@ -783,7 +781,7 @@
 					"y": 217
 				}
 			],
-			"Reachable": "AccessDeepDive",
+			"Reachable": "AccessDeepDive"
 		},
 		{
 			"id": "Deepdive_shaft_top",
@@ -795,7 +793,7 @@
 					"y": 187
 				}
 			],
-			"Reachable": "AccessDeepDive",
+			"Reachable": "AccessDeepDive"
 		},
 		{
 			"id": "Deepdive_shaft_top_right",
@@ -813,9 +811,8 @@
 					"AccessDeepDive",
 					"ICE"
 				]
-			},
+			}
 		},
-		
 		{
 			"id": "Deeptower_boss_2",
 			"visname": "DeepTower Boss",
@@ -826,7 +823,7 @@
 					"y": 142
 				}
 			],
-			"Reachable": "AccessDeepTower",
+			"Reachable": "AccessDeepTower"
 		},
 		{
 			"id": "Deeptower_cannon_boss",
@@ -838,7 +835,7 @@
 					"y": 142
 				}
 			],
-			"Reachable": "AccessDeepTower",
+			"Reachable": "AccessDeepTower"
 		},
 		{
 			"id": "Deeptower_heart",
@@ -860,7 +857,7 @@
 						"value": "Double Jump Upgrade"
 					}
 				]
-			},
+			}
 		},
 		{
 			"id": "Deeptower_top_entrance",
@@ -872,9 +869,8 @@
 					"y": 97
 				}
 			],
-			"Reachable": "AccessNightWalkUpper",
+			"Reachable": "AccessNightWalkUpper"
 		},
-		
 		{
 			"id": "Farfall_3_balloons",
 			"visname": "FarFall Three Balloons Heart",
@@ -885,7 +881,7 @@
 					"y": 292
 				}
 			],
-			"Reachable": "AccessBottom",
+			"Reachable": "AccessBottom"
 		},
 		{
 			"id": "Farfall_5_balloons",
@@ -908,7 +904,7 @@
 						"value": 6
 					}
 				]
-			},
+			}
 		},
 		{
 			"id": "Farfall_blue_rock_boss",
@@ -920,7 +916,7 @@
 					"y": 307
 				}
 			],
-			"Reachable": "AccessFarFallLowerLeft",
+			"Reachable": "AccessFarFallLowerLeft"
 		},
 		{
 			"id": "Farfall_boss_8",
@@ -932,7 +928,7 @@
 					"y": 307
 				}
 			],
-			"Reachable": "AccessFarFallLowerLeft",
+			"Reachable": "AccessFarFallLowerLeft"
 		},
 		{
 			"id": "Farfall_bottom_flower",
@@ -944,7 +940,7 @@
 					"y": 292
 				}
 			],
-			"Reachable": "AccessFarFallLowerRight",
+			"Reachable": "AccessFarFallLowerRight"
 		},
 		{
 			"id": "Farfall_bottom_heart",
@@ -956,7 +952,7 @@
 					"y": 292
 				}
 			],
-			"Reachable": "AccessFarFallLowerRight",
+			"Reachable": "AccessFarFallLowerRight"
 		},
 		{
 			"id": "Farfall_bottom_heart_door",
@@ -968,7 +964,7 @@
 					"y": 292
 				}
 			],
-			"Reachable": "AccessFarFallLowerRight",
+			"Reachable": "AccessFarFallLowerRight"
 		},
 		{
 			"id": "Farfall_chest",
@@ -980,7 +976,7 @@
 					"y": 202
 				}
 			],
-			"Reachable": "AccessFarFall",
+			"Reachable": "AccessFarFall"
 		},
 		{
 			"id": "Farfall_kill_3",
@@ -1032,9 +1028,8 @@
 					"AccessFarFallLowerRight",
 					"YELLOW"
 				]
-			},
+			}
 		},
-		
 		{
 			"id": "Firecage_boss",
 			"visname": "FireCage Yellow Energy Upgrade",
@@ -1059,7 +1054,7 @@
 					"AccessFireCageInner",
 					"RED"
 				]
-			},
+			}
 		},
 		{
 			"id": "Firecage_boss_7",
@@ -1085,7 +1080,7 @@
 					"AccessFireCageInner",
 					"RED"
 				]
-			},
+			}
 		},
 		{
 			"id": "Firecage_bot",
@@ -1105,7 +1100,7 @@
 					"YELLOW",
 					"SLIDE"
 				]
-			},
+			}
 		},
 		{
 			"id": "Firecage_bot_left_secret",
@@ -1118,7 +1113,7 @@
 				}
 			],
 			"Reachable": "AccessFireCageInner",
-			"Out of Logic": "AccessFireCageInnerOOL",
+			"Out of Logic": "AccessFireCageInnerOOL"
 		},
 		{
 			"id": "Firecage_mid",
@@ -1156,7 +1151,7 @@
 						"value": 8
 					}
 				]
-			},
+			}
 		},
 		{
 			"id": "Firecage_mid_heart_door",
@@ -1182,7 +1177,7 @@
 					"AccessFireCageInner",
 					"RED"
 				]
-			},
+			}
 		},
 		{
 			"id": "Firecage_top",
@@ -1219,7 +1214,7 @@
 					"y": 172
 				}
 			],
-			"Reachable": "AccessFireCageInner",
+			"Reachable": "AccessFireCageInner"
 		},
 		{
 			"id": "Firecage_top_left_gate",
@@ -1259,7 +1254,6 @@
 				]
 			}
 		},
-		
 		{
 			"id": "Grotto_boss_1",
 			"visname": "Grotto First Boss",
@@ -1271,7 +1265,7 @@
 				}
 			],
 			"Reachable": "AccessGrotto",
-			"Out of Logic": "AccessGrottoOOL",
+			"Out of Logic": "AccessGrottoOOL"
 		},
 		{
 			"id": "Grotto_djump",
@@ -1284,7 +1278,7 @@
 				}
 			],
 			"Reachable": "AccessGrotto",
-			"Out of Logic": "AccessGrottoOOL",
+			"Out of Logic": "AccessGrottoOOL"
 		},
 		{
 			"id": "Grotto_boss_6",
@@ -1302,7 +1296,7 @@
 					"AccessGrottoUpper",
 					"DIVEBOMB"
 				]
-			},
+			}
 		},
 		{
 			"id": "Grotto_eye_boss",
@@ -1320,7 +1314,7 @@
 					"AccessGrottoUpper",
 					"DIVEBOMB"
 				]
-			},
+			}
 		},
 		{
 			"id": "Grotto_flower",
@@ -1332,7 +1326,7 @@
 					"y": 142
 				}
 			],
-			"Reachable": "AccessGrottoUpper",
+			"Reachable": "AccessGrottoUpper"
 		},
 		{
 			"id": "Grotto_mural_heart",
@@ -1350,8 +1344,8 @@
 					"AccessGrotto",
 					{
 						"type": "ITEM",
-						"count": 2,
-						"value": "Double Jump Upgrade"
+						"value": "Double Jump Upgrade",
+						"count": 2
 					},
 					{
 						"type": "VAR",
@@ -1376,9 +1370,8 @@
 						"value": 4
 					}
 				]
-			},
+			}
 		},
-		
 		{
 			"id": "Highlands_platform",
 			"visname": "HighLands Platform",
@@ -1389,9 +1382,8 @@
 					"y": 97
 				}
 			],
-			"Reachable": "AccessTheCurtain",
+			"Reachable": "AccessTheCurtain"
 		},
-		
 		{
 			"id": "Icecastle_boss",
 			"visname": "IceCastle Post-Boss Save",
@@ -1402,7 +1394,7 @@
 					"y": 52
 				}
 			],
-			"Reachable": "AccessIceCastleBoss",
+			"Reachable": "AccessIceCastleBoss"
 		},
 		{
 			"id": "Icecastle_boss_15",
@@ -1414,7 +1406,7 @@
 					"y": 52
 				}
 			],
-			"Reachable": "AccessIceCastleBoss",
+			"Reachable": "AccessIceCastleBoss"
 		},
 		{
 			"id": "Icecastle_bottom_underhang",
@@ -1426,7 +1418,7 @@
 					"y": 52
 				}
 			],
-			"Reachable": "AccessIceCastleBoss",
+			"Reachable": "AccessIceCastleBoss"
 		},
 		{
 			"id": "Icecastle_entrance_heart_door",
@@ -1438,7 +1430,7 @@
 					"y": 37
 				}
 			],
-			"Reachable": "AccessIceCastle",
+			"Reachable": "AccessIceCastle"
 		},
 		{
 			"id": "Icecastle_entrance",
@@ -1450,7 +1442,7 @@
 					"y": 37
 				}
 			],
-			"Reachable": "AccessIceCastle",
+			"Reachable": "AccessIceCastle"
 		},
 		{
 			"id": "Icecastle_left_outside",
@@ -1462,7 +1454,7 @@
 					"y": 37
 				}
 			],
-			"Reachable": "AccessIceCastle",
+			"Reachable": "AccessIceCastle"
 		},
 		{
 			"id": "Icecastle_entrance_flower",
@@ -1474,7 +1466,7 @@
 					"y": 52
 				}
 			],
-			"Reachable": "AccessIceCastle",
+			"Reachable": "AccessIceCastle"
 		},
 		{
 			"id": "Icecastle_high_mid_heartdoor",
@@ -1486,7 +1478,7 @@
 					"y": 22
 				}
 			],
-			"Reachable": "AccessIceCastle",
+			"Reachable": "AccessIceCastle"
 		},
 		{
 			"id": "Icecastle_low_mid_heartdoor",
@@ -1498,7 +1490,7 @@
 					"y": 37
 				}
 			],
-			"Reachable": "AccessIceCastle",
+			"Reachable": "AccessIceCastle"
 		},
 		{
 			"id": "Icecastle_low_mid_secret",
@@ -1510,7 +1502,7 @@
 					"y": 37
 				}
 			],
-			"Reachable": "AccessIceCastle",
+			"Reachable": "AccessIceCastle"
 		},
 		{
 			"id": "Icecastle_top_left_heart_door",
@@ -1522,7 +1514,7 @@
 					"y": 7
 				}
 			],
-			"Reachable": "AccessIceCastle",
+			"Reachable": "AccessIceCastle"
 		},
 		{
 			"id": "Icecastle_top_right",
@@ -1534,9 +1526,8 @@
 					"y": 7
 				}
 			],
-			"Reachable": "AccessIceCastle",
+			"Reachable": "AccessIceCastle"
 		},
-		
 		{
 			"id": "Library_heart",
 			"visname": "Library Heart",
@@ -1547,7 +1538,7 @@
 					"y": 67
 				}
 			],
-			"Reachable": "AccessLibrary",
+			"Reachable": "AccessLibrary"
 		},
 		{
 			"id": "Library_flower",
@@ -1559,9 +1550,8 @@
 					"y": 67
 				}
 			],
-			"Reachable": "AccessLibrary",
+			"Reachable": "AccessLibrary"
 		},
-		
 		{
 			"id": "Longbeach_water_entrance_flower",
 			"visname": "LongBeach Below Save Flower",
@@ -1584,9 +1574,8 @@
 						"value": 8
 					}
 				]
-			},
+			}
 		},
-		
 		{
 			"id": "Mountside_left_flower",
 			"visname": "MountSide Flower",
@@ -1597,7 +1586,7 @@
 					"y": 307
 				}
 			],
-			"Reachable": "AccessMountSide",
+			"Reachable": "AccessMountSide"
 		},
 		{
 			"id": "Mountside_right_heart_door",
@@ -1609,9 +1598,8 @@
 					"y": 307
 				}
 			],
-			"Reachable": "AccessMountSide",
+			"Reachable": "AccessMountSide"
 		},
-		
 		{
 			"id": "Nightclimb_boss_4",
 			"visname": "NightClimb Boss",
@@ -1622,7 +1610,7 @@
 					"y": 67
 				}
 			],
-			"Reachable": "AccessNightClimb",
+			"Reachable": "AccessNightClimb"
 		},
 		{
 			"id": "Nightclimb_chest",
@@ -1634,7 +1622,7 @@
 					"y": 112
 				}
 			],
-			"Reachable": "AccessNightClimb",
+			"Reachable": "AccessNightClimb"
 		},
 		{
 			"id": "Nightclimb_duck",
@@ -1646,7 +1634,7 @@
 					"y": 52
 				}
 			],
-			"Reachable": "AccessNightClimb",
+			"Reachable": "AccessNightClimb"
 		},
 		{
 			"id": "Nightclimb_duck_heart",
@@ -1671,7 +1659,7 @@
 						"value": "Duck"
 					}
 				]
-			},
+			}
 		},
 		{
 			"id": "Nightclimb_right_heart",
@@ -1683,7 +1671,7 @@
 					"y": 97
 				}
 			],
-			"Reachable": "AccessNightClimb",
+			"Reachable": "AccessNightClimb"
 		},
 		{
 			"id": "Nightclimb_top_heart",
@@ -1695,7 +1683,7 @@
 					"y": 67
 				}
 			],
-			"Reachable": "AccessNightClimb",
+			"Reachable": "AccessNightClimb"
 		},
 		{
 			"id": "Nightclimb_flower",
@@ -1707,7 +1695,7 @@
 					"y": 67
 				}
 			],
-			"Reachable": "AccessNightClimb",
+			"Reachable": "AccessNightClimb"
 		},
 		{
 			"id": "Nightclimb_wall_heart",
@@ -1719,9 +1707,8 @@
 					"y": 82
 				}
 			],
-			"Reachable": "AccessNightClimb",
+			"Reachable": "AccessNightClimb"
 		},
-		
 		{
 			"id": "Nightwalk_chest",
 			"visname": "NightWalk Chest",
@@ -1732,7 +1719,7 @@
 					"y": 97
 				}
 			],
-			"Reachable": "AccessNightWalkUpper",
+			"Reachable": "AccessNightWalkUpper"
 		},
 		{
 			"id": "Nightwalk_hatch",
@@ -1765,7 +1752,7 @@
 						]
 					}
 				]
-			},
+			}
 		},
 		{
 			"id": "Nightwalk_high_flower",
@@ -1777,7 +1764,7 @@
 					"y": 97
 				}
 			],
-			"Reachable": "AccessNightWalkUpper",
+			"Reachable": "AccessNightWalkUpper"
 		},
 		{
 			"id": "Nightwalk_jump_1",
@@ -1789,7 +1776,7 @@
 					"y": 157
 				}
 			],
-			"Reachable": "AccessNightWalk",
+			"Reachable": "AccessNightWalk"
 		},
 		{
 			"id": "Nightwalk_block_heart",
@@ -1807,7 +1794,7 @@
 					"AccessNightWalk",
 					"DIVEBOMB"
 				]
-			},
+			}
 		},
 		{
 			"id": "Nightwalk_nest_flower",
@@ -1819,7 +1806,7 @@
 					"y": 142
 				}
 			],
-			"Reachable": "AccessNightWalkUpper",
+			"Reachable": "AccessNightWalkUpper"
 		},
 		{
 			"id": "Nightwalk_save_flower",
@@ -1853,7 +1840,7 @@
 						"value": "Double Jump Upgrade"
 					}
 				]
-			},
+			}
 		},
 		{
 			"id": "Nightwalk_shrine_heart",
@@ -1876,7 +1863,7 @@
 						"value": 3
 					}
 				]
-			},
+			}
 		},
 		{
 			"id": "Nightwalk_shrine_torches",
@@ -1900,7 +1887,7 @@
 					},
 					"CanLightTorches"
 				]
-			},
+			}
 		},
 		{
 			"id": "Nightwalk_sky_heart",
@@ -1940,7 +1927,7 @@
 						]
 					}
 				]
-			},
+			}
 		},
 		{
 			"id": "Nightwalk_upper_heart",
@@ -1952,9 +1939,8 @@
 					"y": 97
 				}
 			],
-			"Reachable": "AccessNightWalkUpper",
+			"Reachable": "AccessNightWalkUpper"
 		},
-		
 		{
 			"id": "Rainbowdive_100",
 			"visname": "RainbowDive Prize 100",
@@ -1965,7 +1951,7 @@
 					"y": 142
 				}
 			],
-			"Reachable": "AccessRainbowDive",
+			"Reachable": "AccessRainbowDive"
 		},
 		{
 			"id": "Rainbowdive_300",
@@ -1977,7 +1963,7 @@
 					"y": 142
 				}
 			],
-			"Reachable": "AccessRainbowDive",
+			"Reachable": "AccessRainbowDive"
 		},
 		{
 			"id": "Rainbowdive_second_prize",
@@ -1989,7 +1975,7 @@
 					"y": 142
 				}
 			],
-			"Reachable": "AccessRainbowDive",
+			"Reachable": "AccessRainbowDive"
 		},
 		{
 			"id": "Rainbowdive_first_prize",
@@ -2001,9 +1987,8 @@
 					"y": 142
 				}
 			],
-			"Reachable": "AccessRainbowDive",
+			"Reachable": "AccessRainbowDive"
 		},
-		
 		{
 			"id": "Skylands_balloon_chain",
 			"visname": "SkyLands Twelve Balloons Heart",
@@ -2020,7 +2005,7 @@
 					"AccessSkyLandsRight",
 					"FIRE2"
 				]
-			},
+			}
 		},
 		{
 			"id": "Skylands_chest",
@@ -2032,7 +2017,7 @@
 					"y": 112
 				}
 			],
-			"Reachable": "AccessSkyLands",
+			"Reachable": "AccessSkyLands"
 		},
 		{
 			"id": "Skylands_duck",
@@ -2053,7 +2038,7 @@
 						"value": "Duck"
 					}
 				]
-			},
+			}
 		},
 		{
 			"id": "Skylands_heart_gate",
@@ -2065,7 +2050,7 @@
 					"y": 142
 				}
 			],
-			"Reachable": "AccessSkyLandsRight",
+			"Reachable": "AccessSkyLandsRight"
 		},
 		{
 			"id": "Skylands_portal",
@@ -2083,7 +2068,7 @@
 					"AccessGrottoUpper",
 					"RED"
 				]
-			},
+			}
 		},
 		{
 			"id": "Skylands_toll_gate",
@@ -2095,7 +2080,7 @@
 					"y": 142
 				}
 			],
-			"Reachable": "AccessSkyLands",
+			"Reachable": "AccessSkyLands"
 		},
 		{
 			"id": "Skylands_underhang",
@@ -2107,9 +2092,8 @@
 					"y": 67
 				}
 			],
-			"Reachable": "AccessSkyLandsRight",
+			"Reachable": "AccessSkyLandsRight"
 		},
-		
 		{
 			"id": "Skysand_boss",
 			"visname": "SkySand Gold Orb",
@@ -2120,7 +2104,7 @@
 					"y": 22
 				}
 			],
-			"Reachable": "AccessSkySandMiddle",
+			"Reachable": "AccessSkySandMiddle"
 		},
 		{
 			"id": "Skysand_boss_10",
@@ -2132,7 +2116,7 @@
 					"y": 37
 				}
 			],
-			"Reachable": "AccessSkySandMiddle",
+			"Reachable": "AccessSkySandMiddle"
 		},
 		{
 			"id": "Skysand_bot_left",
@@ -2151,7 +2135,7 @@
 					"STICK",
 					"RED"
 				]
-			},
+			}
 		},
 		{
 			"id": "Skysand_left_outside",
@@ -2163,7 +2147,7 @@
 					"y": 112
 				}
 			],
-			"Reachable": "AccessSkySandMiddle",
+			"Reachable": "AccessSkySandMiddle"
 		},
 		{
 			"id": "Skysand_left_roof",
@@ -2175,7 +2159,7 @@
 					"y": 82
 				}
 			],
-			"Reachable": "AccessSkySandMiddle",
+			"Reachable": "AccessSkySandMiddle"
 		},
 		{
 			"id": "Skysand_right_roof_chest",
@@ -2187,7 +2171,7 @@
 					"y": 82
 				}
 			],
-			"Reachable": "AccessSkySandMiddle",
+			"Reachable": "AccessSkySandMiddle"
 		},
 		{
 			"id": "Skysand_right_heart_door",
@@ -2199,7 +2183,7 @@
 					"y": 82
 				}
 			],
-			"Reachable": "AccessSkySandMiddle",
+			"Reachable": "AccessSkySandMiddle"
 		},
 		{
 			"id": "Skysand_top_heart_door",
@@ -2211,7 +2195,7 @@
 					"y": 52
 				}
 			],
-			"Reachable": "AccessSkySandMiddle",
+			"Reachable": "AccessSkySandMiddle"
 		},
 		{
 			"id": "Skysand_top",
@@ -2230,13 +2214,12 @@
 					"YELLOW",
 					{
 						"type": "ITEM",
-						"count": 3,
-						"value": "Double Jump Upgrade"
+						"value": "Double Jump Upgrade",
+						"count": 3
 					}
 				]
-			},
+			}
 		},
-		
 		{
 			"id": "Skytown_flower",
 			"visname": "Sky Town Entrance Flower",
@@ -2247,7 +2230,7 @@
 					"y": 142
 				}
 			],
-			"Reachable": "AccessSkyTown",
+			"Reachable": "AccessSkyTown"
 		},
 		{
 			"id": "Skytown_tower_heart",
@@ -2259,7 +2242,7 @@
 					"y": 142
 				}
 			],
-			"Reachable": "AccessSkySand",
+			"Reachable": "AccessSkySand"
 		},
 		{
 			"id": "Skytown_pit_left",
@@ -2283,7 +2266,7 @@
 						"value": 5
 					}
 				]
-			},
+			}
 		},
 		{
 			"id": "Skytown_pit_right",
@@ -2304,8 +2287,8 @@
 						"rules": [
 							{
 								"type": "ITEM",
-								"count": 3,
-								"value": "Jump Upgrade"
+								"value": "Jump Upgrade",
+								"count": 3
 							},
 							{
 								"type": "ITEM",
@@ -2314,7 +2297,7 @@
 						]
 					}
 				]
-			},
+			}
 		},
 		{
 			"id": "Skytown_red_heart",
@@ -2338,7 +2321,7 @@
 						]
 					}
 				]
-			},
+			}
 		},
 		{
 			"id": "Skytown_shop_1",
@@ -2350,7 +2333,7 @@
 					"y": 142
 				}
 			],
-			"Reachable": "AccessSkyTown",
+			"Reachable": "AccessSkyTown"
 		},
 		{
 			"id": "Skytown_shop_2",
@@ -2362,7 +2345,7 @@
 					"y": 142
 				}
 			],
-			"Reachable": "AccessSkyTown",
+			"Reachable": "AccessSkyTown"
 		},
 		{
 			"id": "Skytown_shop_3",
@@ -2374,7 +2357,7 @@
 					"y": 142
 				}
 			],
-			"Reachable": "AccessSkyTown",
+			"Reachable": "AccessSkyTown"
 		},
 		{
 			"id": "Skytown_shop_4",
@@ -2387,7 +2370,7 @@
 				}
 			],
 			"Reachable": "CanBuyEverythingInShop",
-			"Out of Logic": "AccessSkyTown",
+			"Out of Logic": "AccessSkyTown"
 		},
 		{
 			"id": "Skytown_shop_5",
@@ -2399,7 +2382,7 @@
 					"y": 142
 				}
 			],
-			"Reachable": "AccessSkyTown",
+			"Reachable": "AccessSkyTown"
 		},
 		{
 			"id": "Skytown_shop_6",
@@ -2412,7 +2395,7 @@
 				}
 			],
 			"Reachable": "CanBuyEverythingInShop",
-			"Out of Logic": "AccessSkyTown",
+			"Out of Logic": "AccessSkyTown"
 		},
 		{
 			"id": "Skytown_shop_7",
@@ -2425,7 +2408,7 @@
 				}
 			],
 			"Reachable": "CanBuyEverythingInShop",
-			"Out of Logic": "AccessSkyTown",
+			"Out of Logic": "AccessSkyTown"
 		},
 		{
 			"id": "Skytown_shop_8",
@@ -2438,7 +2421,7 @@
 				}
 			],
 			"Reachable": "CanBuyEverythingInShop",
-			"Out of Logic": "AccessSkyTown",
+			"Out of Logic": "AccessSkyTown"
 		},
 		{
 			"id": "Skytown_yellow_heart",
@@ -2460,9 +2443,8 @@
 						"value": "Double Jump Upgrade"
 					}
 				]
-			},
+			}
 		},
-		
 		{
 			"id": "5_flowers",
 			"visname": "5 Flowers",
@@ -2479,11 +2461,11 @@
 					"AccessStaircase",
 					{
 						"type": "ITEM",
-						"count": 5,
-						"value": "Secret Flower"
+						"value": "Secret Flower",
+						"count": 5
 					}
 				]
-			},
+			}
 		},
 		{
 			"id": "10_flowers",
@@ -2501,11 +2483,11 @@
 					"AccessStaircase",
 					{
 						"type": "ITEM",
-						"count": 10,
-						"value": "Secret Flower"
+						"value": "Secret Flower",
+						"count": 10
 					}
 				]
-			},
+			}
 		},
 		{
 			"id": "15_flowers",
@@ -2523,11 +2505,11 @@
 					"AccessStaircase",
 					{
 						"type": "ITEM",
-						"count": 15,
-						"value": "Secret Flower"
+						"value": "Secret Flower",
+						"count": 15
 					}
 				]
-			},
+			}
 		},
 		{
 			"id": "20_flowers",
@@ -2545,13 +2527,12 @@
 					"AccessStaircase",
 					{
 						"type": "ITEM",
-						"count": 20,
-						"value": "Secret Flower"
+						"value": "Secret Flower",
+						"count": 20
 					}
 				]
-			},
+			}
 		},
-		
 		{
 			"id": "Stonecastle_boss_5",
 			"visname": "StoneCastle Rock Boss",
@@ -2568,7 +2549,7 @@
 					"AccessStoneCastle",
 					"RED"
 				]
-			},
+			}
 		},
 		{
 			"id": "Stonecastle_boss_9",
@@ -2588,13 +2569,13 @@
 					"SLIDE"
 				]
 			},
-			"Out Of Logic": {
+			"Out of Logic": {
 				"type": "ALL",
 				"rules": [
 					"AccessStoneCastleUpper",
 					"DIVEBOMB"
 				]
-			},
+			}
 		},
 		{
 			"id": "Stonecastle_eye_boss",
@@ -2614,13 +2595,13 @@
 					"SLIDE"
 				]
 			},
-			"Out Of Logic": {
+			"Out of Logic": {
 				"type": "ALL",
 				"rules": [
 					"AccessStoneCastleUpper",
 					"DIVEBOMB"
 				]
-			},
+			}
 		},
 		{
 			"id": "Stonecastle_flower",
@@ -2643,7 +2624,7 @@
 						"value": 5
 					}
 				]
-			},
+			}
 		},
 		{
 			"id": "Stonecastle_heart_door",
@@ -2655,7 +2636,7 @@
 					"y": 202
 				}
 			],
-			"Reachable": "AccessStoneCastle",
+			"Reachable": "AccessStoneCastle"
 		},
 		{
 			"id": "Stonecastle_hidden_heart",
@@ -2667,7 +2648,7 @@
 					"y": 202
 				}
 			],
-			"Reachable": "AccessStoneCastle",
+			"Reachable": "AccessStoneCastle"
 		},
 		{
 			"id": "Stonecastle_rock_boss",
@@ -2693,7 +2674,7 @@
 					"AccessStoneCastle",
 					"RED"
 				]
-			},
+			}
 		},
 		{
 			"id": "Stonecastle_top_heart",
@@ -2705,9 +2686,8 @@
 					"y": 172
 				}
 			],
-			"Reachable": "AccessStoneCastleUpper",
+			"Reachable": "AccessStoneCastleUpper"
 		},
-		
 		{
 			"id": "Strangecastle",
 			"visname": "Strangecastle",
@@ -2725,12 +2705,12 @@
 					"FIRE",
 					{
 						"type": "ITEM",
-						"count": 2,
-						"value": "Jump Upgrade"
+						"value": "Jump Upgrade",
+						"count": 2
 					}
 				]
 			},
-			"Out of Logic": "AccessStrangeCastle",
+			"Out of Logic": "AccessStrangeCastle"
 		},
 		{
 			"id": "Strangecastle_heart_door",
@@ -2749,13 +2729,12 @@
 					"FIRE",
 					{
 						"type": "ITEM",
-						"count": 2,
-						"value": "Jump Upgrade"
+						"value": "Jump Upgrade",
+						"count": 2
 					}
 				]
-			},
+			}
 		},
-		
 		{
 			"id": "Undertomb_left",
 			"visname": "UnderTomb Left",
@@ -2766,7 +2745,7 @@
 					"y": 217
 				}
 			],
-			"Reachable": "AccessUnderTomb",
+			"Reachable": "AccessUnderTomb"
 		},
 		{
 			"id": "Undertomb_left_heart_door",
@@ -2778,7 +2757,7 @@
 					"y": 217
 				}
 			],
-			"Reachable": "AccessUnderTomb",
+			"Reachable": "AccessUnderTomb"
 		},
 		{
 			"id": "Undertomb_right_heart_door",
@@ -2790,8 +2769,8 @@
 					"y": 202
 				}
 			],
-			"Reachable": "AccessUnderTomb",
-		},
+			"Reachable": "AccessUnderTomb"
+		}
 	],
 	"named_rules": {
 		"AccessBlackCastle": "AccessLongBeach",
@@ -2810,7 +2789,7 @@
 			"rules": [
 				"AccessHighLands",
 				"SLIDE",
-				"YELLOW",
+				"YELLOW"
 			]
 		},
 		"AccessDarkGrotto": {
@@ -2858,7 +2837,7 @@
 			"rules": [
 				"AccessGrottoUpper",
 				"RED",
-				"ICE",
+				"ICE"
 			]
 		},
 		"AccessIceCastle": "AccessTheCurtainUpper",
@@ -2875,7 +2854,7 @@
 			"type": "ALL",
 			"rules": [
 				"AccessGrottoUpper",
-				"RED",
+				"RED"
 			]
 		},
 		"AccessNightClimb": {
@@ -2888,7 +2867,7 @@
 					"op": ">=",
 					"value": 5
 				},
-				"FIRE",
+				"FIRE"
 			]
 		},
 		"AccessNightWalk": true,
@@ -2906,7 +2885,6 @@
 				"DIVEBOMB"
 			]
 		},
-
 		"AccessBlackCastleInner": {
 			"type": "ALL",
 			"rules": [
@@ -2916,14 +2894,14 @@
 				"SLIDE",
 				{
 					"type": "ITEM",
-					"count": 3,
-					"value": "Double Jump Upgrade"
+					"value": "Double Jump Upgrade",
+					"count": 3
 				},
 				{
 					"type": "ITEM",
-					"count": 7,
-					"value": "Gold Orb"
-				},
+					"value": "Gold Orb",
+					"count": 7
+				}
 			]
 		},
 		"AccessBlancLandLowerLeft": {
@@ -2931,10 +2909,10 @@
 			"rules": [
 				"AccessBlancLand",
 				{
-					"type": "Any",
+					"type": "ANY",
 					"rules": [
 						"RED",
-						"ICE",
+						"ICE"
 					]
 				}
 			]
@@ -2949,21 +2927,21 @@
 					"op": ">=",
 					"value": 8
 				},
-				"FIRE",
+				"FIRE"
 			]
 		},
 		"AccessCloudRunRight": {
 			"type": "ALL",
 			"rules": [
 				"AccessCloudRunMiddle",
-				"ICE",
+				"ICE"
 			]
 		},
 		"AccessDarkGrottoPostBoss": {
 			"type": "ALL",
 			"rules": [
 				"AccessDarkGrotto",
-				"ICE",
+				"ICE"
 			]
 		},
 		"AccessDeepDiveRight": {
@@ -2993,14 +2971,14 @@
 					"type": "ITEM",
 					"value": "Hatch"
 				},
-				"RED",
+				"RED"
 			]
 		},
 		"AccessFarFallLowerRight": {
 			"type": "ALL",
 			"rules": [
 				"AccessFarFallLower",
-				"RED",
+				"RED"
 			]
 		},
 		"AccessFireCageInner": {
@@ -3014,12 +2992,11 @@
 						"RED",
 						{
 							"type": "ITEM",
-							"count": 3,
-							"value": "Double Jump Upgrade"
-						},
+							"value": "Double Jump Upgrade",
+							"count": 3
+						}
 					]
 				}
-
 			]
 		},
 		"AccessFireCageInnerOOL": {
@@ -3029,14 +3006,14 @@
 				"RED",
 				{
 					"type": "ITEM",
-					"count": 2,
-					"value": "Jump Upgrade"
+					"value": "Jump Upgrade",
+					"count": 2
 				},
 				{
 					"type": "ITEM",
-					"count": 3,
-					"value": "Double Jump Upgrade"
-				},
+					"value": "Double Jump Upgrade",
+					"count": 3
+				}
 			]
 		},
 		"AccessGrottoUpper": {
@@ -3062,7 +3039,7 @@
 									"name": "JumpHeight",
 									"op": ">=",
 									"value": 6
-								},
+								}
 							]
 						},
 						{
@@ -3070,7 +3047,7 @@
 							"name": "JumpHeight",
 							"op": ">=",
 							"value": 8
-						},
+						}
 					]
 				}
 			]
@@ -3079,7 +3056,7 @@
 			"type": "ALL",
 			"rules": [
 				"AccessIceCastle",
-				"DIVEBOMB",
+				"DIVEBOMB"
 			]
 		},
 		"AccessNightWalkUpper": "AccessTheCurtainUpper",
@@ -3088,7 +3065,7 @@
 			"type": "ALL",
 			"rules": [
 				"AccessSkySand",
-				"ICE",
+				"ICE"
 			]
 		},
 		"AccessSkySandMiddle": {
@@ -3099,14 +3076,14 @@
 				"RED",
 				{
 					"type": "ITEM",
-					"count": 2,
-					"value": "Jump Upgrade"
+					"value": "Jump Upgrade",
+					"count": 2
 				},
 				{
 					"type": "ITEM",
-					"count": 2,
-					"value": "Double Jump Upgrade"
-				},
+					"value": "Double Jump Upgrade",
+					"count": 2
+				}
 			]
 		},
 		"AccessStoneCastleUpper": {
@@ -3135,12 +3112,11 @@
 				}
 			]
 		},
-
 		"CanLightTorches": {
 			"type": "ANY",
 			"rules": [
 				"FIRE",
-				"DIVEBOMB",
+				"DIVEBOMB"
 			]
 		},
 		"CanBuyEverythingInShop": {
@@ -3155,19 +3131,14 @@
 				}
 			]
 		},
-		
 		"FIRE": {
 			"type": "ITEM",
 			"value": "Progressive Fire Shot"
 		},
 		"FIRE2": {
 			"type": "ITEM",
-			"count": 2,
-			"value": "Progressive Fire Shot"
-		},
-		"DIVEBOMB": {
-			"type": "ITEM",
-			"value": "Smash"
+			"value": "Progressive Fire Shot",
+			"count": 2
 		},
 		"DIVEBOMB": {
 			"type": "ITEM",
@@ -3191,10 +3162,9 @@
 		},
 		"SLIDE": {
 			"type": "ITEM",
-			"count": 2,
-			"value": "Progressive Ceiling Stick"
-		},
-		
+			"value": "Progressive Ceiling Stick",
+			"count": 2
+		}
 	},
 	"variables": {
 		"JumpHeight": {
@@ -3207,7 +3177,7 @@
 				"Double Jump Upgrade": {
 					"type": "+",
 					"value": 1
-				},
+				}
 			}
 		},
 		"Crystals": {
@@ -3280,8 +3250,8 @@
 				"75 Crystals": {
 					"type": "+",
 					"value": 75
-				},
+				}
 			}
-		},
+		}
 	}
 }
