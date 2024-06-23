@@ -46,7 +46,7 @@
 		},
 		{
 			"id": "Blackcastle_end_flower",
-			"visname": "BlackCastle Top Save",
+			"visname": "BlackCastle Top Flower",
 			"map_spots": [
 				{
 					"id": "Overworld",
@@ -147,7 +147,7 @@
 		},
 		{
 			"id": "Blancland_entrance_flower",
-			"visname": "BlancLand Entrance Save",
+			"visname": "BlancLand Entrance Flower",
 			"map_spots": [
 				{
 					"id": "Overworld",
@@ -189,7 +189,7 @@
 				}
 			],
 			"Reachable": "AccessFireCageInner",
-			"Out of Logic": "AccessFireCageInnerOutOfLogic",
+			"Out of Logic": "AccessFireCageInnerOOL",
 		},
 		{
 			"id": "Bonus_2",
@@ -202,12 +202,12 @@
 				}
 			],
 			"Reachable": "AccessFireCageInner",
-			"Out of Logic": "AccessFireCageInnerOutOfLogic",
+			"Out of Logic": "AccessFireCageInnerOOL",
 		},
 		
 		{
 			"id": "Bottom_flower",
-			"visname": "Bottom Save",
+			"visname": "Bottom Flower",
 			"map_spots": [
 				{
 					"id": "Overworld",
@@ -292,7 +292,7 @@
 		},
 		{
 			"id": "Cloudrun_start_flower",
-			"visname": "CloudRun Left Save",
+			"visname": "CloudRun Left Flower",
 			"map_spots": [
 				{
 					"id": "Overworld",
@@ -448,7 +448,7 @@
 		},
 		{
 			"id": "Curtain_start_flower",
-			"visname": "The Curtain Lower Save",
+			"visname": "The Curtain Flower",
 			"map_spots": [
 				{
 					"id": "Overworld",
@@ -461,7 +461,7 @@
 		
 		{
 			"id": "Darkgrotto_bot_right_flower",
-			"visname": "Dark Grotto Exit Save",
+			"visname": "Dark Grotto Flower",
 			"map_spots": [
 				{
 					"id": "Overworld",
@@ -816,6 +816,1235 @@
 			},
 		},
 		
+		{
+			"id": "Deeptower_boss_2",
+			"visname": "DeepTower Boss",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 127,
+					"y": 142
+				}
+			],
+			"Reachable": "AccessDeepTower",
+		},
+		{
+			"id": "Deeptower_cannon_boss",
+			"visname": "DeepTower Fire Shot",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 127,
+					"y": 142
+				}
+			],
+			"Reachable": "AccessDeepTower",
+		},
+		{
+			"id": "Deeptower_heart",
+			"visname": "DeepTower Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 127,
+					"y": 157
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessDeepTower",
+					"SLIDE",
+					{
+						"type": "ITEM",
+						"value": "Double Jump Upgrade"
+					}
+				]
+			},
+		},
+		{
+			"id": "Deeptower_top_entrance",
+			"visname": "DeepTower Upper Heart Door",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 127,
+					"y": 97
+				}
+			],
+			"Reachable": "AccessNightWalkUpper",
+		},
+		
+		{
+			"id": "Farfall_3_balloons",
+			"visname": "FarFall Three Balloons Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 7,
+					"y": 292
+				}
+			],
+			"Reachable": "AccessBottom",
+		},
+		{
+			"id": "Farfall_5_balloons",
+			"visname": "FarFall Five Balloons Clockwise Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 7,
+					"y": 247
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessFarFallLowerLeft",
+					{
+						"type": "VAR",
+						"name": "JumpHeight",
+						"op": ">=",
+						"value": 6
+					}
+				]
+			},
+		},
+		{
+			"id": "Farfall_blue_rock_boss",
+			"visname": "FarFall Gold Orb",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 37,
+					"y": 307
+				}
+			],
+			"Reachable": "AccessFarFallLowerLeft",
+		},
+		{
+			"id": "Farfall_boss_8",
+			"visname": "FarFall Boss",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 22,
+					"y": 307
+				}
+			],
+			"Reachable": "AccessFarFallLowerLeft",
+		},
+		{
+			"id": "Farfall_bottom_flower",
+			"visname": "FarFall Bottom Right Save Flower",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 22,
+					"y": 292
+				}
+			],
+			"Reachable": "AccessFarFallLowerRight",
+		},
+		{
+			"id": "Farfall_bottom_heart",
+			"visname": "FarFall Bottom Right Save Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 22,
+					"y": 292
+				}
+			],
+			"Reachable": "AccessFarFallLowerRight",
+		},
+		{
+			"id": "Farfall_bottom_heart_door",
+			"visname": "FarFall Bottom Right Save Heart Door",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 22,
+					"y": 292
+				}
+			],
+			"Reachable": "AccessFarFallLowerRight",
+		},
+		{
+			"id": "Farfall_chest",
+			"visname": "Farfall Chest",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 7,
+					"y": 202
+				}
+			],
+			"Reachable": "AccessFarFall",
+		},
+		{
+			"id": "Farfall_kill_3",
+			"visname": "FarFall Floating Enemies Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 7,
+					"y": 187
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessFarFall",
+					{
+						"type": "VAR",
+						"name": "JumpHeight",
+						"op": ">=",
+						"value": 5
+					}
+				]
+			},
+			"Out of Logic": {
+				"type": "ALL",
+				"rules": [
+					"AccessFarFall",
+					"FIRE",
+					{
+						"type": "ITEM",
+						"value": "Double Jump Upgrade"
+					}
+				]
+			}
+		},
+		{
+			"id": "Farfall_yellow_heart_door",
+			"visname": "FarFall Yellow Energy Heart Door",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 37,
+					"y": 277
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessFarFallLowerRight",
+					"YELLOW"
+				]
+			},
+		},
+		
+		{
+			"id": "Firecage_boss",
+			"visname": "FireCage Yellow Energy Upgrade",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 217,
+					"y": 187
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessFireCageInner",
+					"RED",
+					"YELLOW"
+				]
+			},
+			"Out of Logic": {
+				"type": "ALL",
+				"rules": [
+					"AccessFireCageInner",
+					"RED"
+				]
+			},
+		},
+		{
+			"id": "Firecage_boss_7",
+			"visname": "FireCage Boss",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 217,
+					"y": 202
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessFireCageInner",
+					"RED",
+					"YELLOW"
+				]
+			},
+			"Out of Logic": {
+				"type": "ALL",
+				"rules": [
+					"AccessFireCageInner",
+					"RED"
+				]
+			},
+		},
+		{
+			"id": "Firecage_bot",
+			"visname": "FireCage Bottom Save",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 187,
+					"y": 202
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessFireCageInner",
+					"RED",
+					"YELLOW",
+					"SLIDE"
+				]
+			},
+		},
+		{
+			"id": "Firecage_bot_left_secret",
+			"visname": "FireCage Bottom Left Save",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 142,
+					"y": 202
+				}
+			],
+			"Reachable": "AccessFireCageInner",
+			"Out of Logic": "AccessFireCageInnerOOL",
+		},
+		{
+			"id": "Firecage_mid",
+			"visname": "FireCage Middle",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 187,
+					"y": 187
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessFireCageInner",
+					"RED",
+					"YELLOW",
+					{
+						"type": "VAR",
+						"name": "JumpHeight",
+						"op": ">=",
+						"value": 8
+					}
+				]
+			},
+			"Out of Logic": {
+				"type": "ALL",
+				"rules": [
+					"AccessFireCageInner",
+					"RED",
+					{
+						"type": "VAR",
+						"name": "JumpHeight",
+						"op": ">=",
+						"value": 8
+					}
+				]
+			},
+		},
+		{
+			"id": "Firecage_mid_heart_door",
+			"visname": "FireCage Middle Heart Door",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 187,
+					"y": 187
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessFireCageInner",
+					"RED",
+					"YELLOW"
+				]
+			},
+			"Out of Logic": {
+				"type": "ALL",
+				"rules": [
+					"AccessFireCageInner",
+					"RED"
+				]
+			},
+		},
+		{
+			"id": "Firecage_top",
+			"visname": "FireCage Two Thwomps Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 172,
+					"y": 172
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessFireCageInner",
+					{
+						"type": "ANY",
+						"rules": [
+							"FIRE",
+							"ICE"
+						]
+					}
+				]
+			},
+			"Out of Logic": "AccessFireCageInnerOutOfLogic"
+		},
+		{
+			"id": "Firecage_top_heart_door",
+			"visname": "FireCage Top Heart Door",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 187,
+					"y": 172
+				}
+			],
+			"Reachable": "AccessFireCageInner",
+		},
+		{
+			"id": "Firecage_top_left_gate",
+			"visname": "FireCage Tollgate",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 142,
+					"y": 172
+				}
+			],
+			"Reachable": {
+				"type": "ANY",
+				"rules": [
+					{
+						"type": "ALL",
+						"rules": [
+							"AccessFireCageInner",
+							"FIRE2",
+							"RED"
+						]
+					},
+					{
+						"type": "ALL",
+						"rules": [
+							"AccessFireCageInner",
+							"SLIDE"
+						]
+					}
+				]
+			},
+			"Out of Logic": {
+				"type": "ALL",
+				"rules": [
+					"AccessFireCageInnerOOL",
+					"FIRE2"
+				]
+			}
+		},
+		
+		{
+			"id": "Grotto_boss_1",
+			"visname": "Grotto First Boss",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 217,
+					"y": 157
+				}
+			],
+			"Reachable": "AccessGrotto",
+			"Out of Logic": "AccessGrottoOOL",
+		},
+		{
+			"id": "Grotto_djump",
+			"visname": "Grotto Double Jump Upgrade",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 202,
+					"y": 157
+				}
+			],
+			"Reachable": "AccessGrotto",
+			"Out of Logic": "AccessGrottoOOL",
+		},
+		{
+			"id": "Grotto_boss_6",
+			"visname": "Grotto Eye Boss",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 232,
+					"y": 172
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessGrottoUpper",
+					"DIVEBOMB"
+				]
+			},
+		},
+		{
+			"id": "Grotto_eye_boss",
+			"visname": "Grotto Eye Boss Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 232,
+					"y": 172
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessGrottoUpper",
+					"DIVEBOMB"
+				]
+			},
+		},
+		{
+			"id": "Grotto_flower",
+			"visname": "Grotto Flower",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 232,
+					"y": 142
+				}
+			],
+			"Reachable": "AccessGrottoUpper",
+		},
+		{
+			"id": "Grotto_mural_heart",
+			"visname": "Grotto Mural",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 232,
+					"y": 157
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessGrotto",
+					{
+						"type": "ITEM",
+						"count": 2,
+						"value": "Double Jump Upgrade"
+					}
+				]
+			},
+			"Out of Logic": {
+				"type": "ALL",
+				"rules": [
+					"AccessGrotto",
+					{
+						"type": "ITEM",
+						"value": "Double Jump Upgrade"
+					}
+				]
+			},
+		},
+		
+		{
+			"id": "Highlands_platform",
+			"visname": "HighLands Platform",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 247,
+					"y": 97
+				}
+			],
+			"Reachable": "AccessTheCurtain",
+		},
+		
+		{
+			"id": "Icecastle_boss",
+			"visname": "IceCastle Post-Boss Save",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 412,
+					"y": 52
+				}
+			],
+			"Reachable": "AccessIceCastleBoss",
+		},
+		{
+			"id": "Icecastle_boss_15",
+			"visname": "IceCastle Boss",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 427,
+					"y": 52
+				}
+			],
+			"Reachable": "AccessIceCastleBoss",
+		},
+		{
+			"id": "Icecastle_bottom_underhang",
+			"visname": "IceCastle Post-Boss Underhang",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 352,
+					"y": 52
+				}
+			],
+			"Reachable": "AccessIceCastleBoss",
+		},
+		{
+			"id": "Icecastle_entrance_heart_door",
+			"visname": "IceCastle Narrow Spikes Heart Door",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 322,
+					"y": 37
+				}
+			],
+			"Reachable": "AccessIceCastle",
+		},
+		{
+			"id": "Icecastle_entrance",
+			"visname": "IceCastle Entrance",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 322,
+					"y": 37
+				}
+			],
+			"Reachable": "AccessIceCastle",
+		},
+		{
+			"id": "Icecastle_left_outside",
+			"visname": "IceCastle Left Outside",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 322,
+					"y": 37
+				}
+			],
+			"Reachable": "AccessIceCastle",
+		},
+		{
+			"id": "Icecastle_entrance_flower",
+			"visname": "IceCastle Entrance Flower",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 322,
+					"y": 52
+				}
+			],
+			"Reachable": "AccessIceCastle",
+		},
+		{
+			"id": "Icecastle_high_mid_heartdoor",
+			"visname": "IceCastle Tiny Platforms Heart Door",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 382,
+					"y": 22
+				}
+			],
+			"Reachable": "AccessIceCastle",
+		},
+		{
+			"id": "Icecastle_low_mid_heartdoor",
+			"visname": "IceCastle Single Cannon Heart Door",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 382,
+					"y": 37
+				}
+			],
+			"Reachable": "AccessIceCastle",
+		},
+		{
+			"id": "Icecastle_low_mid_secret",
+			"visname": "IceCastle Hidden Path Through Spikes Near Save",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 397,
+					"y": 37
+				}
+			],
+			"Reachable": "AccessIceCastle",
+		},
+		{
+			"id": "Icecastle_top_left_heart_door",
+			"visname": "IceCastle Yellow Energy Heart Door",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 337,
+					"y": 7
+				}
+			],
+			"Reachable": "AccessIceCastle",
+		},
+		{
+			"id": "Icecastle_top_right",
+			"visname": "IceCastle Top Right Hidden Path Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 442,
+					"y": 7
+				}
+			],
+			"Reachable": "AccessIceCastle",
+		},
+		
+		{
+			"id": "Library_heart",
+			"visname": "Library Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 292,
+					"y": 67
+				}
+			],
+			"Reachable": "AccessLibrary",
+		},
+		{
+			"id": "Library_flower",
+			"visname": "Library Flower",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 292,
+					"y": 67
+				}
+			],
+			"Reachable": "AccessLibrary",
+		},
+		
+		{
+			"id": "Longbeach_water_entrance_flower",
+			"visname": "LongBeach Below Save Flower",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 292,
+					"y": 157
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessDeepDiveRight",
+					"SLIDE",
+					{
+						"type": "VAR",
+						"name": "JumpHeight",
+						"op": ">=",
+						"value": 8
+					}
+				]
+			},
+		},
+		
+		{
+			"id": "Mountside_left_flower",
+			"visname": "MountSide Flower",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 142,
+					"y": 307
+				}
+			],
+			"Reachable": "AccessMountSide",
+		},
+		{
+			"id": "Mountside_right_heart_door",
+			"visname": "MountSide Heart Door",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 217,
+					"y": 307
+				}
+			],
+			"Reachable": "AccessMountSide",
+		},
+		
+		{
+			"id": "Nightclimb_boss_4",
+			"visname": "NightClimb Boss",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 97,
+					"y": 67
+				}
+			],
+			"Reachable": "AccessNightClimb",
+		},
+		{
+			"id": "Nightclimb_chest",
+			"visname": "NightClimb Chest",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 112,
+					"y": 112
+				}
+			],
+			"Reachable": "AccessNightClimb",
+		},
+		{
+			"id": "Nightclimb_duck",
+			"visname": "NightClimb Duck",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 112,
+					"y": 52
+				}
+			],
+			"Reachable": "AccessNightClimb",
+		},
+		{
+			"id": "Nightclimb_duck_heart",
+			"visname": "NightClimb Duck Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 112,
+					"y": 52
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessNightClimb",
+					{
+						"type": "ITEM",
+						"value": "Hatch"
+					},
+					{
+						"type": "ITEM",
+						"value": "Duck"
+					}
+				]
+			},
+		},
+		{
+			"id": "Nightclimb_right_heart",
+			"visname": "NightClimb Right Ledge Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 112,
+					"y": 97
+				}
+			],
+			"Reachable": "AccessNightClimb",
+		},
+		{
+			"id": "Nightclimb_top_heart",
+			"visname": "NightClimb Upper Save Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 112,
+					"y": 67
+				}
+			],
+			"Reachable": "AccessNightClimb",
+		},
+		{
+			"id": "Nightclimb_flower",
+			"visname": "NightClimb Upper Save Flower",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 112,
+					"y": 67
+				}
+			],
+			"Reachable": "AccessNightClimb",
+		},
+		{
+			"id": "Nightclimb_wall_heart",
+			"visname": "NightClimb Heart Inside Wall",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 97,
+					"y": 82
+				}
+			],
+			"Reachable": "AccessNightClimb",
+		},
+		
+		{
+			"id": "Nightwalk_chest",
+			"visname": "NightWalk Chest",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 172,
+					"y": 97
+				}
+			],
+			"Reachable": "AccessNightWalkUpper",
+		},
+		{
+			"id": "Nightwalk_hatch",
+			"visname": "NightWalk Hatch",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 172,
+					"y": 142
+				}
+			],
+			"Reachable": {
+				"type": "ANY",
+				"rules": [
+					"AccessNightWalkUpper",
+					{
+						"type": "ALL",
+						"rules": [
+							"AccessNightWalk",
+							{
+								"type": "ITEM",
+								"value": "Duck"
+							},
+							{
+								"type": "VAR",
+								"name": "JumpHeight",
+								"op": ">=",
+								"value": 6
+							}
+						]
+					}
+				]
+			},
+		},
+		{
+			"id": "Nightwalk_high_flower",
+			"visname": "NightWalk Upper Save Flower",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 217,
+					"y": 97
+				}
+			],
+			"Reachable": "AccessNightWalkUpper",
+		},
+		{
+			"id": "Nightwalk_jump_1",
+			"visname": "NightWalk Jump Upgrade",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 157,
+					"y": 157
+				}
+			],
+			"Reachable": "AccessNightWalk",
+		},
+		{
+			"id": "Nightwalk_block_heart",
+			"visname": "NightWalk Block Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 157,
+					"y": 157
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessNightWalk",
+					"DIVEBOMB"
+				]
+			},
+		},
+		{
+			"id": "Nightwalk_nest_flower",
+			"visname": "NightWalk Nest Flower",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 142,
+					"y": 142
+				}
+			],
+			"Reachable": "AccessNightWalkUpper",
+		},
+		{
+			"id": "Nightwalk_save_flower",
+			"visname": "NightWalk Start Save Flower",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 142,
+					"y": 157
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessNightWalk",
+					{
+						"type": "VAR",
+						"name": "JumpHeight",
+						"op": ">=",
+						"value": 5
+					}
+				]
+			},
+			"Out of Logic": {
+				"type": "ALL",
+				"rules": [
+					"AccessNightWalk",
+					"AccessSkyTown",
+					{
+						"type": "ITEM",
+						"value": "Double Jump Upgrade"
+					}
+				]
+			},
+		},
+		{
+			"id": "Nightwalk_shrine_heart",
+			"visname": "NightWalk Bird Shrine",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 172,
+					"y": 157
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessNightWalk",
+					{
+						"type": "VAR",
+						"name": "JumpHeight",
+						"op": ">=",
+						"value": 3
+					}
+				]
+			},
+		},
+		{
+			"id": "Nightwalk_shrine_torches",
+			"visname": "NightWalk Shrine Torches",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 172,
+					"y": 157
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessNightWalk",
+					{
+						"type": "VAR",
+						"name": "JumpHeight",
+						"op": ">=",
+						"value": 3
+					},
+					"CanLightTorches"
+				]
+			},
+		},
+		{
+			"id": "Nightwalk_sky_heart",
+			"visname": "NightWalk Red Energy Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 157,
+					"y": 142
+				}
+			],
+			"Reachable": {
+				"type": "ANY",
+				"rules": [
+					{
+						"type": "ALL",
+						"rules": [
+							"AccessNightWalk",
+							{
+								"type": "ITEM",
+								"value": "Duck"
+							},
+							{
+								"type": "VAR",
+								"name": "JumpHeight",
+								"op": ">=",
+								"value": 6
+							},
+							"RED"
+						]
+					},
+					{
+						"type": "ALL",
+						"rules": [
+							"AccessNightWalkUpper",
+							"RED"
+						]
+					}
+				]
+			},
+		},
+		{
+			"id": "Nightwalk_upper_heart",
+			"visname": "NightWalk Upper Path Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 142,
+					"y": 97
+				}
+			],
+			"Reachable": "AccessNightWalkUpper",
+		},
+		
+		{
+			"id": "Rainbowdive_100",
+			"visname": "RainbowDive Prize 100",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 307,
+					"y": 142
+				}
+			],
+			"Reachable": "AccessRainbowDive",
+		},
+		{
+			"id": "Rainbowdive_300",
+			"visname": "RainbowDive Prize 300",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 307,
+					"y": 142
+				}
+			],
+			"Reachable": "AccessRainbowDive",
+		},
+		{
+			"id": "Rainbowdive_second_prize",
+			"visname": "RainbowDive 2nd Prize",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 307,
+					"y": 142
+				}
+			],
+			"Reachable": "AccessRainbowDive",
+		},
+		{
+			"id": "Rainbowdive_first_prize",
+			"visname": "RainbowDive 1st Prize",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 307,
+					"y": 142
+				}
+			],
+			"Reachable": "AccessRainbowDive",
+		},
+		
+		{
+			"id": "Skylands_balloon_chain",
+			"visname": "SkyLands Twelve Balloons Heart",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 382,
+					"y": 127
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessSkyLandsRight",
+					"FIRE2"
+				]
+			},
+		},
+		{
+			"id": "Skylands_chest",
+			"visname": "SkyLands Chest",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 337,
+					"y": 112
+				}
+			],
+			"Reachable": "AccessSkyLands",
+		},
+		{
+			"id": "Skylands_duck",
+			"visname": "SkyLands Duck Statues",
+			"map_spots": [
+				{
+					"id": "Overworld",
+					"x": 367,
+					"y": 97
+				}
+			],
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					"AccessSkyLandsRight",
+					{
+						"type": "ITEM",
+						"value": "Duck"
+					}
+				]
+			},
+		},
+		
+		
 	],
 	"named_rules": {
 		"AccessBlackCastle": "AccessLongBeach",
@@ -870,6 +2099,12 @@
 			"name": "JumpHeight",
 			"op": ">=",
 			"value": 4
+		},
+		"AccessGrottoOOL": {
+			"type": "VAR",
+			"name": "JumpHeight",
+			"op": ">=",
+			"value": 3
 		},
 		"AccessHighLands": {
 			"type": "ALL",
@@ -1040,7 +2275,7 @@
 
 			]
 		},
-		"AccessFireCageInnerOutOfLogic": {
+		"AccessFireCageInnerOOL": {
 			"type": "ALL",
 			"rules": [
 				"AccessFireCage",
@@ -1172,17 +2407,26 @@
 			"type": "ITEM",
 			"value": "Progressive Fire Shot"
 		},
+		"FIRE2": {
+			"type": "ITEM",
+			"count": 2,
+			"value": "Progressive Fire Shot"
+		},
 		"DIVEBOMB": {
 			"type": "ITEM",
 			"value": "Smash"
 		},
-		"YELLOW": {
+		"DIVEBOMB": {
 			"type": "ITEM",
-			"value": "Yellow Energy"
+			"value": "Smash"
 		},
 		"RED": {
 			"type": "ITEM",
 			"value": "Red Energy"
+		},
+		"YELLOW": {
+			"type": "ITEM",
+			"value": "Yellow Energy"
 		},
 		"ICE": {
 			"type": "ITEM",
