@@ -16,7 +16,8 @@ var _queued_refresh := false
 func _process(_delta):
 	if _queued_refresh:
 		_queued_refresh = false
-		refresh_tracker()
+		if Archipelago.conn:
+			refresh_tracker()
 func queue_refresh() -> void:
 	_queued_refresh = true
 
