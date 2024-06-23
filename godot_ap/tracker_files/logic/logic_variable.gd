@@ -46,3 +46,6 @@ static func from_dict(vals: Dictionary) -> TrackerLogicNode:
 	if vals.get("type") != "VAR": return TrackerLogicNode.from_dict(vals)
 	
 	return TrackerLogicVariable.new(str(vals.get("name")), vals.get("op", "NULL"), vals.get("value"))
+
+func get_repr(indent := 0) -> String:
+	return "\t".repeat(indent) + "VAR '%s' %s %s: %s" % [iden, op, val, can_access()]

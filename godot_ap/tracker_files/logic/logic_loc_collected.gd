@@ -17,9 +17,13 @@ static func make(iden: Variant) -> TrackerLogicLocCollected:
 		return make_name(iden)
 	return null
 
+func get_id() -> int:
+	return identifier if identifier is int else Archipelago.conn.get_gamedata_for_player().get_loc_id(identifier)
+func get_name() -> String:
+	return identifier if identifier is String else Archipelago.conn.get_gamedata_for_player().get_loc_name(identifier)
+
 func can_access() -> Variant:
-	var id: int = identifier if identifier is int else Archipelago.conn.get_gamedata_for_player().get_loc_id(identifier)
-	return Archipelago.location_checked(id)
+	return Archipelago.location_checked(get_id())
 
 func _to_dict() -> Dictionary:
 	return {
@@ -39,3 +43,6 @@ static func from_dict(vals: Dictionary) -> TrackerLogicNode:
 		ret.identifier = int(vals.get("value"))
 		
 	return ret
+
+func get_repr(indent := 0) -> String:
+	return "\t".repeat(indent) + "LOCATION_COLLECTED '%s': %s" % [identifier, can_access()]

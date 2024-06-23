@@ -33,3 +33,6 @@ static func from_dict(vals: Dictionary) -> TrackerLogicNode:
 		"VAR":
 			return TrackerLogicVariable.from_dict(vals)
 	return null
+
+func get_repr(indent := 0) -> String:
+	return "\t".repeat(indent) + "DEFAULT: Unknown"

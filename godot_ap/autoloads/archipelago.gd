@@ -907,6 +907,29 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 						var val = TrackerTab.variables.get(varname)
 						mgr.console.add_line(str(val), "", Archipelago.rich_colors["plum"])
 				mgr.console.add_header_spacing()))
+		cmd_manager.register_command(ConsoleCommand.new("/track_loc_db").debug()
+			.add_help("[filter]", "Outputs trackerpack location debug info")
+			.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, msg: String):
+				var filt := msg.substr(14).to_lower()
+				var locs: Array[APLocation] = []
+				locs.assign(conn.slot_locations.keys() \
+					.map(func(locid: int): return TrackerTab.get_location(locid)) \
+					.filter(func(v: APLocation): return v.name.to_lower().contains(filt) and v.loaded_tracker_loc != null))
+				if not locs.is_empty():
+					mgr.console.add_header_spacing()
+					mgr.console.add_line("[ LOCATIONS ]", "", mgr.console.COLOR_UI_MSG)
+					for loc in locs:
+						var tloc: TrackerLocation = loc.loaded_tracker_loc
+						mgr.console.add_line(loc.name+":", "", rich_colors[AP.COLORNAME_LOCATION])
+						for stat in tloc.status_rules.keys():
+							if stat == "Found": continue
+							var stat_obj := TrackerTab.get_status(stat)
+							mgr.console.add_line("'%s':" % stat, stat_obj.tooltip, rich_colors[stat_obj.colorname])
+							var cont: BaseConsole.ContainerPart = mgr.console.add_indented_block(
+								tloc.status_rules[stat].get_repr(1), 25, mgr.console.COLOR_UI_MSG)
+							cont.textpart_replace("true", "true", true, "", rich_colors["green"])
+							cont.textpart_replace("false", "false", true, "", rich_colors["red"])
+				mgr.console.add_header_spacing()))
 		cmd_manager.setup_debug_commands()
 func _init():
 	init_command_manager(true)

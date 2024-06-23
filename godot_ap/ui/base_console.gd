@@ -383,6 +383,12 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 	func _get_color(c: BaseConsole) -> Color:
 		return color if color.a8 else c.font_color
 	
+	static func make(txt: String, ttip := "", col := Color.TRANSPARENT) -> TextPart:
+		var part := TextPart.new()
+		part.text = txt
+		part.tooltip = ttip
+		part.color = col
+		return part
 	func copy_to(other: TextPart) -> void:
 		other.text = text
 		other.tooltip = tooltip
@@ -391,10 +397,35 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 		other.bold = bold
 		other.underline = underline
 		other.italic = italic
+	func duplicate() -> TextPart:
+		var ret := TextPart.new()
+		copy_to(ret)
+		return ret
+	func dupe_settings(new_text: String) -> TextPart:
+		var ret := duplicate()
+		ret.text = new_text
+		return ret
 	func centered() -> CenterTextPart:
 		var c := CenterTextPart.new()
 		copy_to(c)
 		return c
+	func frag_replace(from_str: String, to_str: String, case_sens := true,
+		ttip := "", col := Color.TRANSPARENT) -> Array[TextPart]:
+		var ind = text.find(from_str) if case_sens else text.findn(from_str)
+		var made_to = 0
+		var ret: Array[TextPart] = []
+		while ind > -1:
+			ret.append(dupe_settings(text.substr(0, ind)))
+			ret.append(TextPart.make(to_str, ttip, col))
+			ind += from_str.length()
+			made_to = ind
+			ind = text.find(from_str, ind) if case_sens else text.findn(from_str, ind)
+		if made_to:
+			var left: String = text.substr(made_to)
+			if not left.is_empty():
+				ret.append(dupe_settings(left))
+		return ret
+	
 class CenterTextPart extends TextPart:
 	func _hitbox_string(c: BaseConsole, subtext: String, data: ConsoleDrawData):
 		var str_sz = c.get_string_size(subtext, _font_flags)
@@ -506,6 +537,20 @@ class ContainerPart extends IteratorPart:
 		return part
 	func clear() -> void:
 		parts.clear()
+	func textpart_replace(from_str: String, to_str: String, case_sens := true,
+		ttip := "", col := Color.TRANSPARENT) -> void:
+		var q := 0
+		while q < parts.size():
+			var p: ConsolePart = parts[q]
+			if p is TextPart:
+				var repl = p.frag_replace(from_str, to_str, case_sens, ttip, col)
+				if repl:
+					parts.pop_at(q)
+					for p2 in Util.reversed(repl):
+						parts.insert(q, p2)
+					q += repl.size()
+					continue
+			q += 1
 
 class ColumnsPart extends ContainerPart:
 	## Adds a part to a specified column index
@@ -700,11 +745,7 @@ func add(part: ConsolePart) -> ConsolePart:
 	return part
 
 func make_text(text: String, ttip := "", col := Color.TRANSPARENT) -> TextPart:
-	var part := TextPart.new()
-	part.text = text
-	part.tooltip = ttip
-	part.color = col
-	return part
+	return TextPart.make(text, ttip, col)
 func add_text(text: String, ttip := "", col := Color.TRANSPARENT) -> TextPart:
 	return add(make_text(text, ttip, col))
 
@@ -760,6 +801,28 @@ func ensure_newline(parts_arr: Array[ConsolePart]): ## Returns SpacingPart | nul
 	return make_header_spacing(0)
 func add_ensure_newline(): ## Returns SpacingPart | null
 	add(ensure_newline(parts))
+
+func make_indented_block(s: String, indent: float, color := Color.TRANSPARENT) -> ContainerPart:
+	var c := ContainerPart.new()
+	var spl = s.split("\n")
+	var indent_depth: int = 0
+	for line in spl:
+		
+		var sz: int = line.length()
+		line = line.lstrip("\t")
+		sz -= line.length()
+		
+		var depth: int = sz - indent_depth
+		if depth: # Update the indent when it changes
+			c._add(make_indent(indent * depth))
+			indent_depth += depth
+		c._add(make_line(line, "", color))
+	if indent_depth:
+		c._add(make_indent(indent * -indent_depth)) # Reset indent
+	return c
+func add_indented_block(s: String, indent: float, color := Color.TRANSPARENT) -> ContainerPart:
+	return add(make_indented_block(s, indent, color))
+
 
 var parts: Array[ConsolePart] = []
 var hovered_part: ConsolePart = null

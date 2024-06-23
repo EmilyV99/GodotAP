@@ -24,3 +24,9 @@ static func from_json_val(v: Variant) -> TrackerLogicNode:
 static func from_dict(vals: Dictionary) -> TrackerLogicNode:
 	if vals.get("type") != "NAMED_RULE": return TrackerLogicNode.from_dict(vals)
 	return TrackerLogicNamedRule.new(vals.get("name", ""))
+
+func get_repr(indent := 0) -> String:
+	var rule := TrackerTab.get_named_rule(name)
+	if not rule:
+		return "\t".repeat(indent) + "ERROR"
+	return "\t".repeat(indent) + "NAMED '%s':\n%s" % [name, rule.get_repr(indent+1)]

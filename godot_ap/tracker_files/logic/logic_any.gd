@@ -33,3 +33,9 @@ static func from_dict(vals: Dictionary) -> TrackerLogicNode:
 		if node:
 			ret.add(node)
 	return ret
+
+func get_repr(indent := 0) -> String:
+	var s: String = "\t".repeat(indent) + ("ANY: %s" % can_access())
+	for r in rules:
+		s += "\n" + r.get_repr(indent+1)
+	return s

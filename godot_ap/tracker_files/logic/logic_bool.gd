@@ -17,3 +17,6 @@ func _to_string() -> String:
 static func from_json_val(v: Variant) -> TrackerLogicNode:
 	if not v is bool: return TrackerLogicNode.from_dict(v)
 	return TrackerLogicBool.new(v)
+
+func get_repr(indent := 0) -> String:
+	return "\t".repeat(indent) + "TRUE" if val else "FALSE"

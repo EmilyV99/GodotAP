@@ -14,8 +14,13 @@ static func make_name(name: String, item_count := 1) -> TrackerLogicItem:
 	ret.count = item_count
 	return ret
 
+func get_id() -> int:
+	return identifier if identifier is int else Archipelago.conn.get_gamedata_for_player().get_item_id(identifier)
+func get_name() -> String:
+	return identifier if identifier is String else Archipelago.conn.get_gamedata_for_player().get_item_name(identifier)
+
 func can_access() -> Variant:
-	var id: int = identifier if identifier is int else Archipelago.conn.get_gamedata_for_player().get_item_id(identifier)
+	var id := get_id()
 	var found := 0
 	for item in Archipelago.conn.received_items:
 		if item.id == id:
@@ -39,3 +44,6 @@ static func from_dict(vals: Dictionary) -> TrackerLogicNode:
 	ret.count = vals.get("count", 1)
 		
 	return ret
+
+func get_repr(indent := 0) -> String:
+	return "\t".repeat(indent) + "ITEM '%s' x%d: %s" % [identifier, count, can_access()]

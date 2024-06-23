@@ -96,3 +96,6 @@ static func load_dict(s: Dictionary, parent: TrackerPack_Base) -> TrackerLocatio
 
 func _to_string():
 	return "%s (reqs %s)" % [identifier, status_rules]
+
+func get_loc_name() -> String:
+	return TrackerTab.get_location(identifier).get_display_name()
