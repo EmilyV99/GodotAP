@@ -128,30 +128,59 @@ func _to_string():
 func setup_statuses(status_json: Array) -> void:
 	statuses.clear()
 	statuses_by_name.clear()
-	var pre_add = [LocationStatus.ACCESS_UNKNOWN, LocationStatus.ACCESS_FOUND, LocationStatus.ACCESS_UNREACHABLE]
-	var post_add = [LocationStatus.ACCESS_LOGIC_BREAK, LocationStatus.ACCESS_REACHABLE]
-	for stat in status_json:
-		for v in pre_add:
-			if stat.get("name", "") == v.text:
-				pre_add.erase(v)
-		for v in post_add:
-			if stat.get("name", "") == v.text:
-				post_add.erase(v)
-	var q := 0
-	for stat in pre_add:
-		stat.id = q
-		statuses.append(stat)
-		statuses_by_name[stat.text] = stat
-		q += 1
+	
+	var to_add = []
+	var by_name = {}
 	for js in status_json:
 		var name: String = js.get("name", "")
 		if name.is_empty(): continue
-		var stat := LocationStatus.new(name, js.get("ttip", ""), js.get("color", "white"))
-		stat.id = q
-		statuses.append(stat)
-		statuses_by_name[stat.text] = stat
-		q += 1
-	for stat in post_add:
+		to_add.append(LocationStatus.new(name, js.get("ttip", ""), js.get("color", "white")))
+		by_name[name] = to_add.back()
+	
+	var found = by_name.get("Found")
+	if not found:
+		to_add.push_front(LocationStatus.ACCESS_FOUND)
+		found = 0
+	else:
+		found = to_add.find(found)
+	
+	var unknown = by_name.get("Unknown")
+	if not unknown:
+		to_add.insert(found+1, LocationStatus.ACCESS_UNKNOWN)
+		unknown = found+1
+	else:
+		unknown = to_add.find(unknown)
+	
+	var unreachable = by_name.get("Unreachable")
+	if not unreachable:
+		to_add.insert(unknown+1, LocationStatus.ACCESS_UNREACHABLE)
+		unreachable = unknown+1
+	else:
+		unreachable = to_add.find(unreachable)
+	
+	var not_found = by_name.get("Not Found")
+	if not not_found:
+		to_add.insert(unreachable+1, LocationStatus.ACCESS_NOT_FOUND)
+		not_found = unreachable+1
+	else:
+		not_found = to_add.find(not_found)
+	
+	var logic_break = by_name.get("Out of Logic")
+	if not logic_break:
+		to_add.insert(not_found+1, LocationStatus.ACCESS_LOGIC_BREAK)
+		logic_break = not_found+1
+	else:
+		logic_break = to_add.find(logic_break)
+	
+	var reachable = by_name.get("Out of Logic")
+	if not reachable:
+		to_add.insert(logic_break+1, LocationStatus.ACCESS_REACHABLE)
+		reachable = logic_break+1
+	else:
+		reachable = to_add.find(reachable)
+	
+	var q := 0
+	for stat in to_add:
 		stat.id = q
 		statuses.append(stat)
 		statuses_by_name[stat.text] = stat

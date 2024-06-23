@@ -177,7 +177,7 @@ func _ready():
 	Archipelago.connected.connect(func(conn: ConnectionInfo, _j: Dictionary):
 		conn.set_hint_notify(self.load_hints))
 	Archipelago.disconnected.connect(reset_hints_to_empty)
-	var header := BaseConsole.ColumnsPart.new()
+	var header := BaseConsole.ArrangedColumnsPart.new()
 	headings.append(header.add(hint_console.make_c_text("Receiving Player"), 500))
 	headings.append(header.add(hint_console.make_c_text("Item"), 500))
 	headings.append(header.add(hint_console.make_c_text("Finding Player"), 500))

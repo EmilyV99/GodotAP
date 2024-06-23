@@ -18,7 +18,7 @@ var hint_status_filters: Dictionary = {
 var status_filters: Dictionary = {}
 
 signal item_register(name: String)
-class LocationPart extends BaseConsole.ColumnsPart: ## A part representing a hint info
+class LocationPart extends BaseConsole.ArrangedColumnsPart: ## A part representing a hint info
 	var loc: APLocation
 	var datapack: TrackerPack_Data
 	
@@ -138,7 +138,7 @@ func _ready() -> void:
 	
 	titles[sort_cols[0]] += " ↓"
 	
-	var header := BaseConsole.ColumnsPart.new()
+	var header := BaseConsole.ArrangedColumnsPart.new()
 	for q in width_arr.size():
 		headings.append(header.add(console.make_c_text(titles[q]), width_arr[q]))
 	for q in headings.size():

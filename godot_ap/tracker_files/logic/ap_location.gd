@@ -41,10 +41,10 @@ func refresh() -> void:
 	hint_status = s
 
 ## Returns the location's accessibility as a string
-func get_status() -> String:
-	if loaded_tracker_loc:
+func get_status(default := "Unknown") -> String:
+	if loaded_tracker_loc and TrackerTab.tracking:
 		return loaded_tracker_loc.get_status()
-	return "Unknown"
+	return default
 
 ## Returns a descriptive display name, or an empty string if none exists.
 func get_display_name() -> String:

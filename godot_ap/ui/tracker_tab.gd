@@ -7,11 +7,11 @@ class_name TrackerTab extends MarginContainer
 var tracker: TrackerScene_Base = null
 var info_part: BaseConsole.TextPart = null
 
-var tracking: bool = false
+static var tracking: bool = false
 
 func refr_tags():
-	tracking = "Tracker" in Archipelago.AP_GAME_TAGS
-	tracker_button.set_pressed_no_signal(tracking)
+	TrackerTab.tracking = "Tracker" in Archipelago.AP_GAME_TAGS
+	tracker_button.set_pressed_no_signal(TrackerTab.tracking)
 	init_tracker()
 		
 func _ready():
@@ -21,7 +21,7 @@ func _ready():
 	Archipelago.connected.connect(func(_conn, _json): refr_tags())
 	Archipelago.disconnected.connect(refr_tags)
 	tracker_button.toggled.connect(func(state):
-		tracking = state
+		TrackerTab.tracking = state
 		Archipelago.set_tag("Tracker", state))
 	refr_tags()
 
@@ -32,7 +32,7 @@ func init_tracker():
 	TrackerTab.load_tracker_locations([])
 	TrackerTab.load_named_rules({})
 	
-	if not tracking:
+	if not TrackerTab.tracking:
 		info_part.text = "Tracking Disabled"
 		info_console.queue_redraw()
 		return
@@ -54,7 +54,10 @@ static func get_tracker(game: String) -> TrackerPack_Base:
 	return trackers.get(game, trackers.get(""))
 
 static var named_rules: Dictionary = {}
-static var statuses: Array[LocationStatus]
+static var statuses: Array[LocationStatus] = [LocationStatus.ACCESS_FOUND,
+	LocationStatus.ACCESS_UNKNOWN, LocationStatus.ACCESS_UNREACHABLE,
+	LocationStatus.ACCESS_NOT_FOUND, LocationStatus.ACCESS_LOGIC_BREAK,
+	LocationStatus.ACCESS_REACHABLE]
 static var locations: Dictionary = {}
 static var locs_by_name: Dictionary = {}
 static var variables: Dictionary = {}
@@ -65,6 +68,11 @@ static func get_loc_by_name(loc_name: String) -> APLocation:
 	return locs_by_name.get(loc_name, APLocation.nil())
 static func get_named_rule(rule_name: String) -> TrackerLogicNode:
 	return named_rules.get(rule_name)
+static func get_status(status_name: String) -> LocationStatus:
+	for s in statuses:
+		if s.text == status_name:
+			return s
+	return null
 static func load_locations() -> void:
 	locations.clear()
 	locs_by_name.clear()
@@ -174,3 +182,13 @@ static func load_tracker_packs() -> void:
 	if false:
 		for t in trackers.values():
 			t.resave()
+
+static func sort_by_location_status(a: String, b: String) -> int:
+	var ai = -1
+	var bi = -1
+	for q in statuses.size():
+		if statuses[q].text == a:
+			ai = q
+		if statuses[q].text == b:
+			bi = q
+	return (ai - bi)

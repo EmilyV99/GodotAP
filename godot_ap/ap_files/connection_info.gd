@@ -14,7 +14,7 @@ var slot_data: Dictionary
 var players: Array[NetworkPlayer]
 var slots: Array[NetworkSlot]
 
-var checked_locations: Dictionary = {}
+var slot_locations: Dictionary = {}
 var received_items: Array[NetworkItem] = []
 var hints: Array[NetworkHint] = []
 

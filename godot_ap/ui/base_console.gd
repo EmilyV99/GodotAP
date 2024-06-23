@@ -111,6 +111,11 @@ class ConsoleDrawData:
 	var max_shown_y: float = 0.0
 	var reset_y: Variant
 	
+	var max_shown_x: float = 0.0 ## Only ever reset manually
+	
+	func show_x(tx: float) -> void:
+		if tx > max_shown_x:
+			max_shown_x = tx;
 	func show_y(ty: float) -> void:
 		ty -= t
 		if ty > max_shown_y:
@@ -136,9 +141,28 @@ class ConsoleDrawData:
 		x = l + spacing.x
 		if not Util.approx_eq(r_y, t):
 			y = max(y, r_y + spacing.y) # max to avoid reducing space
+	func duplicate() -> ConsoleDrawData:
+		var ret := ConsoleDrawData.new()
+		ret.win_l = win_l
+		ret.win_r = win_r
+		ret.l = l
+		ret.t = t
+		ret.r = r
+		ret.b = b
+		ret.x = x
+		ret.y = y
+		ret.w = w
+		ret.h = h
+		ret.cx = cx
+		ret.cy = cy
+		ret.max_shown_y = max_shown_y
+		ret.reset_y = reset_y
+		ret.max_shown_x = max_shown_x
+		return ret
 class ConsolePart: ## A base part, for all other parts to inherit from
 	var on_click: Callable # Callable[InputEventMouseButton]->bool
 	var hidden: bool = false
+	var hitboxes: Array[Rect2] = []
 	signal hitbox_changed
 	func draw(_c: BaseConsole, _data: ConsoleDrawData) -> void:
 		pass
@@ -159,6 +183,8 @@ class ConsolePart: ## A base part, for all other parts to inherit from
 			ret.position.y = min(hb.position.y, hb2.position.y)
 			ret.size.y = max(hb.position.y+hb.size.y, hb2.position.y+hb2.size.y) - ret.position.y
 		return ret
+	func calc_hitboxes(_c: BaseConsole, _data: ConsoleDrawData) -> void: # Call for hitbox recalculation
+		pass
 	func try_hover(c: BaseConsole, pos: Vector2) -> bool:
 		for hb in get_hitboxes():
 			if hb.has_point(pos):
@@ -218,7 +244,6 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 	var text: String = ""
 	var tooltip: String = ""
 	var color: Color = Color.TRANSPARENT
-	var hitboxes: Array[Rect2] = []
 	var bold := false
 	var underline := false
 	var italic := false
@@ -228,6 +253,13 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 			_font_flags.italic = italic
 			return _font_flags
 	
+	func _to_string() -> String:
+		return "TextPart<'%s' '%s' %s>" % [text, tooltip, color]
+	
+	func _hitbox_string(c: BaseConsole, subtext: String, data: ConsoleDrawData):
+		var str_sz = c.get_string_size(subtext, _font_flags)
+		var hb := Rect2(Vector2(data.x,data.y), str_sz)
+		hitboxes.append(hb)
 	func _draw_string(c: BaseConsole, subtext: String, data: ConsoleDrawData):
 		var str_sz = c.get_string_size(subtext, _font_flags)
 		var pos := Vector2(data.x, data.y+c.get_font_ascent(_font_flags))
@@ -239,58 +271,7 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 			c.draw_rect(Rect2(hb.position.x, hb.position.y + str_sz.y, hb.size.x, 1), _get_color(c))
 	func draw(c: BaseConsole, data: ConsoleDrawData) -> void:
 		if dont_draw(): return
-		var text_pos = 0
-		var trim_pos: int
-		var old_hitbox := get_hitbox()
-		hitboxes.clear()
-		var space_only := true
-		while true:
-			if text_pos >= text.length():
-				break
-			if text[text_pos] == "\n":
-				data.newline(c)
-				while text_pos < text.length() and not text[text_pos].lstrip("\n"):
-					text_pos += 1
-				continue
-			trim_pos = text.find("\n", text_pos)
-			if trim_pos < 0: trim_pos = text.length()
-			var subtext := text.substr(text_pos,trim_pos-text_pos)
-			var str_sz := c.get_string_size(subtext, _font_flags)
-			while data.x < data.r and data.x + str_sz.x >= data.r and trim_pos > text_pos:
-				if text[trim_pos-1].lstrip(" \t"):
-					while trim_pos > text_pos and text[trim_pos-1].lstrip(" \t"): # Trim non-WS
-						trim_pos -= 1
-						if not space_only: break # Allow breaking mid-word
-				else:
-					while trim_pos > text_pos and not text[trim_pos-1].lstrip(" \t"): # Trim WS
-						trim_pos -= 1
-				subtext = text.substr(text_pos,trim_pos-text_pos)
-				str_sz = c.get_string_size(subtext, _font_flags)
-			if trim_pos <= text_pos: # No space at all, window is too thin
-				if Util.approx_eq(data.x, data.l):
-					if space_only:
-						space_only = false
-						continue # Try again, allowing breaking mid-word
-					break # abort to avoid infinite loop
-				data.x = data.r # Force next line
-			if data.x >= data.r: # no space! next line!
-				data.newline(c)
-				while text_pos < text.length() and not text[text_pos].lstrip("\n"):
-					text_pos += 1
-				continue
-			# The string WILL be drawn if this line is reached
-			space_only = true # Reset space check mode
-			if subtext.lstrip(" \t"): #not all whitespace
-				str_sz = c.get_string_size(subtext, _font_flags)
-				_draw_string(c, subtext, data)
-				data.show_y(data.y + str_sz.y + c.get_font_ascent(_font_flags))
-				data.x += str_sz.x
-			elif trim_pos < text.length():
-				# Trimmed whitespace, need to force the line down though
-				data.x = data.r
-			text_pos = trim_pos
-		if old_hitbox != get_hitbox():
-			hitbox_changed.emit()
+		_calc_and_draw(c, data, true)
 	func _ttip_calc_size(c: BaseConsole, data: ConsoleDrawData, clip := false) -> void:
 		if clip:
 			c.tooltip_label.size = Vector2(data.win_w,c.tooltip_label.size.y)
@@ -335,14 +316,70 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 			c.tooltip_bg.position.x -= 1
 		while c.tooltip_bg.position.y < 0:
 			c.tooltip_bg.position.y += 1
-		#while c.tooltip_bg.position.y + c.tooltip_bg.size.y >= data.b:
-			#c.tooltip_bg.position.y -= 1
 		#endregion Bound tooltip in-window
 	func needs_hover() -> bool:
 		return not tooltip.is_empty()
 	func get_hitboxes() -> Array[Rect2]:
 		return hitboxes
-	
+	func calc_hitboxes(c: BaseConsole, data: ConsoleDrawData) -> void:
+		_calc_and_draw(c, data, false)
+	func _calc_and_draw(c: BaseConsole, data: ConsoleDrawData, do_draw: bool) -> void:
+		var text_pos = 0
+		var trim_pos: int
+		var old_hitbox := get_hitbox()
+		hitboxes.clear()
+		var space_only := true
+		while true:
+			if text_pos >= text.length():
+				break
+			if text[text_pos] == "\n":
+				data.newline(c)
+				while text_pos < text.length() and not text[text_pos].lstrip("\n"):
+					text_pos += 1
+				continue
+			trim_pos = text.find("\n", text_pos)
+			if trim_pos < 0: trim_pos = text.length()
+			var subtext := text.substr(text_pos,trim_pos-text_pos)
+			var str_sz := c.get_string_size(subtext, _font_flags)
+			while data.x < data.r and data.x + str_sz.x >= data.r and trim_pos > text_pos:
+				if text[trim_pos-1].lstrip(" \t"):
+					while trim_pos > text_pos and text[trim_pos-1].lstrip(" \t"): # Trim non-WS
+						trim_pos -= 1
+						if not space_only: break # Allow breaking mid-word
+				else:
+					while trim_pos > text_pos and not text[trim_pos-1].lstrip(" \t"): # Trim WS
+						trim_pos -= 1
+				subtext = text.substr(text_pos,trim_pos-text_pos)
+				str_sz = c.get_string_size(subtext, _font_flags)
+			if trim_pos <= text_pos: # No space at all, window is too thin
+				if Util.approx_eq(data.x, data.l):
+					if space_only:
+						space_only = false
+						continue # Try again, allowing breaking mid-word
+					break # abort to avoid infinite loop
+				data.x = data.r # Force next line
+			if data.x >= data.r: # no space! next line!
+				data.newline(c)
+				while text_pos < text.length() and not text[text_pos].lstrip("\n"):
+					text_pos += 1
+				continue
+			# The string WILL be drawn if this line is reached
+			space_only = true # Reset space check mode
+			if subtext.lstrip(" \t"): #not all whitespace
+				str_sz = c.get_string_size(subtext, _font_flags)
+				if do_draw:
+					_draw_string(c, subtext, data)
+				else:
+					_hitbox_string(c, subtext, data)
+				data.show_x(data.x + str_sz.x)
+				data.show_y(data.y + str_sz.y + c.get_font_ascent(_font_flags))
+				data.x += str_sz.x
+			elif trim_pos < text.length():
+				# Trimmed whitespace, need to force the line down though
+				data.x = data.r
+			text_pos = trim_pos
+		if old_hitbox != get_hitbox():
+			hitbox_changed.emit()
 	func _get_color(c: BaseConsole) -> Color:
 		return color if color.a8 else c.font_color
 	
@@ -359,6 +396,10 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 		copy_to(c)
 		return c
 class CenterTextPart extends TextPart:
+	func _hitbox_string(c: BaseConsole, subtext: String, data: ConsoleDrawData):
+		var str_sz = c.get_string_size(subtext, _font_flags)
+		var hb := Rect2(data.l, data.y, data.w, str_sz.y)
+		hitboxes.append(hb)
 	func _draw_string(c: BaseConsole, subtext: String, data: ConsoleDrawData):
 		var str_sz = c.get_string_size(subtext, _font_flags)
 		var pos := Vector2(data.cx - str_sz.x/2, data.y+c.get_font_ascent(_font_flags))
@@ -373,11 +414,6 @@ class CenterTextPart extends TextPart:
 		data.ensure_line(c)
 		super(c, data)
 
-class LineBreakPart extends ConsolePart: ## A part that breaks a line
-	var break_count: int = 1
-	func draw(c: BaseConsole, data: ConsoleDrawData) -> void:
-		if dont_draw(): return
-		data.newline(c, break_count)
 class SpacingPart extends ConsolePart: ## A part that adds spacing
 	var spacing := Vector2.ZERO
 	var reset_line := true
@@ -392,6 +428,28 @@ class SpacingPart extends ConsolePart: ## A part that adds spacing
 			data.x += spacing.x
 			if not Util.approx_eq(data.y, data.t):
 				data.y += spacing.y
+		if spacing.x: data.show_x(data.x)
+	func calc_hitboxes(c: BaseConsole, data: ConsoleDrawData) -> void:
+		hitboxes.clear()
+		var hb := Rect2(data.x, data.y, 0, c.get_line_height())
+		if from_reset_y:
+			data.ensure_spacing(c, spacing)
+			if Util.approx_eq(hb.position.y, data.y):
+				hb.size.x = max(0, data.x - hb.position.x)
+			else:
+				hb.position.x = data.l
+				hb.position.y = data.y
+				hb.size.x = data.x - data.l
+			if spacing.y > Util.GAMMA:
+				hb.position.y -= spacing.y
+				hb.size.y += spacing.y
+		else:
+			data.x += spacing.x
+			if not Util.approx_eq(data.y, data.t):
+				data.y += spacing.y
+			hb.size = spacing
+		hitboxes.append(hb)
+		if spacing.x: data.show_x(data.x)
 class IndentPart extends ConsolePart: ## A part that manages indents
 	var indent: float = 0.0
 	func draw(_c: BaseConsole, data: ConsoleDrawData) -> void:
@@ -405,27 +463,37 @@ class IteratorPart extends ConsolePart: ## A base part, for parts that contain p
 	func draw(c: BaseConsole, data: ConsoleDrawData) -> void:
 		if dont_draw(): return
 		for p in iter_parts():
+			if not p: continue
 			p.draw(c,data)
 	func draw_hover(c: BaseConsole, data: ConsoleDrawData) -> void:
 		for p in iter_parts():
+			if not p: continue
 			p.draw_hover(c,data)
 	func needs_hover() -> bool:
 		for p in iter_parts():
+			if not p: continue
 			if p.needs_hover():
 				return true
 		return false
 	func get_hitboxes() -> Array[Rect2]:
 		var ret: Array[Rect2] = []
 		for p in iter_parts():
+			if not p: continue
 			ret.append_array(p.get_hitboxes())
 		return ret
+	func calc_hitboxes(c: BaseConsole, data: ConsoleDrawData) -> void:
+		for p in iter_parts():
+			if not p: continue
+			p.calc_hitboxes(c, data)
 	func try_hover(c: BaseConsole, pos: Vector2) -> bool:
 		for p in iter_parts():
+			if not p: continue
 			if p.try_hover(c, pos):
 				return true
 		return false
 	func try_click(evt: InputEventMouseButton, pos: Vector2) -> bool:
 		for p in iter_parts():
+			if not p: continue
 			if p.try_click(evt, pos):
 				return true
 		return false
@@ -438,7 +506,79 @@ class ContainerPart extends IteratorPart:
 		return part
 	func clear() -> void:
 		parts.clear()
+
 class ColumnsPart extends ContainerPart:
+	## Adds a part to a specified column index
+	## Columns will be auto-spaced by their used witdth
+	func add(col: int, part: ConsolePart) -> ConsolePart:
+		while parts.size() <= col:
+			_add(ContainerPart.new())
+		return parts[col]._add(part)
+	func add_nil(col: int) -> void:
+		add(col, null)
+	func draw(c: BaseConsole, data: ConsoleDrawData) -> void:
+		if dont_draw(): return
+		_calc_and_draw(c, data, true)
+	func calc_hitboxes(c: BaseConsole, data: ConsoleDrawData) -> void:
+		_calc_and_draw(c, data, false)
+	func _calc_and_draw(c: BaseConsole, data: ConsoleDrawData, do_draw: bool) -> void:
+		# Ensure we're at line start
+		data.ensure_line(c)
+		# Cache data vals
+		var dl := data.l
+		var dy := data.y
+		# Draw
+		var by := data.y
+		var old_max_x := data.max_shown_x
+		var xs: Array = [data.x]
+		var ys: Array = [dy]
+		var heights: Array = []
+		
+		for q in parts.size():
+			var data_copy := data.duplicate()
+			data_copy.max_shown_x = 0.0
+			data_copy.l = xs.back()
+			data_copy.x = data_copy.l
+			for ind in parts[q].parts.size():
+				var p = parts[q].parts[ind]
+				if not p: continue
+				data_copy.y = dy
+				p.calc_hitboxes(c, data_copy)
+				data_copy.ensure_line(c)
+			if data_copy.max_shown_x > xs.back():
+				xs.append(data_copy.max_shown_x)
+			else: xs.append(xs.back())
+			for ind in parts[q].parts.size():
+				var p = parts[q].parts[ind]
+				if not p: continue
+				var h = p.get_hitbox().size.y
+				while heights.size() <= ind: heights.append(0.0)
+				heights[ind] = max(heights[ind], h)
+		for h in heights:
+			ys.append(ys.back() + h)
+		for q in parts.size():
+			data.max_shown_x = 0.0
+			for ind in parts[q].parts.size():
+				var p = parts[q].parts[ind]
+				if not p: continue
+				data.x = xs[q]
+				data.y = ys[ind]
+				if do_draw:
+					p.draw(c,data)
+				else:
+					p.calc_hitboxes(c,data)
+			data.ensure_line(c)
+			# Increment position
+			data.l = data.max_shown_x + 4 # add spacing
+			data.x = data.l
+			if data.y > by:
+				by = data.y
+		data.max_shown_x = max(data.max_shown_x, old_max_x)
+		# Revert boundaries, and linebreak from by
+		data.l = dl
+		data.y = by
+		data.newline(c)
+class ArrangedColumnsPart extends ContainerPart:
 	var widths: Array[int] = []
 	
 	## Adds a part as a 'Column', with an associated width.
@@ -449,6 +589,10 @@ class ColumnsPart extends ContainerPart:
 		return part
 	func draw(c: BaseConsole, data: ConsoleDrawData) -> void:
 		if dont_draw(): return
+		_calc_and_draw(c, data, true)
+	func calc_hitboxes(c: BaseConsole, data: ConsoleDrawData) -> void:
+		_calc_and_draw(c, data, false)
+	func _calc_and_draw(c: BaseConsole, data: ConsoleDrawData, do_draw: bool) -> void:
 		# Ensure we're at line start
 		data.ensure_line(c)
 		# Cache data vals
@@ -476,11 +620,18 @@ class ColumnsPart extends ContainerPart:
 					total_w += ws[q]
 		# Draw
 		var by := data.y
+		var max_x := 0.0
 		for q in parts.size():
 			if ws[q] <= 0: continue
 			data.y = dy # Start at top
 			data.r = data.l + ws[q] # Set width
-			parts[q].draw(c, data)
+			data.max_shown_x = 0
+			if do_draw:
+				parts[q].draw(c, data)
+			else:
+				parts[q].calc_hitboxes(c, data)
+			if data.max_shown_x > max_x:
+				max_x = data.max_shown_x
 			# Increment position
 			data.l += ws[q]
 			data.x = data.l
@@ -491,10 +642,11 @@ class ColumnsPart extends ContainerPart:
 		data.r = dr
 		data.y = by
 		data.newline(c)
+		data.max_shown_x = data.r
 	func clear() -> void:
 		super()
 		widths.clear()
-class HintPart extends ColumnsPart: ## A part representing a hint info
+class HintPart extends ArrangedColumnsPart	: ## A part representing a hint info
 	var hint: NetworkHint
 	func draw(c: BaseConsole, data: ConsoleDrawData) -> void:
 		if dont_draw(): return
@@ -569,13 +721,6 @@ func make_line(text, ttip := "", col := Color.TRANSPARENT) -> TextPart:
 	return make_text(text+"\n", ttip, col)
 func add_line(text, ttip := "", col := Color.TRANSPARENT) -> TextPart:
 	return add(make_line(text, ttip, col))
-
-func make_linebreak(count := 1) -> LineBreakPart:
-	var part = LineBreakPart.new()
-	part.break_count = count
-	return part
-func add_linebreak(count := 1) -> LineBreakPart:
-	return add(make_linebreak(count))
 
 func make_spacing(spacing: Vector2, reset_line := true, from_reset_y := false) -> SpacingPart:
 	var part = SpacingPart.new()
@@ -676,7 +821,7 @@ func refocus_part():
 		update_hover(null, Rect2())
 
 var _draw_data := ConsoleDrawData.new()
-func _draw():
+func _reset_draw_data() -> void:
 	if Engine.is_editor_hint() or OS.is_debug_build(): # Reload these fonts each redraw, incase they changed
 		font_bold = null
 		font_italic = null
@@ -693,9 +838,12 @@ func _draw():
 	_draw_data.reset_y = _draw_data.t
 	tooltip_bg.visible = false
 	tooltip_label.text = ""
+func _draw():
+	_reset_draw_data()
 	for part in parts:
-		#if part is TextPart:
-			#part.color = Color.RED if part == hovered_part else Color.WHITE
+		part.calc_hitboxes(self, _draw_data)
+	_reset_draw_data()
+	for part in parts:
 		part.draw(self, _draw_data)
 	if hovered_part:
 		hovered_part.draw_hover(self, _draw_data)

@@ -290,7 +290,7 @@ func _handle_command(json: Dictionary) -> void:
 			
 			for loc in json["missing_locations"]:
 				if not location_exists(loc):
-					conn.checked_locations[loc as int] = false
+					conn.slot_locations[loc as int] = false
 					#Force this locations to be accessible?
 			
 			var server_checked = {}
@@ -299,8 +299,8 @@ func _handle_command(json: Dictionary) -> void:
 				server_checked[loc] = true
 			
 			var to_collect: Array[int] = []
-			for loc in conn.checked_locations.keys():
-				if conn.checked_locations[loc] and not loc in server_checked:
+			for loc in conn.slot_locations.keys():
+				if conn.slot_locations[loc] and not loc in server_checked:
 					to_collect.append(loc)
 			collect_locations(to_collect)
 			
@@ -492,13 +492,13 @@ func _receive_item(index: int, item: NetworkItem) -> bool:
 
 #region LOCATIONS
 func _remove_loc(loc_id: int) -> void:
-	if conn and not conn.checked_locations.get(loc_id, false):
-		conn.checked_locations[loc_id] = true
+	if conn and not conn.slot_locations.get(loc_id, false):
+		conn.slot_locations[loc_id] = true
 		remove_location.emit(loc_id)
 ## Will call `proc` when the specified location id is "removed" (i.e. collected, either by the player or the server)
 ## If the location is already removed when you call this, `proc` will be called immediately.
 func on_removed_id(loc_id: int, proc: Callable) -> void:
-	if conn.checked_locations.get(loc_id, false):
+	if conn.slot_locations.get(loc_id, false):
 		proc.call()
 	else:
 		remove_location.connect(func(id:int):
@@ -525,14 +525,14 @@ func collect_locations(locs: Array[int]) -> void:
 
 ## Returns if the location exists in the slot or not.
 func location_exists(loc_id: int) -> bool:
-	return conn.checked_locations.has(loc_id)
+	return conn.slot_locations.has(loc_id)
 ## Returns if the location was checked or not. `def` is returned if the location does not exist in the slot.
 func location_checked(loc_id: int, def := false) -> bool:
-	return conn.checked_locations.get(loc_id, def)
+	return conn.slot_locations.get(loc_id, def)
 ## Returns a list of all location ids
 func location_list() -> Array[int]:
 	var arr: Array[int] = []
-	arr.assign(conn.checked_locations.keys())
+	arr.assign(conn.slot_locations.keys())
 	return arr
 #endregion LOCATIONS
 func _process(_delta):
@@ -621,8 +621,15 @@ func load_console(console_scene: Node, as_child := true) -> bool:
 	if as_child: add_child(console_scene)
 	console_scene.ready.connect(func():
 		output_console = output_console_container.console
-		output_console_container.typing_bar.send_text.connect(cmd_manager.call_cmd)
-		output_console_container.typing_bar.send_text.connect(func(_s): output_console.scroll_bottom())
+		output_console_container.typing_bar.send_text.connect(func(s: String):
+			var data = output_console._draw_data
+			var y = data.max_shown_y
+			cmd_manager.call_cmd(s)
+			output_console.is_max_scroll = false
+			await get_tree().process_frame # IDK why this is needed, but it works
+			output_console.scroll = y
+			output_console.is_max_scroll = false
+			)
 		output_console.tree_exiting.connect(close_console)
 		output_console_container.typing_bar.cmd_manager = cmd_manager
 		on_attach_console.emit())
@@ -680,37 +687,103 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 			.add_help("", "Kills the connection to the Archipelago server")
 			.set_call(func(_mgr: CommandManager, _cmd: ConsoleCommand, _msg: String): ap_disconnect()))
 	cmd_manager.register_command(ConsoleCommand.new("/locations")
-		.add_help("[filter]", "Lists all locations (optionally matching a filter) for the current slot.")
+		.add_help("[filter]", "Lists all locations (optionally matching a filter) for the current slot's game.")
 		.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, msg: String):
 			if not _ensure_connected(mgr.console): return
 			var filt := msg.substr(11)
-			var data := Archipelago.conn.get_gamedata_for_player()
-			var headstr := "Locations"
+			var data := conn.get_gamedata_for_player()
+			
+			var columns := BaseConsole.ColumnsPart.new()
+			mgr.console.add(columns)
+			
+			var h1 = columns.add(0, mgr.console.make_text("Location Name:"))
 			if filt:
-				headstr += " matching '%s'" % filt
-			mgr.console.add_line(headstr+":")
-
-			for loc in Archipelago.conn.checked_locations.keys():
-				var lname := data.get_loc_name(loc)
-				if not filt or (filt.to_lower() in lname.to_lower()):
-					Archipelago.out_location(mgr.console, loc, data).tooltip = "Location %d" % loc
-					mgr.console.add_ensure_newline()
+				h1.tooltip = "Filter: " + filt
+			columns.add(1, mgr.console.make_spacing(Vector2(80,0)))
+			columns.add(2, mgr.console.make_text("Status:"))
+			
+			var ids: Array = data.location_name_to_id.values()
+			var _index_dict := {}
+			for q in ids.size(): _index_dict[ids[q]] = q
+			var _status_getter = func(lid: int) -> String:
+				if conn.slot_locations.get(lid): return "Found"
+				var status_name = TrackerTab.get_location(lid).get_status("Not Found")
+				return status_name
+			ids.sort_custom(func(a,b):
+				var astat: String = _status_getter.call(a)
+				var bstat: String = _status_getter.call(b)
+				var v = TrackerTab.sort_by_location_status(astat, bstat)
+				if v:
+					return v > 0
+				return _index_dict[b] > _index_dict[a])
+			
+			for lid in ids:
+				var loc_name = data.get_loc_name(lid)
+				if not filt or (filt.to_lower() in loc_name.to_lower()):
+					var loc_status = TrackerTab.get_status(_status_getter.call(lid))
+					if not loc_status: loc_status = LocationStatus.new("Not Found","","red")
+					
+					columns.add(0, mgr.console.make_text(loc_name, "Location %d" % lid, rich_colors[loc_status.colorname]))
+					columns.add(2, mgr.console.make_text(loc_status.text, loc_status.tooltip, rich_colors[loc_status.colorname]))
 			))
 	cmd_manager.register_command(ConsoleCommand.new("/items")
-		.add_help("[filter]", "Lists all items (optionally matching a filter) for the current slot.")
+		.add_help("[filter]", "Lists all items (optionally matching a filter) for the current slot's game.")
 		.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, msg: String):
 			if not _ensure_connected(mgr.console): return
-			var filt := msg.substr(11)
-			var data := Archipelago.conn.get_gamedata_for_player()
-			var headstr := "Items"
-			if filt:
-				headstr += " matching '%s'" % filt
-			mgr.console.add_line(headstr+":")
+			var filt := msg.substr(7)
+			var data := conn.get_gamedata_for_player()
 
-			for itm_name in data.item_name_to_id.keys():
-				var iid = data.get_item_id(itm_name)
+			var columns := BaseConsole.ColumnsPart.new()
+			mgr.console.add(columns)
+			
+			var h1 = columns.add(0, mgr.console.make_text("Item Name:"))
+			if filt:
+				h1.tooltip = "Filter: " + filt
+			columns.add(1, mgr.console.make_spacing(Vector2(80,0)))
+			columns.add(2, mgr.console.make_text("Num Collected:"))
+			
+			var item_dict := {}
+			for item in conn.received_items:
+				var dict = item_dict.get(item.id)
+				if dict:
+					dict[item.flags] = dict.get(item.flags, 0) + 1
+				else:
+					item_dict[item.id] = {item.flags: 1}
+			
+			var ids: Array = data.item_name_to_id.values()
+			var _index_dict := {}
+			for q in ids.size(): _index_dict[ids[q]] = q
+			ids.sort_custom(func(a,b):
+				var has_a = item_dict.has(a)
+				var has_b = item_dict.has(b)
+				if has_a and not has_b:
+					return true
+				if has_a == has_b:	
+					return _index_dict[b] > _index_dict[a]
+				return false)
+			
+			var num_counted := 0
+			for iid in ids:
+				var itm_name = data.get_item_name(iid)
 				if not filt or (filt.to_lower() in itm_name.to_lower()):
-					mgr.console.add_line(itm_name, "Item %d" % iid, Archipelago.rich_colors[AP.COLORNAME_ITEM])
+					var flag_options = item_dict.get(iid)
+					if flag_options:
+						num_counted += 1
+						for flags in flag_options.keys():
+							var c1 = columns.add(0, out_item(mgr.console, iid, flags, data, false))
+							columns.add(2, mgr.console.make_text("x%d" % flag_options[flags], "", c1.color))
+					else:
+						columns.add(0, mgr.console.make_text(itm_name, "Item %d" % iid, rich_colors["white"]))
+						columns.add_nil(2)
+			if columns.parts[0].parts.size() == 1:
+				columns.parts = []
+				if filt:
+					columns.add(0, mgr.console.make_text(
+						"No%s items found!" % (" matching" if filt else ""),
+						h1.tooltip, rich_colors["salmon"]))
+			elif not num_counted:
+				columns.parts.pop_back()
+				columns.parts.pop_back()
 			))
 	if server_autofills: # Autofill for some AP commands
 		cmd_manager.register_command(ConsoleCommand.new("!hint_location")
@@ -745,10 +818,10 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 				var command_args = msg.split(" ", true, 1)
 				if command_args.size() > 1 and command_args[1]:
 					var data = conn.get_gamedata_for_player(conn.player_id)
-					for loc in conn.checked_locations.keys():
+					for loc in conn.slot_locations.keys():
 						var loc_name := data.get_loc_name(loc)
 						if loc_name.strip_edges().to_lower() == command_args[1].strip_edges().to_lower():
-							if conn.checked_locations[loc]:
+							if conn.slot_locations[loc]:
 								mgr.console.add_line("Location already sent!", "", mgr.console.COLOR_UI_MSG)
 							else:
 								mgr.console.add_line("Sending location '%s'!" % loc_name, "", mgr.console.COLOR_UI_MSG)
