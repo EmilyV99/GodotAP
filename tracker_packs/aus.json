@@ -1352,16 +1352,28 @@
 						"type": "ITEM",
 						"count": 2,
 						"value": "Double Jump Upgrade"
+					},
+					{
+						"type": "VAR",
+						"name": "JumpHeight",
+						"op": ">=",
+						"value": 4
 					}
 				]
 			},
 			"Out of Logic": {
 				"type": "ALL",
 				"rules": [
-					"AccessGrotto",
+					"AccessGrottoOOL",
 					{
 						"type": "ITEM",
 						"value": "Double Jump Upgrade"
+					},
+					{
+						"type": "VAR",
+						"name": "JumpHeight",
+						"op": ">=",
+						"value": 4
 					}
 				]
 			},
@@ -2288,13 +2300,18 @@
 				"rules": [
 					"AccessSkyTown",
 					{
-						"type": "ITEM",
-						"count": 3,
-						"value": "Jump Upgrade"
-					},
-					{
-						"type": "ITEM",
-						"value": "Double Jump Upgrade"
+						"type": "ANY",
+						"rules": [
+							{
+								"type": "ITEM",
+								"count": 3,
+								"value": "Jump Upgrade"
+							},
+							{
+								"type": "ITEM",
+								"value": "Double Jump Upgrade"
+							}
+						]
 					}
 				]
 			},
