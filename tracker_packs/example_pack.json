@@ -1,0 +1,83 @@
+{
+	"game": "Game Name Here",
+	"type": "DATA_PACK",
+	"description_bar": "Description Here",
+	"description_ttip": "Longer description here",
+	"statuses": [
+		{
+			"name": "Found",
+			"ttip": "Already found",
+			"color": "green",
+		},
+		{
+			"name": "Unreachable",
+			"ttip": "Cannot be accessed",
+			"color": "red",
+		},
+		{
+			"name": "Out of Logic",
+			"ttip": "Reachable, but not currently expected of you, and might require glitches/tricks or be exceedingly difficult.",
+			"color": "orange",
+		},
+		{
+			"name": "Reachable",
+			"ttip": "Currently reachable within logic",
+			"color": "plum",
+		},
+	],
+	"locations": [
+		{
+			"id": "name_in_ap",
+			"visname": "Name to Show Users",
+			"Reachable": {
+				"type": "ALL",
+				"rules": [
+					{
+						"type": "ITEM",
+						"count": 2,
+						"value": "L2 Small Key"
+					},
+					{
+						"type": "ANY",
+						"rules": [
+							{
+								"type": "ITEM",
+								"value": "Progressive Boomerang"
+							},
+							"SomeNamedRule"
+						]
+					}
+				]
+			},
+		},
+		{
+			"id": "name_in_ap",
+			"visname": "Name to Show Users",
+			"Reachable": "SomeNamedRule",
+			"Out of Logic": true,
+		},
+	],
+	"named_rules": {
+		"SomeNamedRule": {
+			"type": "VAR",
+			"name": "Money",
+			"op": ">=",
+			"value": 500
+		},
+	},
+	"variables": {
+		"Money": {
+			"value": 0,
+			"item_triggers": {
+				"20 Money": {
+					"type": "+",
+					"value": 20
+				},
+				"50 Money": {
+					"type": "+",
+					"value": 50
+				},
+			}
+		},
+	}
+}
