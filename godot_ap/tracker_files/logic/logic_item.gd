@@ -30,11 +30,13 @@ func can_access() -> Variant:
 	return false
 
 func _to_dict() -> Dictionary:
-	return {
+	var data := {
 		"type": "ITEM",
-		"count": count,
 		"value": identifier,
 	}
+	if count != 1:
+		data["count"] = count
+	return data
 
 static func from_dict(vals: Dictionary) -> TrackerLogicNode:
 	if vals.get("type") != "ITEM": return TrackerLogicNode.from_dict(vals)

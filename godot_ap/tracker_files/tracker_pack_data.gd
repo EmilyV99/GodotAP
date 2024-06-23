@@ -8,6 +8,8 @@ var statuses: Array[LocationStatus] = []
 var statuses_by_name: Dictionary = {}
 var starting_variables: Dictionary = {}
 
+var _variable_ops: Dictionary = {}
+
 var description_bar: String = ""
 var description_ttip: String = ""
 
@@ -41,6 +43,8 @@ func _save_file(data: Dictionary) -> Error:
 		loc_vals.append(loc.save_dict())
 	var stat_vals: Array[Dictionary] = []
 	for stat in statuses:
+		if stat.text == "Not Found" and stat.tooltip.is_empty() and stat.colorname == "red":
+			continue
 		stat_vals.append(stat.save_dict())
 	data["description_bar"] = description_bar
 	data["description_ttip"] = description_ttip
@@ -48,8 +52,9 @@ func _save_file(data: Dictionary) -> Error:
 	data["locations"] = loc_vals
 	var rules_dict = {}
 	for name in named_rules.keys():
-		rules_dict[name] = named_rules[name]._to_dict()
+		rules_dict[name] = named_rules[name]._to_json_val()
 	data["named_rules"] = rules_dict
+	data["variables"] = _variable_ops
 	return OK
 
 func _load_file(json: Dictionary) -> Error:
@@ -68,9 +73,9 @@ func _load_file(json: Dictionary) -> Error:
 	for name in dict.keys():
 		named_rules[name] = TrackerLogicNode.from_json_val(dict[name])
 	
-	dict = json.get("variables", {})
-	for varname in dict.keys():
-		var varvals: Dictionary = dict[varname]
+	_variable_ops = json.get("variables", {})
+	for varname in _variable_ops.keys():
+		var varvals: Dictionary = _variable_ops[varname]
 		starting_variables[varname] = varvals.get("value", 0)
 		var itemtrigs: Dictionary = varvals.get("item_triggers", {})
 		for iname in itemtrigs.keys():

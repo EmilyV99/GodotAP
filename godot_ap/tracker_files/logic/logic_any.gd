@@ -19,7 +19,7 @@ func add(rule: TrackerLogicNode) -> TrackerLogicAny:
 func _to_dict() -> Dictionary:
 	var rule_arr = []
 	for rule in rules:
-		rule_arr.append(rule._to_dict())
+		rule_arr.append(rule._to_json_val())
 	return {
 		"type": "ANY",
 		"rules": rule_arr,

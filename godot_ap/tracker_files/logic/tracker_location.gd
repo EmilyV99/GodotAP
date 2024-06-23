@@ -27,18 +27,25 @@ func get_loc() -> APLocation:
 		return TrackerTab.get_loc_by_name(identifier)
 	return APLocation.nil()
 
+func _iter_statuses(only_relevant := true) -> Array[LocationStatus]:
+	var s
+	if pack is TrackerPack_Data:
+		s = pack.statuses
+	else:
+		s = [LocationStatus.ACCESS_UNKNOWN,LocationStatus.ACCESS_FOUND,
+			LocationStatus.ACCESS_UNREACHABLE,LocationStatus.ACCESS_LOGIC_BREAK,
+			LocationStatus.ACCESS_REACHABLE]
+	if only_relevant:
+		s = s.filter(func(loc: LocationStatus): return loc.text in status_rules.keys())
+	return Util.reversed(s)
+
 func get_status() -> String:
 	if status_rules.is_empty():
 		return "Unknown"
-	var statuses_in_order
-	if pack is TrackerPack_Data:
-		statuses_in_order = pack.statuses
-	else:
-		statuses_in_order = [LocationStatus.ACCESS_UNKNOWN,LocationStatus.ACCESS_FOUND,LocationStatus.ACCESS_UNREACHABLE,LocationStatus.ACCESS_LOGIC_BREAK,LocationStatus.ACCESS_REACHABLE]
 	var found_something := false
-	for status in Util.reversed(statuses_in_order):
+	for status in _iter_statuses():
 		var rule: TrackerLogicNode = status_rules.get(status.text)
-		if not rule: continue
+		#if not rule: continue #_iter_statuses handles this case
 		var v = rule.can_access()
 		if v == null: continue
 		if status.text != "Found":
@@ -67,9 +74,9 @@ func save_dict() -> Dictionary:
 		for spot in map_spots:
 			spots.append(spot._to_dict())
 		data["map_spots"] = spots
-	for k in status_rules.keys():
-		if k == "Found": continue
-		data[k] = status_rules[k]._to_json_val()
+	for k in _iter_statuses():
+		if k.text == "Found": continue
+		data[k.text] = status_rules[k.text]._to_json_val()
 	return data
 
 static func load_dict(s: Dictionary, parent: TrackerPack_Base) -> TrackerLocation:
