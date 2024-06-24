@@ -64,11 +64,10 @@ func validate_gui_element(elem) -> bool:
 			if not colname is String:
 				TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected 'color' to be 'String'!" % type)
 				return false
-			if not colname in Archipelago.rich_colors.keys() and colname != "default":
-				if Color.from_string(colname, Color.WHITE) == Color.WHITE and \
-					Color.from_string(colname, Color.BLACK) == Color.BLACK:
-					TrackerPack_Base._output_error("Invalid Color", "Color '%s' could not be parsed as a color!" % colname)
-					return false
+			if AP.color_from_name(colname, Color.WHITE) == Color.WHITE and \
+				AP.color_from_name(colname, Color.BLACK) == Color.BLACK:
+				TrackerPack_Base._output_error("Invalid Color", "Color '%s' could not be parsed as a color!" % colname)
+				return false
 			return true
 		"Tabs":
 			if not TrackerPack_Base._expect_keys(elem, ["tabs","type"]):
@@ -146,12 +145,7 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 			var cont := MarginContainer.new()
 			var colorrect := ColorRect.new()
 			var color_name: String = elem["color"]
-			if color_name == "default":
-				colorrect.color = Color8(0x2C, 0x2C, 0x2C)
-			elif color_name in Archipelago.rich_colors.keys():
-				colorrect.color = Archipelago.rich_colors[color_name]
-			else:
-				colorrect.color = Color.from_string(color_name, Color8(0x2C,0x2C,0x2C))
+			colorrect.color = AP.color_from_name(color_name, AP.color_from_name("default"))
 			cont.add_child(colorrect)
 			var inner_cont := MarginContainer.new()
 			cont.add_child(inner_cont)
@@ -360,7 +354,7 @@ func setup_statuses(status_json: Array) -> void:
 	else:
 		logic_break = to_add.find(logic_break)
 	
-	var reachable = by_name.get("Out of Logic")
+	var reachable = by_name.get("Reachable")
 	if not reachable:
 		to_add.insert(logic_break+1, LocationStatus.ACCESS_REACHABLE)
 		reachable = logic_break+1

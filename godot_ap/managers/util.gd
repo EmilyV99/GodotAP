@@ -167,3 +167,10 @@ static func find_break_paren(s: String) -> int:
 				brace -= 1
 				if brace < 0: return q
 	return s.length()
+
+static func poll_timer(timer: Timer, dur: float) -> bool:
+	if timer.is_stopped():
+		if dur > GAMMA:
+			timer.start(dur)
+		return true
+	return false

@@ -12,7 +12,7 @@ func save_dict() -> Dictionary:
 	return {"name": text, "ttip": tooltip, "color": colorname}
 
 func make_c_text(c: BaseConsole) -> BaseConsole.CenterTextPart:
-	return c.make_c_text(text, tooltip, Archipelago.rich_colors[colorname])
+	return c.make_c_text(text, tooltip, AP.color_from_name(colorname))
 func add_c_text(c: BaseConsole) -> BaseConsole.CenterTextPart:
 	return c.add(make_c_text(c))
 

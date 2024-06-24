@@ -107,25 +107,39 @@ func load_tracker_packs() -> void:
 	var successcount := 0
 	var games: Dictionary = {}
 	var errors: Dictionary = {}
+	var timer := Timer.new()
+	add_child(timer)
+	const TIMER_DELAY = 1.0 ## Seconds to process before giving control back for the rest of the frame
 	for fname in file_names:
+		if Util.poll_timer(timer, TIMER_DELAY): 
+			await get_tree().process_frame
 		var tpack_verbose_part
+		var tpack_newline_part
 		if Archipelago.config.verbose_trackerpack:
 			var txt := "Loading TrackerPack from '%s'..." % fname
 			if Archipelago.output_console:
 				tpack_verbose_part = Archipelago.output_console.add_text(txt, "", Archipelago.output_console.COLOR_UI_MSG)
-				Archipelago.output_console.add_ensure_newline()
+				tpack_newline_part = Archipelago.output_console.add_ensure_newline()
 			AP.log(txt)
 		var pack := TrackerPack_Base.load_from(fname)
 		if Archipelago.config.verbose_trackerpack:
-			var txt: String= "%s loading TrackerPack '%s'" % ["Success" if pack else "Failure", fname]
-			if Archipelago.output_console and tpack_verbose_part:
-				tpack_verbose_part.text = txt
-				tpack_verbose_part.color = Archipelago.rich_colors["green" if pack else "red"]
-				tpack_verbose_part.tooltip = ("TrackerPack for '%s'" % pack.game) if pack else TrackerPack_Base.load_error
-			AP.log(txt)
+			if TrackerPack_Base.load_error == "Ignored Extension":
+				if tpack_verbose_part: tpack_verbose_part.hidden = true
+				if tpack_newline_part: tpack_newline_part.hidden = true
+			else:
+				var txt: String= "%s loading TrackerPack '%s'" % ["Success" if pack else "Failure", fname]
+				if Archipelago.output_console and tpack_verbose_part:
+					tpack_verbose_part.text = txt
+					tpack_verbose_part.color = AP.color_from_name("green" if pack else "red")
+					tpack_verbose_part.tooltip = ("TrackerPack for '%s'" % pack.game) if pack else TrackerPack_Base.load_error
+				AP.log(txt)
+		if Util.poll_timer(timer, TIMER_DELAY):
+			await get_tree().process_frame
 		match TrackerPack_Base.load_error:
 			"": # Valid
 				pass
+			"Ignored Extension": # Bad filetype, skip
+				continue
 			"Unrecognized Extension": # Bad filetype, skip
 				continue
 			var err: # Print out any other error
@@ -151,7 +165,7 @@ func load_tracker_packs() -> void:
 				var success_ttip: String = ""
 				for g in success_games:
 					success_ttip += "%s: %s\n" % [g, games[g]]
-				console.add_line(loadstatus, success_ttip.strip_edges(), Archipelago.rich_colors["green" if not failcount else "orange"])
+				console.add_line(loadstatus, success_ttip.strip_edges(), AP.color_from_name("green" if not failcount else "orange"))
 			if failcount:
 				var err_ttip := ""
 				var err_files: Array[String] = []
@@ -159,13 +173,14 @@ func load_tracker_packs() -> void:
 				err_files.sort_custom(func(a, b): return a.naturalnocasecmp_to(b))
 				for f in err_files:
 					err_ttip += "%s: %s\n" % [f, errors[f]]
-				console.add_line("Failed loading %d/%d TrackerPacks" % [failcount, failcount+successcount], err_ttip.strip_edges(), Archipelago.rich_colors["red"])
+				console.add_line("Failed loading %d/%d TrackerPacks" % [failcount, failcount+successcount], err_ttip.strip_edges(), AP.color_from_name("red"))
 	else:
 		AP.log("No TrackerPacks Found")
 		console.add_line("No TrackerPacks Found", "Add packs to `./tracker_packs/` and relaunch to load!", console.COLOR_UI_MSG)
 	tracking = was_tracking
 	do_update_tags = true
 	tracking_reloaded.emit()
+	timer.queue_free()
 
 func sort_by_location_status(a: String, b: String) -> int:
 	var ai = -1

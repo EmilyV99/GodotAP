@@ -97,7 +97,9 @@ static func load_from(path: String) -> TrackerPack_Base:
 		if ret: ret.saved_path = path
 		return ret
 	else:
-		load_error = "Unrecognized Extension"
+		if path.ends_with(".md") or path.ends_with(".txt"):
+			load_error = "Ignored Extension"
+		else: load_error = "Unrecognized Extension"
 		return null
 
 static func load_json_string(text: String, _environment: Variant) -> TrackerPack_Base:
@@ -144,7 +146,7 @@ func _load_file(json: Dictionary) -> Error:
 static func _output_error(s: String, ttip: String = "") -> void:
 	if not (Archipelago.config.verbose_trackerpack and Archipelago.output_console):
 		return
-	Archipelago.output_console.add_line(s, ttip, Archipelago.rich_colors["red"])
+	Archipelago.output_console.add_line(s, ttip, AP.color_from_name("red"))
 	AP.log(s)
 	if not ttip.is_empty():
 		AP.log(ttip)

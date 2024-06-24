@@ -21,6 +21,8 @@ func can_access() -> Variant:
 		match op:
 			"==":
 				return Util.approx_eq(curval, val) if fl else (curval == val)
+			"!=":
+				return not Util.approx_eq(curval, val) if fl else (curval == val)
 			">":
 				return curval > val
 			"<":

@@ -28,21 +28,12 @@ func can_access() -> Variant:
 func _to_dict() -> Dictionary:
 	return {
 		"type": "LOCATION_COLLECTED",
-		"is_name": not identifier is int,
 		"value": identifier,
 	}
 
 static func from_dict(vals: Dictionary) -> TrackerLogicNode:
 	if vals.get("type") != "LOCATION_COLLECTED": return TrackerLogicNode.from_dict(vals)
-	var is_name: bool = vals.get("is_name", true)
-	
-	var ret := TrackerLogicItem.new()
-	if is_name:
-		ret.identifier = str(vals.get("value"))
-	else:
-		ret.identifier = int(vals.get("value"))
-		
-	return ret
+	return make(vals.get("value"))
 
 func get_repr(indent := 0) -> String:
 	return "\t".repeat(indent) + "LOCATION_COLLECTED '%s': %s" % [identifier, can_access()]

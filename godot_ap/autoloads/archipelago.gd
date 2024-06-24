@@ -40,6 +40,10 @@ const COLORNAME_ITEM_USEFUL: StringName = "slateblue"
 const COLORNAME_ITEM_TRAP: StringName = "salmon"
 const COLORNAME_LOCATION: StringName = "green"
 
+static func color_from_name(colname: String, def := Color.TRANSPARENT) -> Color:
+	var c = rich_colors.get(colname)
+	return c if c else Color.from_string(colname, def)
+
 ## The rich-text colors used for console output
 ## Chosen to match Archipelago CommonClient
 static var rich_colors: Dictionary = {
@@ -55,6 +59,7 @@ static var rich_colors: Dictionary = {
 	"plum": Color8(0xAF,0x99,0xEF),
 	"salmon": Color8(0xFA,0x80,0x72),
 	"orange": Color8(0xFF,0x77,0x00),
+	"default": Color8(0x2C,0x2C,0x2C),
 }
 
 #endregion COLORS
@@ -888,7 +893,7 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 								if b != null:
 									c = "green" if b else "red"
 								var inner_folder: BaseConsole.FoldablePart = rules_folder.add(
-									mgr.console.make_foldable(rulename, "", Archipelago.rich_colors[c]))
+									mgr.console.make_foldable(rulename, "", AP.color_from_name(c)))
 								var cont: BaseConsole.ContainerPart = inner_folder.add(mgr.console.make_indented_block(
 									rule.get_repr(0), 25, mgr.console.COLOR_UI_MSG))
 								cont.textpart_replace("true", "true", true, "", rich_colors["green"])
@@ -902,7 +907,7 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 							for varname in vars:
 								vars_folder.add(mgr.console.make_text(varname+": ", "", mgr.console.COLOR_UI_MSG))
 								var val = TrackerManager.variables.get(varname)
-								vars_folder.add(mgr.console.make_text(str(val), "", Archipelago.rich_colors["green"]))
+								vars_folder.add(mgr.console.make_text(str(val), "", AP.color_from_name("green")))
 								vars_folder.add(mgr.console.make_header_spacing(0))
 						outer_folder.add(mgr.console.make_indent(-20))
 						mgr.console.add_header_spacing()

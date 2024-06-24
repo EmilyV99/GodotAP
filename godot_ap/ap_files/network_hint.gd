@@ -51,7 +51,7 @@ func make_status(c: BaseConsole) -> BaseConsole.TextPart:
 static func make_hint_status(c: BaseConsole, targ_status: Status) -> BaseConsole.TextPart:
 	var txt = NetworkHint.status_names.get(targ_status, "Unknown")
 	var colname = NetworkHint.status_colors.get(targ_status, "red")
-	return c.make_text(txt, "", Archipelago.rich_colors[colname])
+	return c.make_text(txt, "", AP.color_from_name(colname))
 
 static func update_hint_status(targ_status: Status, part: BaseConsole.TextPart):
 	part.text = NetworkHint.status_names.get(targ_status, "Unknown")

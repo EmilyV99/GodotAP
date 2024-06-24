@@ -906,13 +906,14 @@ func ensure_newline(parts_arr: Array[ConsolePart]): ## Returns SpacingPart | nul
 		var last_part = parts_arr.back()
 		if last_part is SpacingPart:
 			if last_part.reset_line or last_part.from_reset_y:
-				return #already ensured
+				return null #already ensured
 	var part := make_header_spacing(0)
 	parts_arr.append(part)
 	return part
 func add_ensure_newline(): ## Returns SpacingPart | null
-	ensure_newline(parts)
+	var ret = ensure_newline(parts)
 	queue_redraw()
+	return ret
 
 func make_indented_block(s: String, indent: float, color := Color.TRANSPARENT) -> ContainerPart:
 	var c := ContainerPart.new()
@@ -1206,7 +1207,7 @@ func printjson_out(elems: Array) -> String:
 					"underline":
 						part.underline = true
 					_:
-						part.color = Archipelago.rich_colors.get(col_str, part.color)
+						part.color = AP.color_from_name(col_str, part.color)
 	return s
 
 static func printjson_str(elems: Array) -> String:

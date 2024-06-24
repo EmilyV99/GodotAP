@@ -112,7 +112,7 @@ static func load_dict(s: Dictionary, parent: TrackerPack_Base) -> TrackerLocatio
 					var txt: String = "Status '%s' has not been defined in the 'statuses' section!" % str(e)
 					AP.log(txt)
 					if Archipelago.output_console:
-						Archipelago.output_console.add_line(txt, src, Archipelago.rich_colors["orange"])
+						Archipelago.output_console.add_line(txt, src, AP.color_from_name("orange"))
 					AP.log("\t"+src)
 	else:
 		if Archipelago.config.verbose_trackerpack:
@@ -120,7 +120,7 @@ static func load_dict(s: Dictionary, parent: TrackerPack_Base) -> TrackerLocatio
 			var src: String = "Must include 'id' of type 'int' >=0 or 'String' non-empty!\n" + JSON.stringify(s, "    ", false)
 			AP.log(txt)
 			if Archipelago.output_console:
-				Archipelago.output_console.add_line(txt, src, Archipelago.rich_colors["orange"])
+				Archipelago.output_console.add_line(txt, src, AP.color_from_name("orange"))
 			AP.log(("    "+src).replace("\n", "\n    "))
 	return ret
 
@@ -128,7 +128,7 @@ func _to_string():
 	return "%s (reqs %s)" % [identifier, status_rules]
 
 func get_loc_name() -> String:
-	var disp_name := TrackerManager.get_location(identifier).get_display_name()
+	var disp_name: String = TrackerManager.get_location(identifier).get_display_name()
 	if disp_name.is_empty():
 		return identifier if identifier is String else Archipelago.get_gamedata_for_player().get_loc_name(identifier)
 	return disp_name
