@@ -306,6 +306,7 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 	func draw_hover(c: BaseConsole, data: ConsoleDrawData) -> void:
 		if not tooltip: return
 		c.tooltip_bg.visible = true
+		c.tooltip_bg.top_level = false
 		c.tooltip_label.text = tooltip
 		c.tooltip_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 		c.tooltip_label.reset_size()
@@ -322,7 +323,11 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 			c.tooltip_bg.position.x -= 1
 		while c.tooltip_bg.position.y < 0:
 			c.tooltip_bg.position.y += 1
+		while c.tooltip_bg.global_position.y + c.tooltip_bg.size.y > c.get_window().size.y:
+			c.tooltip_bg.position.y -= 1
 		#endregion Bound tooltip in-window
+		c.tooltip_bg.top_level = true
+		c.tooltip_bg.position += c.global_position
 	func needs_hover() -> bool:
 		return not tooltip.is_empty() and not hidden
 	func calc_hitboxes(c: BaseConsole, data: ConsoleDrawData) -> void:
