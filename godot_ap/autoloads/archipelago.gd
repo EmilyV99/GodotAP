@@ -60,6 +60,7 @@ static var rich_colors: Dictionary = {
 	"salmon": Color8(0xFA,0x80,0x72),
 	"orange": Color8(0xFF,0x77,0x00),
 	"default": Color8(0x2C,0x2C,0x2C),
+	"gold": Color.GOLD,
 }
 
 #endregion COLORS

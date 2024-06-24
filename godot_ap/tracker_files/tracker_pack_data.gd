@@ -87,6 +87,19 @@ func validate_gui_element(elem) -> bool:
 				TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected 'hint_status' to be 'bool'!" % type)
 				return false
 			return true
+		"LocationMap":
+			if not TrackerPack_Base._expect_keys(elem, ["id", "image", "some_reachable_color", "type"]):
+				return false
+			if not elem.get("id") is String:
+				TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected 'id' to be 'String'!" % type)
+				return false
+			if not elem.get("image") is String:
+				TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected 'image' to be 'String'!" % type)
+				return false
+			if not elem.get("some_reachable_color") is String:
+				TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected 'some_reachable_color' to be 'String'!" % type)
+				return false
+			return true
 		_:
 			if type == null:
 				TrackerPack_Base._output_error("No Type Specified", "Object requires 'type' field!")
@@ -186,6 +199,16 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 			scene.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			scene.size_flags_vertical = Control.SIZE_EXPAND_FILL
 			scene.show_hint_status = elem["hint_status"]
+			return scene
+		"LocationMap":
+			var scene: TrackerScene_Map = load("res://godot_ap/tracker_files/map_tracker.tscn").instantiate()
+			scene.datapack = self
+			scene.item_register.connect(register_item)
+			scene.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			scene.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			scene.image_path = elem.get("image")
+			scene.map_id = elem.get("id")
+			scene.some_reachable_color = elem.get("some_reachable_color")
 			return scene
 	assert(false)
 	return null
@@ -316,7 +339,8 @@ func setup_statuses(status_json: Array) -> void:
 	for js in status_json:
 		var name: String = js.get("name", "")
 		if name.is_empty(): continue
-		to_add.append(LocationStatus.new(name, js.get("ttip", ""), js.get("color", "white")))
+		var color = js.get("color", "white")
+		to_add.append(LocationStatus.new(name, js.get("ttip", ""), color, js.get("map_color", color)))
 		by_name[name] = to_add.back()
 	
 	var found = by_name.get("Found")

@@ -4,10 +4,12 @@ var id: int
 var text: String
 var tooltip: String
 var colorname: String
-func _init(txt: String, ttip := "", colname := ""):
+var map_colorname: String
+func _init(txt: String, ttip := "", colname := "", map_colname := ""):
 	text = txt
 	tooltip = ttip
 	colorname = colname
+	map_colorname = map_colname
 func save_dict() -> Dictionary:
 	return {"name": text, "ttip": tooltip, "color": colorname}
 

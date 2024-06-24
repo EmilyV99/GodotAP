@@ -159,7 +159,6 @@ func _ready() -> void:
 	console.add(header)
 	loc_container = console.add(BaseConsole.ContainerPart.new())
 	super()
-	Archipelago.remove_location.connect(func(_id): queue_refresh())
 	Archipelago.conn.set_hint_notify(func(_hints): queue_refresh())
 	
 	for itm in Archipelago.conn.received_items:
@@ -202,7 +201,7 @@ func on_items_get(_items: Array[NetworkItem]) -> void:
 
 ## Refresh due to location being checked
 func on_loc_checked(_locid: int) -> void:
-	pass # Optionally override this function
+	queue_refresh()
 
 func filter_allow(part: LocationPart) -> bool:
 	if datapack:

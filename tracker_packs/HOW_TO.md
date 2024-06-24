@@ -22,11 +22,12 @@ A [GUI Element](#gui-elements), which acts as the root of the page. This element
 
 ### statuses
 An array of Status objects. A Status object is defined as:
-| Key     | Value                                     |
-|---------|-------------------------------------------|
-| "name"  | String; name of the status                |
-| "ttip"  | String; tooltip for the status to display |
-| "color" | a [ColorName](#colors) string             |
+| Key         | Value                                                        |
+|-------------|--------------------------------------------------------------|
+| "name"      | String; name of the status                                   |
+| "ttip"      | String; tooltip for the status to display                    |
+| "color"     | a [ColorName](#colors) string for displaying the status name |
+| "map_color" | a [ColorName](#colors) string for displaying the map square  |
 
 The statuses named "Found", "Unknown", "Unreachable", and "Not Found" have special meaning.
 
@@ -216,6 +217,22 @@ Container. Displays a tab for each element, with the name displayed on the tab h
 | "hint_status" | bool, if the `Hint Status` column should be visible |
 
 Content. Displays a console-style, sortable, filterable list of all [Locations](#locations), and their currently determined [status](#statuses).
+
+### GUI LocationMap
+| Key                    | Value                                                                      |
+|------------------------|----------------------------------------------------------------------------|
+| "type"                 | "LocationMap"                                                              |
+| "id"                   | String, name of this map (matching [MapSpot](#mapspots))                   |
+| "image"                | String, relative path from the json to the image                           |
+| "some_reachable_color" | a [ColorName](#colors) for when some but not all locations are 'Reachable' |
+| "square_size"          | int, the size of the squares on the map                                    |
+
+Content. Displays a map image. Any [MapSpots](#mapspots) on locations with an id matching the LocationMap's id will appear as colored squares on the map, whose color is determined as follows:
+- The color will match the `map_color` of the highest-priority status of all locations sharing the [MapSpot](#mapspots).
+- If that status is `Reachable`, there is an exception: Unless every location at the [MapSpot](#mapspots) is `Found` or `Reachable`, the `some_reachable_color` will be used in place of `Reachable`'s `map_color`.
+- `Found` is not considered highest-priority for the coloring order, despite it being highest-priority when determining a location's status. This generally means `Found` will be the lowest priority, thus only showing its' color when every location at the [MapSpot](#mapspots) is `Found`.
+
+PLANNED: Tooltip showing more info when hovering over the squares
 
 ### GUI Empty Element
 A completely empty dictionary `{}` is also a valid element- or rather, represents the LACK of an element. Useful as a placeholder while designing, so you can test while the gui is partly-completed.

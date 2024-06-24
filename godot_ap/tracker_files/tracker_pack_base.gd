@@ -5,6 +5,33 @@ func get_type() -> String: return "BASE_PACK"
 var saved_path: String = ""
 
 var game: String
+var env: PackEnvironment
+
+func load_image(relpath: String) -> Image:
+	var dir = env.open()
+	if dir is DirAccess:
+		if not dir.file_exists(relpath):
+			return null
+		var file_path: String = dir.get_current_dir() + "/" + relpath
+		return Image.load_from_file(file_path)
+	elif dir is ZIPReader:
+		var bytes: PackedByteArray = dir.read_file(relpath)
+		if bytes.is_empty():
+			dir.close()
+			return null
+		var ret := Image.new()
+		if relpath.ends_with(".png"):
+			ret.load_png_from_buffer(bytes)
+		elif relpath.ends_with(".jpg") or relpath.ends_with(".jpeg"):
+			ret.load_jpg_from_buffer(bytes)
+		elif relpath.ends_with(".bmp"):
+			ret.load_bmp_from_buffer(bytes)
+		elif relpath.ends_with(".webp"):
+			ret.load_webp_from_buffer(bytes)
+		else: ret = null
+		dir.close()
+		return ret
+	return null
 
 func instantiate() -> TrackerScene_Root:
 	assert(false) # Override with a valid return!
@@ -59,7 +86,23 @@ func _save_file(data: Dictionary) -> Error:
 	data["game"] = game
 	data["type"] = get_type()
 	return OK
-	
+
+class PackEnvironment:
+	var path: String
+	var is_zip: bool
+	func _init(dirpath: String, zip: bool):
+		path = dirpath
+		is_zip = zip
+	func open() -> Variant: # Returns ZIPReader, DirAccess, or Error
+		if is_zip:
+			var reader := ZIPReader.new()
+			var err := reader.open(path)
+			if err: return err
+			return reader
+		else:
+			var dir := DirAccess.open(path)
+			if dir: return dir
+			return ERR_FILE_CANT_OPEN
 
 static var load_error := ""
 static func load_from(path: String) -> TrackerPack_Base:
@@ -77,8 +120,10 @@ static func load_from(path: String) -> TrackerPack_Base:
 			reader.close()
 			return null
 		var text := bytes.get_string_from_ascii()
-		var ret := load_json_string(text, reader)
-		if ret: ret.saved_path = path
+		var ret := load_json_string(text)
+		if ret:
+			ret.saved_path = path
+			ret.env = PackEnvironment.new(path, true)
 		if load_error:
 			load_error.insert(0, "Error loading 'pack.json':\n")
 		reader.close()
@@ -93,8 +138,10 @@ static func load_from(path: String) -> TrackerPack_Base:
 			load_error = "Can't open file"
 			return null
 		var text := file.get_as_text()
-		var ret := load_json_string(text, dir)
-		if ret: ret.saved_path = path
+		var ret := load_json_string(text)
+		if ret:
+			ret.saved_path = path
+			ret.env = PackEnvironment.new(path.get_base_dir(), false)
 		return ret
 	else:
 		if path.ends_with(".md") or path.ends_with(".txt"):
@@ -102,7 +149,7 @@ static func load_from(path: String) -> TrackerPack_Base:
 		else: load_error = "Unrecognized Extension"
 		return null
 
-static func load_json_string(text: String, _environment: Variant) -> TrackerPack_Base:
+static func load_json_string(text: String) -> TrackerPack_Base:
 	load_error = ""
 	var json_parser := JSON.new()
 	var json = null

@@ -42,13 +42,15 @@ func get_status() -> String:
 	if status_rules.is_empty():
 		return "Unknown"
 	var found_something := false
+	if status_rules["Found"].can_access():
+		return "Found"
 	for status in _iter_statuses():
+		if status.text == "Found": continue
 		var rule: TrackerLogicNode = status_rules.get(status.text)
 		#if not rule: continue #_iter_statuses handles this case
 		var v = rule.can_access()
 		if v == null: continue
-		if status.text != "Found":
-			found_something = true
+		found_something = true
 		if v: return status.text
 	if not found_something:
 		return "Unknown"
