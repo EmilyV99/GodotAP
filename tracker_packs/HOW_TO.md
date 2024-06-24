@@ -244,11 +244,11 @@ A color string can be any of the following:
 - A color name that Godot's `Color.from_string()` recognizes
 
 ## MapSpots
-Currently unused. Intended for indicating a visual position on a map for the location. Format:
-| Key  | Value                   |
-|------|-------------------------|
-| "id" | String, name of the map |
-| "x"  | int, the x coordinate   |
-| "y"  | int, the y coordinate   |
+Intended for indicating a visual position on a [LocationMap](#gui-locationmap) for the location. Format:
+| Key  | Value                                               |
+|------|-----------------------------------------------------|
+| "id" | String, name of the [LocationMap](#gui-locationmap) |
+| "x"  | int, the x coordinate                               |
+| "y"  | int, the y coordinate                               |
 
 
