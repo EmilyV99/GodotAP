@@ -3,31 +3,64 @@
 	"type": "DATA_PACK",
 	"description_bar": "An Untitled Story (WIP) Tracker",
 	"description_ttip": "A WIP tracker for AUS, built for GodotAP clients.",
+	"GUI": {
+		"type": "Margin",
+		"top": 0,
+		"left": 15,
+		"bottom": 15,
+		"right": 15,
+		"color": "default",
+		"child": {
+			"type": "Tabs",
+			"tabs": {
+				"Locations": {
+					"type": "LocationConsole",
+					"hint_status": false
+				},
+				"Map": {
+					"type": "Row",
+					"children": [
+						{
+							"type": "LocationMap",
+							"id": "Overworld",
+							"image": "aus_assets/OverworldMap.png",
+							"some_reachable_color": "gold"
+						}
+					]
+				}
+			}
+		}
+	},
 	"statuses": [
 		{
 			"name": "Found",
 			"ttip": "Already found",
-			"color": "green"
+			"color": "green",
+			"map_color": "404040"
 		},
 		{
 			"name": "Unknown",
 			"ttip": "",
-			"color": "white"
+			"color": "white",
+			"map_color": "white"
 		},
 		{
 			"name": "Unreachable",
 			"ttip": "Cannot be accessed",
-			"color": "red"
+			"color": "red",
+			"map_color": "red"
 		},
 		{
 			"name": "Out of Logic",
 			"ttip": "Reachable, but not currently expected of you, and might require glitches/tricks or be exceedingly difficult.",
-			"color": "orange"
+			"color": "orange",
+			"map_color": "orange"
 		},
 		{
 			"name": "Reachable",
 			"ttip": "Currently reachable within logic",
-			"color": "plum"
+			"color": "plum",
+			"map_color": "green"
 		}
 	],
 	"locations": [
