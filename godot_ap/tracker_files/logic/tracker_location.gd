@@ -9,15 +9,14 @@ var pack: TrackerPack_Base
 
 class MapSpot:
 	var id: String
-	var x: int
-	var y: int
+	var pos: Vector2i
 	func _to_dict() -> Dictionary:
-		return {"id": id, "x": x, "y": y}
+		return {"id": id, "x": pos.x, "y": pos.y}
 	static func from_dict(dict: Dictionary) -> MapSpot:
 		var ret := MapSpot.new()
 		ret.id = dict.get("id", "")
-		ret.x = dict.get("x", 0)
-		ret.y = dict.get("y", 0)
+		ret.pos.x = dict.get("x", 0)
+		ret.pos.y = dict.get("y", 0)
 		return ret
 
 func get_loc() -> APLocation:
