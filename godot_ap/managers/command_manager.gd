@@ -79,18 +79,18 @@ func get_debug_commands() -> Array[ConsoleCommand]:
 
 func setup_basic_commands() -> void:
 	register_command(ConsoleCommand.new("/help")
-		.add_help("", "Displays this message")
+		.add_help("", "Displays all currently available commands")
 		.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, _msg: String):
 			mgr.console.add_header_spacing()
-			mgr.console.add_line("Command Help (Contextual):",
+			var folder: BaseConsole.FoldablePart = mgr.console.add_foldable("[ COMMAND HELP ]",
 				"Commands shown may vary based on various conditions, such as if you are" +
-				" connected to an Archipelago server or not.", mgr.console.COLOR_UI_MSG) \
-				.underline = true
-			mgr.console.add_header_spacing()
+				" connected to an Archipelago server or not.", mgr.console.COLOR_UI_MSG)
+			folder.add(mgr.console.make_header_spacing())
 			for cmd in mgr.get_commands().filter(func(cmd):
 				return not (cmd.is_disabled() or cmd.is_debug())):
-				cmd.output_helptext(mgr.console)
-			mgr.console.add_header_spacing()))
+				cmd.output_helptext(mgr.console, folder)
+			mgr.console.add_header_spacing()
+			folder.fold(false)))
 	register_command(ConsoleCommand.new("/cls")
 		.add_help("", "Clears the console")
 		.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, _msg: String):

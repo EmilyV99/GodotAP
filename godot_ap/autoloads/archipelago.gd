@@ -688,7 +688,7 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 						ipport.append("38281")
 					ap_connect(ipport[0],ipport[1],command_args[2],command_args[3])))
 		cmd_manager.register_command(ConsoleCommand.new("/reconnect")
-			.add_help_cond("", "Refreshes the connection to the Archipelago server", is_ap_connected)
+			.add_help("", "Refreshes the connection to the Archipelago server")
 			.set_call(func(_mgr: CommandManager, _cmd: ConsoleCommand, _msg: String): ap_reconnect()))
 		cmd_manager.register_command(ConsoleCommand.new("/disconnect")
 			.add_help_cond("", "Kills the connection to the Archipelago server", is_ap_connected)
@@ -701,7 +701,11 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 			var data := conn.get_gamedata_for_player()
 			
 			var columns := BaseConsole.ColumnsPart.new()
-			mgr.console.add(columns)
+			var title := "LOCATIONS"
+			if filt: title += " (%s)" % filt
+			var folder: BaseConsole.FoldablePart = mgr.console.add_foldable("[ %s ]" % title, msg, mgr.console.COLOR_UI_MSG)
+			folder.add(columns)
+			folder.fold(false)
 			
 			var h1 = columns.add(0, mgr.console.make_text("Location Name:"))
 			if filt:
@@ -732,6 +736,7 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 					
 					columns.add(0, mgr.console.make_text(loc_name, "Location %d" % lid, rich_colors[loc_status.colorname]))
 					columns.add(2, mgr.console.make_text(loc_status.text, loc_status.tooltip, rich_colors[loc_status.colorname]))
+			mgr.console.add_header_spacing()
 			))
 	cmd_manager.register_command(ConsoleCommand.new("/items")
 		.add_help_cond("[filter]", "Lists all items (optionally matching a filter) for the current slot's game.", is_ap_connected)
@@ -739,9 +744,13 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 			if not _ensure_connected(mgr.console): return
 			var filt := msg.substr(7)
 			var data := conn.get_gamedata_for_player()
-
+			
 			var columns := BaseConsole.ColumnsPart.new()
-			mgr.console.add(columns)
+			var title := "ITEMS"
+			if filt: title += " (%s)" % filt
+			var folder: BaseConsole.FoldablePart = mgr.console.add_foldable("[ %s ]" % title, msg, mgr.console.COLOR_UI_MSG)
+			folder.add(columns)
+			folder.fold(false)
 			
 			var h1 = columns.add(0, mgr.console.make_text("Item Name:"))
 			if filt:
@@ -791,6 +800,7 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 			elif not num_counted:
 				columns.parts.pop_back()
 				columns.parts.pop_back()
+			mgr.console.add_header_spacing()
 			))
 	if server_autofills: # Autofill for some AP commands
 		cmd_manager.register_command(ConsoleCommand.new("!hint_location")
@@ -833,47 +843,68 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 						
 						locs.assign(conn.slot_locations.keys() \
 							.map(func(locid: int): return TrackerTab.get_location(locid)) \
-							.filter(func(v: APLocation): return v.loaded_tracker_loc != null and (filt.is_empty() or v.name.to_lower().contains(filt))))
+							.filter(func(v: APLocation): return v.loaded_tracker_loc != null and \
+								(filt.is_empty() or v.name.to_lower().contains(filt))))
+						locs.sort_custom(func(a: APLocation, b: APLocation): return a.name.naturalnocasecmp_to(b.name) < 0)
 						if not locs.is_empty():
 							mgr.console.add_header_spacing()
-							mgr.console.add_line("[ LOCATIONS ]", "", mgr.console.COLOR_UI_MSG)
+							var outer_folder := mgr.console.add_foldable("[ TRACKER LOCATIONS ]", msg, mgr.console.COLOR_UI_MSG)
+							outer_folder.fold(false)
 							for loc in locs:
 								var tloc: TrackerLocation = loc.loaded_tracker_loc
-								mgr.console.add_line(loc.name+":", "", rich_colors[AP.COLORNAME_LOCATION])
-								for stat in tloc.status_rules.keys():
-									if stat == "Found": continue
-									var stat_obj := TrackerTab.get_status(stat)
-									mgr.console.add_line("'%s':" % stat, stat_obj.tooltip, rich_colors[stat_obj.colorname])
-									var cont: BaseConsole.ContainerPart = mgr.console.add_indented_block(
-										tloc.status_rules[stat].get_repr(1), 25, mgr.console.COLOR_UI_MSG)
+								var status_name := tloc.get_status()
+								var status_obj := TrackerTab.get_status(status_name)
+								var folder: BaseConsole.FoldablePart = outer_folder.add(
+									mgr.console.make_foldable("%s (%s)" % [loc.name, status_name], "", rich_colors[status_obj.colorname]))
+								for stat in tloc._iter_statuses():
+									if stat.text == "Found": continue
+									folder.add(mgr.console.make_text("'%s':" % stat.text, stat.tooltip, rich_colors[stat.colorname]))
+									mgr.console.ensure_newline(folder.get_inner_parts())
+									var cont: BaseConsole.ContainerPart = folder.add(mgr.console.make_indented_block(
+										tloc.status_rules[stat.text].get_repr(1), 25, mgr.console.COLOR_UI_MSG))
 									cont.textpart_replace("true", "true", true, "", rich_colors["green"])
 									cont.textpart_replace("false", "false", true, "", rich_colors["red"])
-						mgr.console.add_header_spacing()
+							mgr.console.add_header_spacing()
 					"refresh":
 						TrackerTab.load_tracker_packs()
 					"vars":
 						if not _ensure_connected(mgr.console): return
+						mgr.console.add_header_spacing()
+						var outer_folder := mgr.console.add_foldable("[ TRACKER INFO ]", msg, mgr.console.COLOR_UI_MSG)
+						outer_folder.fold(false)
+						outer_folder.add(mgr.console.make_header_spacing())
+						outer_folder.add(mgr.console.make_indent(20))
+						var needs_spacing := false
 						var named_rules = TrackerTab.named_rules.keys()
 						if not named_rules.is_empty():
-							mgr.console.add_header_spacing()
-							mgr.console.add_line("[ NAMED RULES ]", "", mgr.console.COLOR_UI_MSG)
+							if needs_spacing:
+								outer_folder.add(mgr.console.make_header_spacing())
+							else: needs_spacing = true
+							var rules_folder := outer_folder.add(mgr.console.make_foldable("[ NAMED RULES ]", "", mgr.console.COLOR_UI_MSG))
 							for rulename in named_rules:
-								mgr.console.add_text(rulename+": ", "", mgr.console.COLOR_UI_MSG)
-								var b = TrackerTab.get_named_rule(rulename).can_access()
-								var s = "Unknown"
+								var rule = TrackerTab.get_named_rule(rulename)
+								var b = rule.can_access()
 								var c = "white"
 								if b != null:
-									s = str(b)
 									c = "green" if b else "red"
-								mgr.console.add_line(s, "", Archipelago.rich_colors[c])
+								var inner_folder: BaseConsole.FoldablePart = rules_folder.add(
+									mgr.console.make_foldable(rulename, "", Archipelago.rich_colors[c]))
+								var cont: BaseConsole.ContainerPart = inner_folder.add(mgr.console.make_indented_block(
+									rule.get_repr(0), 25, mgr.console.COLOR_UI_MSG))
+								cont.textpart_replace("true", "true", true, "", rich_colors["green"])
+								cont.textpart_replace("false", "false", true, "", rich_colors["red"])
 						var vars = TrackerTab.variables.keys()
 						if not vars.is_empty():
-							mgr.console.add_header_spacing()
-							mgr.console.add_line("[ VARIABLES ]", "", mgr.console.COLOR_UI_MSG)
+							if needs_spacing:
+								outer_folder.add(mgr.console.make_header_spacing())
+							else: needs_spacing = true
+							var vars_folder := outer_folder.add(mgr.console.make_foldable("[ VARIABLES ]", "", mgr.console.COLOR_UI_MSG))
 							for varname in vars:
-								mgr.console.add_text(varname+": ", "", mgr.console.COLOR_UI_MSG)
+								vars_folder.add(mgr.console.make_text(varname+": ", "", mgr.console.COLOR_UI_MSG))
 								var val = TrackerTab.variables.get(varname)
-								mgr.console.add_line(str(val), "", Archipelago.rich_colors["plum"])
+								vars_folder.add(mgr.console.make_text(str(val), "", Archipelago.rich_colors["green"]))
+								vars_folder.add(mgr.console.make_header_spacing(0))
+						outer_folder.add(mgr.console.make_indent(-20))
 						mgr.console.add_header_spacing()
 				))
 	cmd_manager.setup_basic_commands()

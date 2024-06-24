@@ -44,7 +44,6 @@ func _get_joint_repr(dict, indent := 0):
 	if rule and not repeated: dict[name] = rule
 	var names: Array[String] = []
 	names.assign(dict.keys())
-	names.sort()
 	if repeated:
 		return "\t".repeat(indent) + "NAMED %s -> SELF-LOOP" % names
 	if not rule:

@@ -172,8 +172,11 @@ class ConsolePart: ## A base part, for all other parts to inherit from
 		pass
 	func needs_hover() -> bool:
 		return false
+	func clear_hitboxes() -> void:
+		hitboxes.clear()
 	func get_hitboxes() -> Array[Rect2]:
-		return []
+		if dont_draw(): return []
+		return hitboxes
 	func get_hitbox() -> Rect2: ## Combines all the hitboxes from 'get_hitboxes()' rectangularly
 		var hbs := get_hitboxes()
 		if hbs.is_empty(): return Rect2()
@@ -260,10 +263,12 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 	
 	func _hitbox_string(c: BaseConsole, subtext: String, data: ConsoleDrawData):
 		var str_sz = c.get_string_size(subtext, _font_flags)
+		str_sz.y = min(str_sz.y, c.get_line_height())
 		var hb := Rect2(Vector2(data.x,data.y), str_sz)
 		hitboxes.append(hb)
 	func _draw_string(c: BaseConsole, subtext: String, data: ConsoleDrawData):
 		var str_sz = c.get_string_size(subtext, _font_flags)
+		str_sz.y = min(str_sz.y, c.get_line_height())
 		var pos := Vector2(data.x, data.y+c.get_font_ascent(_font_flags))
 		c.draw_string(c.get_font(_font_flags), pos, subtext, HORIZONTAL_ALIGNMENT_LEFT, -1, c.font_size, _get_color(c))
 		var hb := Rect2(Vector2(data.x,data.y), str_sz)
@@ -272,7 +277,6 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 		if underline:
 			c.draw_rect(Rect2(hb.position.x, hb.position.y + str_sz.y, hb.size.x, 1), _get_color(c))
 	func draw(c: BaseConsole, data: ConsoleDrawData) -> void:
-		if dont_draw(): return
 		_calc_and_draw(c, data, true)
 	func _ttip_calc_size(c: BaseConsole, data: ConsoleDrawData, clip := false) -> void:
 		if clip:
@@ -320,16 +324,17 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 			c.tooltip_bg.position.y += 1
 		#endregion Bound tooltip in-window
 	func needs_hover() -> bool:
-		return not tooltip.is_empty()
-	func get_hitboxes() -> Array[Rect2]:
-		return hitboxes
+		return not tooltip.is_empty() and not hidden
 	func calc_hitboxes(c: BaseConsole, data: ConsoleDrawData) -> void:
 		_calc_and_draw(c, data, false)
 	func _calc_and_draw(c: BaseConsole, data: ConsoleDrawData, do_draw: bool) -> void:
+		if dont_draw():
+			clear_hitboxes()
+			return
 		var text_pos = 0
 		var trim_pos: int
 		var old_hitbox := get_hitbox()
-		hitboxes.clear()
+		clear_hitboxes()
 		var space_only := true
 		while true:
 			if text_pos >= text.length():
@@ -431,10 +436,12 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 class CenterTextPart extends TextPart:
 	func _hitbox_string(c: BaseConsole, subtext: String, data: ConsoleDrawData):
 		var str_sz = c.get_string_size(subtext, _font_flags)
+		str_sz.y = min(str_sz.y, c.get_line_height())
 		var hb := Rect2(data.l, data.y, data.w, str_sz.y)
 		hitboxes.append(hb)
 	func _draw_string(c: BaseConsole, subtext: String, data: ConsoleDrawData):
 		var str_sz = c.get_string_size(subtext, _font_flags)
+		str_sz.y = min(str_sz.y, c.get_line_height())
 		var pos := Vector2(data.cx - str_sz.x/2, data.y+c.get_font_ascent(_font_flags))
 		c.draw_string(c.get_font(_font_flags), pos, subtext, HORIZONTAL_ALIGNMENT_LEFT, -1, c.font_size, _get_color(c))
 		var hb := Rect2(data.l, data.y, data.w, str_sz.y)
@@ -442,17 +449,21 @@ class CenterTextPart extends TextPart:
 		hitboxes.append(hb)
 		if underline:
 			c.draw_rect(Rect2(pos.x, data.y + str_sz.y, str_sz.x, 1), _get_color(c))
-	func draw(c: BaseConsole, data: ConsoleDrawData) -> void:
-		if dont_draw(): return
+	func _calc_and_draw(c: BaseConsole, data: ConsoleDrawData, do_draw: bool) -> void:
+		if dont_draw():
+			clear_hitboxes()
+			return
 		data.ensure_line(c)
-		super(c, data)
+		super(c, data, do_draw)
 
 class SpacingPart extends ConsolePart: ## A part that adds spacing
 	var spacing := Vector2.ZERO
 	var reset_line := true
 	var from_reset_y := false
 	func draw(c: BaseConsole, data: ConsoleDrawData) -> void:
-		if dont_draw(): return
+		if dont_draw():
+			clear_hitboxes()
+			return
 		if reset_line:
 			data.ensure_line(c)
 		if from_reset_y:
@@ -463,7 +474,8 @@ class SpacingPart extends ConsolePart: ## A part that adds spacing
 				data.y += spacing.y
 		if spacing.x: data.show_x(data.x)
 	func calc_hitboxes(c: BaseConsole, data: ConsoleDrawData) -> void:
-		hitboxes.clear()
+		clear_hitboxes()
+		if dont_draw(): return
 		var hb := Rect2(data.x, data.y, 0, c.get_line_height())
 		if from_reset_y:
 			data.ensure_spacing(c, spacing)
@@ -486,6 +498,9 @@ class SpacingPart extends ConsolePart: ## A part that adds spacing
 class IndentPart extends ConsolePart: ## A part that manages indents
 	var indent: float = 0.0
 	func draw(_c: BaseConsole, data: ConsoleDrawData) -> void:
+		if dont_draw():
+			clear_hitboxes()
+			return
 		if Util.approx_eq(data.x, data.l):
 			data.x += indent
 		data.l += indent
@@ -494,7 +509,9 @@ class IteratorPart extends ConsolePart: ## A base part, for parts that contain p
 	func iter_parts() -> Array[ConsolePart]:
 		return []
 	func draw(c: BaseConsole, data: ConsoleDrawData) -> void:
-		if dont_draw(): return
+		if dont_draw():
+			clear_hitboxes()
+			return
 		for p in iter_parts():
 			if not p: continue
 			p.draw(c,data)
@@ -508,6 +525,12 @@ class IteratorPart extends ConsolePart: ## A base part, for parts that contain p
 			if p.needs_hover():
 				return true
 		return false
+	func clear_hitboxes() -> void:
+		super()
+		for p in iter_parts():
+			if not p: continue
+			p.clear_hitboxes()
+		
 	func get_hitboxes() -> Array[Rect2]:
 		var ret: Array[Rect2] = []
 		for p in iter_parts():
@@ -515,6 +538,9 @@ class IteratorPart extends ConsolePart: ## A base part, for parts that contain p
 			ret.append_array(p.get_hitboxes())
 		return ret
 	func calc_hitboxes(c: BaseConsole, data: ConsoleDrawData) -> void:
+		if dont_draw():
+			clear_hitboxes()
+			return
 		for p in iter_parts():
 			if not p: continue
 			p.calc_hitboxes(c, data)
@@ -554,6 +580,57 @@ class ContainerPart extends IteratorPart:
 					continue
 			q += 1
 
+class FoldablePart extends ContainerPart:
+	var folded: bool :
+		set = fold
+	
+	signal fold_changed
+	func fold(val: bool) -> void:
+		if folded == val: return
+		folded = val
+		parts[2].hidden = folded
+		var textpart: TextPart = parts[0]
+		textpart.text = textpart.text.rstrip(" 🞂🞃") + (" 🞂" if folded else " 🞃")
+		fold_changed.emit()
+	
+	func draw(c: BaseConsole, data: ConsoleDrawData) -> void:
+		if dont_draw():
+			super(c, data)
+			return
+		data.ensure_line(c)
+		super(c, data)
+		data.ensure_line(c)
+	func calc_hitboxes(c: BaseConsole, data: ConsoleDrawData) -> void:
+		if dont_draw():
+			super(c, data)
+			return
+		data.ensure_line(c)
+		super(c, data)
+		data.ensure_line(c)
+	
+	func try_click(evt: InputEventMouseButton, pos: Vector2) -> bool:
+		if super(evt, pos): return true
+		if not evt.pressed or not evt.button_index == MOUSE_BUTTON_LEFT:
+			return false
+		for hb in parts[0].get_hitboxes():
+			if hb.has_point(pos):
+				folded = not folded
+				return true
+		return false
+	func add(part: ConsolePart) -> ConsolePart:
+		return parts[2]._add(part)
+	func get_inner_parts() -> Array[ConsolePart]:
+		return parts[2].parts
+	static func make(c: BaseConsole, text: String, ttip: String = "", color: Color = Color.TRANSPARENT) -> FoldablePart:
+		var ret := FoldablePart.new()
+		if not text.ends_with(" 🞂"):
+			text = text.rstrip(" 🞂🞃") + " 🞂"
+		ret._add(c.make_text(text, ttip, color))
+		ret._add(c.make_header_spacing(3))
+		ret._add(ContainerPart.new())
+		ret.fold(true)
+		ret.fold_changed.connect(c.queue_locked_redraw)
+		return ret
 class ColumnsPart extends ContainerPart:
 	## Adds a part to a specified column index
 	## Columns will be auto-spaced by their used witdth
@@ -564,9 +641,14 @@ class ColumnsPart extends ContainerPart:
 	func add_nil(col: int) -> void:
 		add(col, null)
 	func draw(c: BaseConsole, data: ConsoleDrawData) -> void:
-		if dont_draw(): return
+		if dont_draw():
+			super(c, data)
+			return
 		_calc_and_draw(c, data, true)
 	func calc_hitboxes(c: BaseConsole, data: ConsoleDrawData) -> void:
+		if dont_draw():
+			super(c, data)
+			return
 		_calc_and_draw(c, data, false)
 	func _calc_and_draw(c: BaseConsole, data: ConsoleDrawData, do_draw: bool) -> void:
 		# Ensure we're at line start
@@ -635,9 +717,14 @@ class ArrangedColumnsPart extends ContainerPart:
 		widths.append(w)
 		return part
 	func draw(c: BaseConsole, data: ConsoleDrawData) -> void:
-		if dont_draw(): return
+		if dont_draw():
+			super(c, data)
+			return
 		_calc_and_draw(c, data, true)
 	func calc_hitboxes(c: BaseConsole, data: ConsoleDrawData) -> void:
+		if dont_draw():
+			super(c, data)
+			return
 		_calc_and_draw(c, data, false)
 	func _calc_and_draw(c: BaseConsole, data: ConsoleDrawData, do_draw: bool) -> void:
 		# Ensure we're at line start
@@ -696,7 +783,27 @@ class ArrangedColumnsPart extends ContainerPart:
 class HintPart extends ArrangedColumnsPart	: ## A part representing a hint info
 	var hint: NetworkHint
 	func draw(c: BaseConsole, data: ConsoleDrawData) -> void:
-		if dont_draw(): return
+		if dont_draw():
+			super(c, data)
+			return
+		if parts.is_empty():
+			refresh(c)
+		var vspc = c.get_line_height()/4
+		data.ensure_spacing(c, Vector2(0, vspc))
+		super(c, data)
+		for part in parts:
+			if part is TextPart and not part.hitboxes.is_empty():
+				var top_hb = part.hitboxes.front()
+				top_hb.position.y -= vspc/2
+				top_hb.size.y += vspc/2
+				part.hitboxes[0] = top_hb
+				var bot_hb = part.hitboxes.back()
+				bot_hb.size.y += vspc/2
+				part.hitboxes[-1] = bot_hb
+	func calc_hitboxes(c: BaseConsole, data: ConsoleDrawData) -> void:
+		if dont_draw():
+			super(c, data)
+			return
 		if parts.is_empty():
 			refresh(c)
 		var vspc = c.get_line_height()/4
@@ -760,7 +867,7 @@ func make_c_text(text: String, ttip := "", col := Color.TRANSPARENT) -> CenterTe
 func add_c_text(text: String, ttip := "", col := Color.TRANSPARENT) -> CenterTextPart:
 	return add(make_c_text(text, ttip, col))
 
-func add_line(text, ttip := "", col := Color.TRANSPARENT) -> TextPart:
+func add_line(text: String, ttip := "", col := Color.TRANSPARENT) -> TextPart:
 	var ret := add_text(text, ttip, col)
 	add_ensure_newline()
 	return ret
@@ -828,6 +935,10 @@ func make_indented_block(s: String, indent: float, color := Color.TRANSPARENT) -
 func add_indented_block(s: String, indent: float, color := Color.TRANSPARENT) -> ContainerPart:
 	return add(make_indented_block(s, indent, color))
 
+func make_foldable(text: String, ttip := "", col := Color.TRANSPARENT) -> FoldablePart:
+	return FoldablePart.make(self, text, ttip, col)
+func add_foldable(text: String, ttip := "", col := Color.TRANSPARENT) -> FoldablePart:
+	return add(make_foldable(text, ttip, col))
 
 var parts: Array[ConsolePart] = []
 var hovered_part: ConsolePart = null
@@ -976,6 +1087,10 @@ func _gui_input(event):
 					scroll_by_abs(-size.y)
 				KEY_PAGEDOWN:
 					scroll_by_abs(size.y)
+
+func queue_locked_redraw() -> void:
+	is_max_scroll = false
+	queue_redraw()
 
 func close() -> void:
 	if Engine.is_editor_hint(): return
