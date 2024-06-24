@@ -181,34 +181,72 @@ func _gui_input(event):
 					if has_select():
 						type("")
 					elif text_pos > 0:
-						text_pos2 -= 1
+						if event.ctrl_pressed:
+							var ws := RegEx.new()
+							ws.compile("^[ \t\r\n]+$")
+							var alphanum := RegEx.new()
+							alphanum.compile("^[a-zA-Z0-9_]+$")
+							var other := RegEx.new()
+							other.compile("^[^ \t\r\na-zA-Z0-9_]+$")
+							for reg in [ws, alphanum, other]:
+								if reg.search(text[text_pos-1]):
+									while text_pos2 > 0 and reg.search(text[text_pos2-1]):
+										text_pos2 -= 1
+									break
+						else:
+							text_pos2 -= 1
 						type("")
 						updated_text = true
 				KEY_DELETE:
 					if has_select():
 						type("")
 					elif text_pos < text.length():
-						text_pos2 += 1
+						if event.ctrl_pressed:
+							var ws := RegEx.new()
+							ws.compile("^[ \t\r\n]+$")
+							var alphanum := RegEx.new()
+							alphanum.compile("^[a-zA-Z0-9_]+$")
+							var other := RegEx.new()
+							other.compile("^[^ \t\r\na-zA-Z0-9_]+$")
+							for reg in [ws, alphanum, other]:
+								if reg.search(text[text_pos]):
+									while text_pos2 < text.length() and reg.search(text[text_pos2]):
+										text_pos2 += 1
+									break
+						else:
+							text_pos2 += 1
 						type("")
 						updated_text = true
 				KEY_LEFT:
 					if text_pos:
 						if event.ctrl_pressed:
-							var regex := RegEx.new()
-							regex.compile("[^A-Za-z0-9_]")
-							var state: bool = regex.search(text[text_pos-1]) != null
-							while text_pos and ((regex.search(text[text_pos-1]) != null) == state):
-								text_pos -= 1
+							var ws := RegEx.new()
+							ws.compile("^[ \t\r\n]+$")
+							var alphanum := RegEx.new()
+							alphanum.compile("^[a-zA-Z0-9_]+$")
+							var other := RegEx.new()
+							other.compile("^[^ \t\r\na-zA-Z0-9_]+$")
+							for reg in [ws, alphanum, other]:
+								if reg.search(text[text_pos-1]):
+									while text_pos > 0 and reg.search(text[text_pos-1]):
+										text_pos -= 1
+									break
 						else:
 							text_pos -= 1
 				KEY_RIGHT:
 					if text_pos < text.length():
 						if event.ctrl_pressed:
-							var regex := RegEx.new()
-							regex.compile("[^A-Za-z0-9_]")
-							var state: bool = regex.search(text[text_pos]) != null
-							while text_pos < text.length() and ((regex.search(text[text_pos]) != null) == state):
-								text_pos += 1
+							var ws := RegEx.new()
+							ws.compile("^[ \t\r\n]+$")
+							var alphanum := RegEx.new()
+							alphanum.compile("^[a-zA-Z0-9_]+$")
+							var other := RegEx.new()
+							other.compile("^[^ \t\r\na-zA-Z0-9_]+$")
+							for reg in [ws, alphanum, other]:
+								if reg.search(text[text_pos]):
+									while text_pos < text.length() and reg.search(text[text_pos]):
+										text_pos += 1
+									break
 						else:
 							text_pos += 1
 				KEY_UP:
