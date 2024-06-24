@@ -6,7 +6,7 @@ var saved_path: String = ""
 
 var game: String
 
-func instantiate() -> TrackerScene_Base:
+func instantiate() -> TrackerScene_Root:
 	assert(false) # Override with a valid return!
 	return null
 

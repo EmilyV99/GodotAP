@@ -22,6 +22,7 @@ config/icon="res://icon.svg"
 
 Archipelago="*res://godot_ap/autoloads/archipelago.gd"
 Saves="*res://godot_ap/autoloads/saves.gd"
+TrackerManager="*res://godot_ap/autoloads/tracker_manager.gd"
 
 [display]
 

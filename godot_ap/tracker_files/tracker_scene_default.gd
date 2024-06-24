@@ -8,9 +8,11 @@ var loc_container: BaseConsole.ContainerPart
 var sort_ascending := [true,false]
 var sort_cols := [1,0]
 
+var width_arr := []
+
 var datapack: TrackerPack_Data
-var labeltext := "No game-specific tracker found. Showing default tracker."
-var labelttip := ""
+
+var show_hint_status := true
 
 var hint_status_filters: Dictionary = {
 	NetworkHint.Status.FOUND: false,
@@ -21,10 +23,12 @@ signal item_register(name: String)
 class LocationPart extends BaseConsole.ArrangedColumnsPart: ## A part representing a hint info
 	var loc: APLocation
 	var datapack: TrackerPack_Data
+	var parent: TrackerScene_Default
 	
-	func _init(tracker_loc: APLocation, pack: TrackerPack_Data):
+	func _init(tracker_loc: APLocation, pack: TrackerPack_Data, parent_scene: TrackerScene_Default):
 		loc = tracker_loc
 		datapack = pack
+		parent = parent_scene
 	func draw(c: BaseConsole, data: ConsoleDrawData) -> void:
 		if dont_draw(): return
 		if parts.is_empty():
@@ -46,21 +50,18 @@ class LocationPart extends BaseConsole.ArrangedColumnsPart: ## A part representi
 		clear()
 		var data := Archipelago.conn.get_gamedata_for_player()
 		
-		var width_arr := [1000, 500]
-		if datapack:
-			width_arr[0] = 750
-			width_arr.append(500)
-		var locpart: BaseConsole.TextPart = add(Archipelago.out_location(c, loc.id, data, false).centered(),width_arr[0])
+		var locpart: BaseConsole.TextPart = add(Archipelago.out_location(c, loc.id, data, false).centered(),parent.width_arr[0])
 		var dispname := loc.get_display_name()
 		if dispname:
 			locpart.tooltip = ("%s\n%s" % [locpart.text, locpart.tooltip]).strip_edges()
 			locpart.text = dispname
-		add(NetworkHint.make_hint_status(c, loc.hint_status).centered(), width_arr[1])
+		if parent.show_hint_status:
+			add(NetworkHint.make_hint_status(c, loc.hint_status).centered(), parent.width_arr[1])
 		if datapack:
-			var stat: String = TrackerTab.get_location(loc.id).get_status()
-			var stats: Array = TrackerTab.statuses.filter(func(s): return s.text == stat)
+			var stat: String = TrackerManager.get_location(loc.id).get_status()
+			var stats: Array = TrackerManager.statuses.filter(func(s): return s.text == stat)
 			if stats:
-				add(stats[0].make_c_text(c), width_arr[2])
+				add(stats[0].make_c_text(c), parent.width_arr[2])
 		
 
 func sort_click(event: InputEventMouseButton, index: int) -> bool:
@@ -114,7 +115,7 @@ func sort_click(event: InputEventMouseButton, index: int) -> bool:
 					vbox.add_child(hbox)
 			2: # Location Status
 				var arr: Array = []
-				arr.append_array(Util.reversed(TrackerTab.statuses))
+				arr.append_array(Util.reversed(TrackerManager.statuses))
 				for s in arr:
 					var hbox := GUI.make_cbox_row(s.text,
 						status_filters.get(s.text, true),
@@ -126,23 +127,35 @@ func sort_click(event: InputEventMouseButton, index: int) -> bool:
 	return false
 
 func _ready() -> void:
-	var width_arr := [1000, 500]
+	width_arr.assign([1000, 500])
 	var titles := ["Location Name", "Hint Status"]
 	
 	if datapack:
-		width_arr[0] = 750
-		width_arr.append(500)
+		width_arr.assign([-1, 120, 120])
+		for q in NetworkHint.Status.values():
+			var statname: String = NetworkHint.status_names[q]
+			var font := console.get_font()
+			var sz := font.get_string_size(statname)
+			width_arr[1] = max(width_arr[1], sz.x)
+		for stat in TrackerManager.statuses:
+			var font := console.get_font()
+			var sz := font.get_string_size(stat.text)
+			width_arr[2] = max(width_arr[2], sz.x)
+		width_arr[1] += 10
+		width_arr[2] += 10
+		
 		titles.append("Status")
 		sort_ascending.append(false)
 		sort_cols.push_front(2)
 	
 	titles[sort_cols[0]] += " ↓"
-	
+	var to_hide := [false, not show_hint_status, false]
 	var header := BaseConsole.ArrangedColumnsPart.new()
 	for q in width_arr.size():
-		headings.append(header.add(console.make_c_text(titles[q]), width_arr[q]))
-	for q in headings.size():
-		headings[q].on_click = func(evt): return sort_click(evt,q)
+		if to_hide[q]: continue
+		var heading = header.add(console.make_c_text(titles[q]), width_arr[q])
+		heading.on_click = func(evt): return sort_click(evt,q)
+		headings.append(heading)
 	console.add(header)
 	loc_container = console.add(BaseConsole.ContainerPart.new())
 	super()
@@ -162,7 +175,7 @@ func refresh_tracker(fresh_connection: bool = false) -> void:
 		if Archipelago.datapack_pending:
 			await Archipelago.all_datapacks_loaded
 		for locid in Archipelago.location_list():
-			var new_part := LocationPart.new(TrackerTab.get_location(locid), datapack)
+			var new_part := LocationPart.new(TrackerManager.get_location(locid), datapack, self)
 			loc_container._add(new_part)
 		await get_tree().process_frame
 		console.scroll_by_abs(-console.scroll)
@@ -224,7 +237,3 @@ func do_sort(a: LocationPart, b: LocationPart) -> bool:
 		elif c > 0: return not sort_ascending[sort_cols[q]]
 	return sort_by_prev_index(a,b) >= 0
 #endregion
-
-func _update_label() -> void:
-	_linked_label.text = labeltext
-	_linked_label.tooltip = labelttip

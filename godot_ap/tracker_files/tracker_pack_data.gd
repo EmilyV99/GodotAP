@@ -17,22 +17,205 @@ var _variable_ops: Dictionary = {}
 var description_bar: String = ""
 var description_ttip: String = ""
 
-func instantiate() -> TrackerScene_Base:
-	var scene: TrackerScene_Default = load("res://godot_ap/tracker_files/default_tracker.tscn").instantiate()
-	scene.datapack = self
-	scene.item_register.connect(register_item)
-	TrackerTab.variables.clear()
-	TrackerTab.variables.merge(starting_variables)
+func validate_gui_element(elem) -> bool:
+	if not elem is Dictionary:
+		TrackerPack_Base._output_error("Bad element!", "Found a non-Dictionary type when looking for a gui element!")
+		return false
+	if elem.is_empty(): return true
+	var type = elem.get("type")
+	match type:
+		"Column", "Row":
+			if not TrackerPack_Base._expect_keys(elem, ["children","type"]):
+				return false
+			var children = elem.get("children")
+			if not children is Array:
+				TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected 'children' to be 'Array'!" % type)
+				return false
+			for child in children:
+				if not validate_gui_element(child):
+					return false
+			return true
+		"HSplit", "VSplit":
+			if not TrackerPack_Base._expect_keys(elem, ["children","type"]):
+				return false
+			var children = elem.get("children")
+			if not children is Array:
+				TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected 'children' to be 'Array'!" % type)
+				return false
+			if children.size() > 2:
+				TrackerPack_Base._output_error("Invalid Array Size", "Type '%s' expected 'children' to be size 2 or less!" % type)
+				return false
+			for child in children:
+				if not validate_gui_element(child):
+					return false
+			return true
+		"Margin":
+			if not TrackerPack_Base._expect_keys(elem, ["bottom","child","color","left","right","top","type"]):
+				return false
+			var child = elem.get("child")
+			if not validate_gui_element(child):
+				return false
+			for side in ["top","bottom","left","right"]:
+				var val = elem.get(side)
+				if not (val is int or (val is float and (Util.approx_eq(roundi(val),val)))):
+					TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected '%s' to be 'int'!" % [side,type])
+					return false
+			var colname = elem.get("color")
+			if not colname is String:
+				TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected 'color' to be 'String'!" % type)
+				return false
+			if not colname in Archipelago.rich_colors.keys() and colname != "default":
+				if Color.from_string(colname, Color.WHITE) == Color.WHITE and \
+					Color.from_string(colname, Color.BLACK) == Color.BLACK:
+					TrackerPack_Base._output_error("Invalid Color", "Color '%s' could not be parsed as a color!" % colname)
+					return false
+			return true
+		"Tabs":
+			if not TrackerPack_Base._expect_keys(elem, ["tabs","type"]):
+				return false
+			var tabs = elem.get("tabs")
+			if not tabs is Dictionary:
+				TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected 'tabs' to be 'Dictionary'!" % type)
+				return false
+			for child in tabs.values():
+				if not validate_gui_element(child):
+					return false
+			return true
+		"LocationConsole":
+			if not TrackerPack_Base._expect_keys(elem, ["hint_status", "type"]):
+				return false
+			if not elem.get("hint_status") is bool:
+				TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected 'hint_status' to be 'bool'!" % type)
+				return false
+			return true
+		_:
+			if type == null:
+				TrackerPack_Base._output_error("No Type Specified", "Object requires 'type' field!")
+			else:
+				TrackerPack_Base._output_error("Unrecognized Type", "Type '%s' is not recognized as a valid GUI object type!" % type)
+			return false
+func _instantiate_gui_element(elem: Dictionary) -> Node:
+	if elem.is_empty(): return null
+	var type = elem.get("type")
+	match type:
+		"Column":
+			var cont := VBoxContainer.new()
+			cont.add_theme_constant_override("separation", 0)
+			cont.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			cont.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			var children: Array = elem.get("children")
+			for child in children:
+				var child_elem = _instantiate_gui_element(child)
+				if child_elem:
+					cont.add_child(child_elem)
+			return cont
+		"Row":
+			var cont := HBoxContainer.new()
+			cont.add_theme_constant_override("separation", 0)
+			cont.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			cont.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			var children: Array = elem.get("children")
+			for child in children:
+				var child_elem = _instantiate_gui_element(child)
+				if child_elem:
+					cont.add_child(child_elem)
+			return cont
+		"HSplit":
+			var cont := HSplitContainer.new()
+			cont.add_theme_constant_override("separation", 0)
+			cont.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			cont.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			var children: Array = elem.get("children")
+			for child in children:
+				var child_elem = _instantiate_gui_element(child)
+				if child_elem:
+					cont.add_child(child_elem)
+			return cont
+		"VSplit":
+			var cont := VSplitContainer.new()
+			cont.add_theme_constant_override("separation", 0)
+			cont.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			cont.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			var children: Array = elem.get("children")
+			for child in children:
+				var child_elem = _instantiate_gui_element(child)
+				if child_elem:
+					cont.add_child(child_elem)
+			return cont
+		"Margin":
+			var cont := MarginContainer.new()
+			var colorrect := ColorRect.new()
+			var color_name: String = elem["color"]
+			if color_name == "default":
+				colorrect.color = Color8(0x2C, 0x2C, 0x2C)
+			elif color_name in Archipelago.rich_colors.keys():
+				colorrect.color = Archipelago.rich_colors[color_name]
+			else:
+				colorrect.color = Color.from_string(color_name, Color8(0x2C,0x2C,0x2C))
+			cont.add_child(colorrect)
+			var inner_cont := MarginContainer.new()
+			cont.add_child(inner_cont)
+			var sides = ["top","bottom","left","right"]
+			for side in sides:
+				cont.add_theme_constant_override("margin_%s" % side, 0)
+				inner_cont.add_theme_constant_override("margin_%s" % side, elem.get(side))
+			cont.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			cont.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			colorrect.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			colorrect.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			inner_cont.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			inner_cont.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			var child_elem = _instantiate_gui_element(elem.get("child"))
+			if child_elem:
+				inner_cont.add_child(child_elem)
+			return cont
+		"Tabs":
+			var cont := TabContainer.new()
+			cont.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+			var bg_box := StyleBoxFlat.new()
+			bg_box.bg_color = Color8(0x2C,0x2C,0x2C)
+			cont.add_theme_stylebox_override("tabbar_background", bg_box)
+			cont.tab_focus_mode = Control.FOCUS_NONE
+			cont.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			cont.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			var tabs: Dictionary = elem.get("tabs")
+			for tabname in tabs.keys():
+				var child_elem = _instantiate_gui_element(tabs[tabname])
+				if child_elem:
+					cont.add_child(child_elem)
+					child_elem.name = tabname
+			return cont
+		"LocationConsole":
+			var scene: TrackerScene_Default = load("res://godot_ap/tracker_files/default_tracker.tscn").instantiate()
+			scene.datapack = self
+			scene.item_register.connect(register_item)
+			scene.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			scene.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			scene.show_hint_status = elem["hint_status"]
+			return scene
+	assert(false)
+	return null
+func instantiate() -> TrackerScene_Root:
+	var scene := TrackerScene_Root.new()
 	if description_bar.is_empty():
 		scene.labeltext = "Showing DataTracker for '%s'" % game
 	else:
 		scene.labeltext = description_bar
 	if not description_ttip.is_empty():
 		scene.labelttip = description_ttip
+	TrackerManager.variables.clear()
+	TrackerManager.variables.merge(starting_variables)
+	TrackerManager.load_tracker_locations(locations)
+	TrackerManager.load_named_rules(named_rules)
+	TrackerManager.load_statuses(statuses)
 	
-	TrackerTab.load_tracker_locations(locations)
-	TrackerTab.load_named_rules(named_rules)
-	TrackerTab.load_statuses(statuses)
+	if gui_layout.is_empty():
+		gui_layout = TrackerPack_Data.DEFAULT_GUI.duplicate(true)
+	var child_elem = _instantiate_gui_element(gui_layout)
+	if child_elem:
+		scene.add_child(child_elem)
+	
+	
 	return scene
 
 signal _item_register(name: String)
@@ -62,30 +245,6 @@ func _save_file(data: Dictionary) -> Error:
 	data["variables"] = _variable_ops
 	return OK
 
-func validate_gui_element(elem: Dictionary) -> bool:
-	var type = elem.get("type")
-	match type:
-		"Column", "Row":
-			if not TrackerPack_Base._expect_keys(elem, ["children","type"]):
-				return false
-			var children = elem.get("children")
-			if not children is Array:
-				TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected 'children' to be 'Array'!" % type)
-				return false
-			for child in children:
-				if not validate_gui_element(child):
-					return false
-			return true
-		"LocationConsole":
-			if not TrackerPack_Base._expect_keys(elem, ["type"]):
-				return false
-			return true
-		_:
-			if type == null:
-				TrackerPack_Base._output_error("No Type Specified", "Object requires 'type' field!")
-			else:
-				TrackerPack_Base._output_error("Unrecognized Type", "Type '%s' is not recognized as a valid GUI object type!" % type)
-			return false
 func validate_gui() -> bool:
 	return validate_gui_element(gui_layout)
 func _load_file(json: Dictionary) -> Error:
@@ -120,19 +279,19 @@ func _load_file(json: Dictionary) -> Error:
 				"+":
 					_item_register.connect(func(name):
 						if name == iname:
-							TrackerTab.variables[varname] += op.get("value", 0))
+							TrackerManager.variables[varname] += op.get("value", 0))
 				"-":
 					_item_register.connect(func(name):
 						if name == iname:
-							TrackerTab.variables[varname] -= op.get("value", 0))
+							TrackerManager.variables[varname] -= op.get("value", 0))
 				"*":
 					_item_register.connect(func(name):
 						if name == iname:
-							TrackerTab.variables[varname] *= op.get("value", 1))
+							TrackerManager.variables[varname] *= op.get("value", 1))
 				"/":
 					_item_register.connect(func(name):
 						if name == iname:
-							TrackerTab.variables[varname] /= op.get("value", 1))
+							TrackerManager.variables[varname] /= op.get("value", 1))
 		
 	return ret
 

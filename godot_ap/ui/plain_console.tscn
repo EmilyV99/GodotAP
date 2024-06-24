@@ -17,7 +17,7 @@ font = ExtResource("2_w3f10")
 
 [node name="TooltipBG" type="ColorRect" parent="."]
 visible = false
-z_as_relative = false
+z_index = 1000
 layout_mode = 2
 offset_right = 40.0
 offset_bottom = 40.0

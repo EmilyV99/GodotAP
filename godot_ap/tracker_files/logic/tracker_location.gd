@@ -22,9 +22,9 @@ class MapSpot:
 
 func get_loc() -> APLocation:
 	if identifier is int:
-		return TrackerTab.get_location(identifier)
+		return TrackerManager.get_location(identifier)
 	elif identifier is String:
-		return TrackerTab.get_loc_by_name(identifier)
+		return TrackerManager.get_loc_by_name(identifier)
 	return APLocation.nil()
 
 func _iter_statuses(only_relevant := true) -> Array[LocationStatus]:
@@ -128,7 +128,7 @@ func _to_string():
 	return "%s (reqs %s)" % [identifier, status_rules]
 
 func get_loc_name() -> String:
-	var disp_name := TrackerTab.get_location(identifier).get_display_name()
+	var disp_name := TrackerManager.get_location(identifier).get_display_name()
 	if disp_name.is_empty():
 		return identifier if identifier is String else Archipelago.get_gamedata_for_player().get_loc_name(identifier)
 	return disp_name

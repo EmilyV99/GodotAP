@@ -4,9 +4,11 @@ func get_type() -> String: return "SCENE"
 
 @export var scene: PackedScene
 
-func instantiate() -> TrackerScene_Base:
+func instantiate() -> TrackerScene_Root:
 	if scene and scene.can_instantiate():
-		return scene.instantiate()
+		var root_scene := TrackerScene_Root.new()
+		root_scene.add_child(scene.instantiate())
+		return root_scene
 	return super()
 	
 func _save_file(_data: Dictionary) -> Error:

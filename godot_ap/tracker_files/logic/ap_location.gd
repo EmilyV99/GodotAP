@@ -42,7 +42,7 @@ func refresh() -> void:
 
 ## Returns the location's accessibility as a string
 func get_status(default := "Unknown") -> String:
-	if loaded_tracker_loc and TrackerTab.tracking:
+	if loaded_tracker_loc and TrackerManager.tracking:
 		return loaded_tracker_loc.get_status()
 	return default
 

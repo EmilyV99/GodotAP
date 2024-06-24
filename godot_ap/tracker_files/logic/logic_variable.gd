@@ -10,7 +10,7 @@ func _init(name: String, operator: String, value: Variant) -> void:
 	val = value
 
 func can_access() -> Variant:
-	var curval = TrackerTab.variables.get(iden)
+	var curval = TrackerManager.variables.get(iden)
 	if curval is String:
 		match op:
 			"==":

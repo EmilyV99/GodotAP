@@ -7,7 +7,8 @@
 		"type": "Column",
 		"children": [
 			{
-				"type": "LocationConsole"
+				"type": "LocationConsole",
+				"hint_status": true
 			}
 		]
 	},
