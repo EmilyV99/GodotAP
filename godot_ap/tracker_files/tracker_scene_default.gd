@@ -2,13 +2,35 @@ class_name TrackerScene_Default extends TrackerScene_Base
 
 @onready var console: BaseConsole = $Console/Cont/ConsoleMargin/Row/Console
 
+const COL_LOCATION := "Location Name"
+const COL_HINT_STAT := "Hint Status"
+const COL_LOC_STAT := "Status"
+
 var headings: Array[BaseConsole.TextPart]
 var loc_container: BaseConsole.ContainerPart
 
-var sort_ascending := [true,false]
-var sort_cols := [1,0]
-
-var width_arr := []
+class ColumnData:
+	var index: int
+	var name: String
+	var def_sort_ascending := true
+	var sort_ascending := true
+	var col_width: int = 200
+	var sorter: Callable
+	var filter: Callable
+	func _init(headname: String, wid: int, ind: int, sort_proc: Callable, ascending := true):
+		name = headname
+		col_width = wid
+		def_sort_ascending = ascending
+		sort_ascending = ascending
+		index = ind
+		sorter = sort_proc
+	func set_filter(filt: Callable) -> ColumnData:
+		filter = filt
+		return self
+var cols_in_order := [ColumnData.new(COL_LOCATION,1000,0,sort_by_name),
+	ColumnData.new(COL_HINT_STAT,500,1,sort_by_hint_status,false).set_filter(_hint_status_filter)]
+var sort_cols := [cols_in_order[1],cols_in_order[0]]
+var cols_by_name := {COL_LOCATION: cols_in_order[0], COL_HINT_STAT: cols_in_order[1]}
 
 var datapack: TrackerPack_Data
 
@@ -50,38 +72,41 @@ class LocationPart extends BaseConsole.ArrangedColumnsPart: ## A part representi
 		clear()
 		var data := Archipelago.conn.get_gamedata_for_player()
 		
-		var locpart: BaseConsole.TextPart = add(Archipelago.out_location(c, loc.id, data, false).centered(),parent.width_arr[0])
+		var locpart: BaseConsole.TextPart
+		if parent.cols_by_name.has(COL_LOCATION):
+			locpart = add(Archipelago.out_location(c, loc.id, data, false).centered(),parent.cols_by_name[COL_LOCATION].col_width)
 		var dispname := loc.get_display_name()
-		if dispname:
+		if dispname and locpart:
 			locpart.tooltip = ("%s\n%s" % [locpart.text, locpart.tooltip]).strip_edges()
 			locpart.text = dispname
-		if parent.show_hint_status:
-			add(NetworkHint.make_hint_status(c, loc.hint_status).centered(), parent.width_arr[1])
-		if datapack:
+		if parent.cols_by_name.has(COL_HINT_STAT):
+			add(NetworkHint.make_hint_status(c, loc.hint_status).centered(), parent.cols_by_name[COL_HINT_STAT].col_width)
+		if datapack and parent.cols_by_name.has(COL_LOC_STAT):
 			var stat: String = TrackerManager.get_location(loc.id).get_status()
 			var stats: Array = TrackerManager.statuses.filter(func(s): return s.text == stat)
 			if stats:
-				add(stats[0].make_c_text(c), parent.width_arr[2])
+				add(stats[0].make_c_text(c), parent.cols_by_name[COL_LOC_STAT].col_width)
 		
 
-func sort_click(event: InputEventMouseButton, index: int) -> bool:
+func sort_click(event: InputEventMouseButton, column_name: String) -> bool:
 	if not event.pressed: return false
+	var column: ColumnData = cols_by_name[column_name]
 	if event.button_index == MOUSE_BUTTON_LEFT:
-		if sort_cols[0] == index:
-			sort_ascending[index] = not sort_ascending[index]
-			headings[index].text = headings[index].text.rstrip("↓↑") + ("↑" if sort_ascending[index] else "↓")
+		if sort_cols[0] == column:
+			column.sort_ascending = not column.sort_ascending
+			headings[column.index].text = headings[column.index].text.rstrip("↓↑") + ("↑" if column.sort_ascending else "↓")
 		else:
-			headings[sort_cols[0]].text = headings[sort_cols[0]].text.rstrip(" ↓↑")
-			sort_cols.erase(index)
-			sort_cols.push_front(index)
-			sort_ascending[index] = index != 1
-			headings[index].text += (" ↑" if sort_ascending[index] else " ↓")
+			headings[sort_cols[0].index].text = headings[sort_cols[0].index].text.rstrip(" ↓↑")
+			sort_cols.erase(column)
+			sort_cols.push_front(column)
+			column.sort_ascending = column.def_sort_ascending
+			headings[column.index].text += (" ↑" if column.sort_ascending else " ↓")
 		queue_refresh()
 		return true
 	elif event.button_index == MOUSE_BUTTON_RIGHT:
-		if index == 0:
+		if column_name == COL_LOCATION:
 			return false # Nothing to show
-		var vbox := headings[index].pop_dropdown(console)
+		var vbox := headings[column.index].pop_dropdown(console)
 		# Create action buttons
 		var btnrow := HBoxContainer.new()
 		var btn_checkall := Button.new()
@@ -102,8 +127,8 @@ func sort_click(event: InputEventMouseButton, index: int) -> bool:
 		btnrow.add_child(btn_uncheckall)
 		vbox.add_child(btnrow)
 		# Add filter options
-		match index:
-			1: # Status
+		match column_name:
+			COL_HINT_STAT:
 				var arr: Array = []
 				arr.append_array(Util.reversed(NetworkHint.status_names.keys()))
 				for s in arr:
@@ -113,7 +138,7 @@ func sort_click(event: InputEventMouseButton, index: int) -> bool:
 							hint_status_filters[s] = state
 							queue_refresh())
 					vbox.add_child(hbox)
-			2: # Location Status
+			COL_LOC_STAT:
 				var arr: Array = []
 				arr.append_array(Util.reversed(TrackerManager.statuses))
 				for s in arr:
@@ -127,36 +152,42 @@ func sort_click(event: InputEventMouseButton, index: int) -> bool:
 	return false
 
 func _ready() -> void:
-	width_arr.assign([1000, 500])
-	var titles := ["Location Name", "Hint Status"]
-	
 	if datapack:
-		width_arr.assign([-1, 120, 120])
+		cols_in_order[0].col_width = -1
+		cols_in_order[1].col_width = 120
+		cols_in_order.append(ColumnData.new(COL_LOC_STAT, 120, 2, sort_by_loc_status, false).set_filter(_status_filter))
+		cols_by_name[COL_LOC_STAT] = cols_in_order.back()
 		for q in NetworkHint.Status.values():
 			var statname: String = NetworkHint.status_names[q]
 			var font := console.get_font()
 			var sz := font.get_string_size(statname)
-			width_arr[1] = max(width_arr[1], sz.x)
+			cols_in_order[1].col_width = max(cols_in_order[1].col_width, sz.x)
 		for stat in TrackerManager.statuses:
 			var font := console.get_font()
 			var sz := font.get_string_size(stat.text)
-			width_arr[2] = max(width_arr[2], sz.x)
-		width_arr[1] += 10
-		width_arr[2] += 10
+			cols_in_order[2].col_width = max(cols_in_order[2].col_width, sz.x)
+		cols_in_order[1].col_width += 10
+		cols_in_order[2].col_width += 10
 		
-		titles.append("Status")
-		sort_ascending.append(false)
-		sort_cols.push_front(2)
+		sort_cols.push_front(cols_in_order[2])
 	
-	titles[sort_cols[0]] += " ↓"
 	var to_hide := [false, not show_hint_status, false]
 	var header := BaseConsole.ArrangedColumnsPart.new()
-	for q in width_arr.size():
-		if to_hide[q]: continue
-		var heading = header.add(console.make_c_text(titles[q]), width_arr[q])
-		heading.on_click = func(evt): return sort_click(evt,q)
+	var ind := 0
+	while ind < cols_in_order.size():
+		if to_hide.pop_front():
+			var colmn = cols_in_order.pop_at(ind)
+			sort_cols.erase(colmn)
+			cols_by_name.erase(colmn.name)
+			continue
+		var col = cols_in_order[ind]
+		col.index = ind
+		var heading = header.add(console.make_c_text(col.name), col.col_width)
+		heading.on_click = func(evt): return sort_click(evt, col.name)
 		headings.append(heading)
+		ind += 1
 	console.add(header)
+	headings[sort_cols[0].index].text += (" ↑" if sort_cols[0].sort_ascending else " ↓")
 	loc_container = console.add(BaseConsole.ContainerPart.new())
 	super()
 	Archipelago.conn.set_hint_notify(func(_hints): queue_refresh())
@@ -203,11 +234,16 @@ func on_items_get(_items: Array[NetworkItem]) -> void:
 func on_loc_checked(_locid: int) -> void:
 	queue_refresh()
 
-func filter_allow(part: LocationPart) -> bool:
-	if datapack:
-		if not status_filters.get(part.loc.get_status(), true):
-			return false
+func _status_filter(part: LocationPart) -> bool:
+	return not datapack or status_filters.get(part.loc.get_status(), true)
+func _hint_status_filter(part: LocationPart) -> bool:
 	return hint_status_filters.get(part.loc.hint_status, true)
+func filter_allow(part: LocationPart) -> bool:
+	for col in cols_in_order:
+		if not col.filter: continue
+		if not col.filter.call(part):
+			return false
+	return true
 #region Sorting
 var _sort_index_data: Dictionary = {}
 func sort_by_name(a: LocationPart, b: LocationPart) -> int:
@@ -229,10 +265,9 @@ func sort_by_prev_index(a: LocationPart, b: LocationPart) -> int:
 	return _sort_index_data.get(b, 99999) - _sort_index_data.get(a, 99999)
 
 func do_sort(a: LocationPart, b: LocationPart) -> bool:
-	var sorters = [sort_by_name,sort_by_hint_status,sort_by_loc_status]
 	for q in sort_cols.size():
-		var c: int = sorters[sort_cols[q]].call(a,b)
-		if c < 0: return sort_ascending[sort_cols[q]]
-		elif c > 0: return not sort_ascending[sort_cols[q]]
+		var c: int = sort_cols[q].sorter.call(a,b)
+		if c < 0: return sort_cols[q].sort_ascending
+		elif c > 0: return not sort_cols[q].sort_ascending
 	return sort_by_prev_index(a,b) >= 0
 #endregion

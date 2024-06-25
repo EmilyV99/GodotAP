@@ -1031,7 +1031,6 @@ func _calculate_hitboxes() -> void:
 		part.calc_hitboxes(self, _draw_data)
 	hitboxes_recalculated.emit()
 func _draw() -> void:
-	print(size, scroll)
 	_calculate_hitboxes()
 	_reset_draw_data()
 	for part in parts:
