@@ -111,7 +111,7 @@ func load_tracker_packs() -> void:
 	add_child(timer)
 	const TIMER_DELAY = 1.0 ## Seconds to process before giving control back for the rest of the frame
 	for fname in file_names:
-		if Util.poll_timer(timer, TIMER_DELAY): 
+		if Util.poll_timer(timer, TIMER_DELAY):
 			await get_tree().process_frame
 		var tpack_verbose_part
 		var tpack_newline_part

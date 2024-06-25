@@ -2,6 +2,8 @@
 
 const DEBUG_RECTS := false
 
+signal hitboxes_recalculated
+
 class FontFlags:
 	var bold := false
 	var italic := false
@@ -1021,12 +1023,16 @@ func _reset_draw_data() -> void:
 	_draw_data.y = _draw_data.t
 	_draw_data.max_shown_y = 0.0
 	_draw_data.reset_y = _draw_data.t
-	tooltip_bg.visible = false
-	tooltip_label.text = ""
-func _draw():
+	if tooltip_bg: tooltip_bg.visible = false
+	if tooltip_label: tooltip_label.text = ""
+func _calculate_hitboxes() -> void:
 	_reset_draw_data()
 	for part in parts:
 		part.calc_hitboxes(self, _draw_data)
+	hitboxes_recalculated.emit()
+func _draw() -> void:
+	print(size, scroll)
+	_calculate_hitboxes()
 	_reset_draw_data()
 	for part in parts:
 		part.draw(self, _draw_data)

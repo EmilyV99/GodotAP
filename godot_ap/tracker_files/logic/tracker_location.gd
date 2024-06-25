@@ -129,7 +129,6 @@ func _to_string():
 	return "%s (reqs %s)" % [identifier, status_rules]
 
 func get_loc_name() -> String:
-	var disp_name: String = TrackerManager.get_location(identifier).get_display_name()
-	if disp_name.is_empty():
+	if descriptive_name.is_empty():
 		return identifier if identifier is String else Archipelago.get_gamedata_for_player().get_loc_name(identifier)
-	return disp_name
+	return descriptive_name

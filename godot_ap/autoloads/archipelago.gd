@@ -63,6 +63,7 @@ static var rich_colors: Dictionary = {
 	"gold": Color.GOLD,
 }
 
+
 #endregion COLORS
 
 enum ItemHandling {

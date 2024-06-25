@@ -10,6 +10,11 @@ var verbose_trackerpack := false :
 		if val != verbose_trackerpack:
 			verbose_trackerpack = val
 			save_cfg()
+var hide_finished_map_squares := false :
+	set(val):
+		if val != hide_finished_map_squares:
+			hide_finished_map_squares = val
+			save_cfg()
 
 func _init():
 	load_cfg()
@@ -19,13 +24,18 @@ func load_cfg():
 	var file: FileAccess = FileAccess.open("user://ap/settings.dat", FileAccess.READ)
 	if not file:
 		return
-	is_tracking = 0 != file.get_8()
-	verbose_trackerpack = 0 != file.get_8()
+	var byte = file.get_8()
+	is_tracking = (byte & 0b00000001) != 0
+	verbose_trackerpack = (byte & 0b00000010) != 0
+	hide_finished_map_squares = (byte & 0b00000100) != 0
 	file.close()
 func save_cfg():
 	DirAccess.make_dir_recursive_absolute("user://ap/")
 	var file: FileAccess = FileAccess.open("user://ap/settings.dat", FileAccess.WRITE)
-	file.store_8(is_tracking as int)
-	file.store_8(verbose_trackerpack as int)
+	var byte = 0
+	if is_tracking: byte |= 0b00000001
+	if verbose_trackerpack: byte |= 0b00000010
+	if hide_finished_map_squares: byte |= 0b00000100
+	file.store_8(byte)
 	file.close()
 

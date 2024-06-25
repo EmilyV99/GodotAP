@@ -17,6 +17,20 @@ class MapPin extends Control:
 	var base_pos: Vector2i
 	var locs: Array[TrackerLocation] = []
 	var parent: TrackerScene_Map
+	
+	var skipped := false
+	var showing_ttip := false :
+		set = show_tooltip
+	
+	var ttip: ColorRect = null
+	
+	func _ready():
+		focus_mode = Control.FOCUS_CLICK
+		mouse_filter = Control.MOUSE_FILTER_STOP
+		mouse_entered.connect(func(): if not skipped: showing_ttip = true)
+		mouse_exited.connect(func(): if not has_focus(): showing_ttip = false)
+		focus_entered.connect(func(): showing_ttip = true)
+		focus_exited.connect(func(): showing_ttip = false)
 	func _process(_delta):
 		position = parent.offset + (Vector2(base_pos) * parent.diff_scale) - size/2
 		if locs.is_empty():
@@ -26,20 +40,85 @@ class MapPin extends Control:
 		var statuses = {}
 		for loc in locs:
 			var stat = loc.get_status()
+			if stat == "Found":
+				continue
 			statuses[stat] = statuses.get(stat, 0) + 1
-		var cname = TrackerManager.get_status("Found").map_colorname
+		
+		if Archipelago.config.hide_finished_map_squares and statuses.is_empty():
+			skipped = true
+			showing_ttip = false
+			return
+		skipped = false
+		
+		var c_status = "Found"
 		for stat in locs[0]._iter_statuses(false):
 			if stat.text in statuses:
-				if stat.text == "Reachable":
-					if statuses.keys().filter(func(s): return s != "Reachable" and s != "Found").size() > 0:
-						cname = parent.some_reachable_color
-						break
-				cname = stat.map_colorname
+				c_status = stat.text
 				break
+		var cname = TrackerManager.get_status(c_status).map_colorname
+		if c_status == "Reachable":
+			if statuses.keys().filter(func(s): return s != "Reachable" and s != "Found").size() > 0:
+				cname = parent.some_reachable_color
 		var color = AP.color_from_name(cname)
 		var rect := Rect2(Vector2.ZERO, size)
 		draw_rect(rect, color)
 		draw_rect(rect, Color.BLACK, false, 2)
+	
+	func show_tooltip(val: bool) -> void:
+		if showing_ttip == val: return
+		showing_ttip = val
+		if not val:
+			if ttip:
+				ttip.queue_free()
+				ttip = null
+			return
+		ttip = ColorRect.new()
+		ttip.top_level = true
+		ttip.color = AP.color_from_name("default")
+		var bg := ColorRect.new()
+		bg.color = AP.color_from_name("black")
+		ttip.add_child(bg)
+		
+		var console: BaseConsole = load("res://godot_ap/ui/plain_console.tscn").instantiate()
+		console.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		console.custom_minimum_size = Vector2(9999,9999)
+		console.size = Vector2(9999,9999)
+		var columns := BaseConsole.ColumnsPart.new()
+		columns.add(1, console.make_spacing(Vector2(4,0)))
+		for loc in locs:
+			var stat := TrackerManager.get_status(loc.get_status())
+			if Archipelago.config.hide_finished_map_squares and stat.text == "Found":
+				continue
+			columns.add(0, console.make_text(loc.get_loc_name() + ": ",
+				"" if loc.descriptive_name.is_empty() else loc.get_loc().name,
+				stat.map_colorname))
+			columns.add(2, console.make_text(stat.text, stat.tooltip, stat.colorname))
+		console.add(columns)
+		console._calculate_hitboxes()
+		console.custom_minimum_size = Vector2(console._draw_data.max_shown_x+8,console._draw_data.max_shown_y)
+		bg.custom_minimum_size = Vector2(console.custom_minimum_size.x + 8, console.custom_minimum_size.y + 8)
+		ttip.custom_minimum_size = Vector2(bg.custom_minimum_size.x + 8, bg.custom_minimum_size.y + 8)
+		
+		
+		bg.add_child(console)
+		parent.add_child(ttip)
+		position_ttip()
+		console.size = console.custom_minimum_size
+		bg.size = bg.custom_minimum_size
+		ttip.size = ttip.custom_minimum_size
+		bg.top_level = true
+		console.top_level = true
+		bg.position = ttip.position + Vector2(4,4)
+		console.position = bg.position + Vector2(4,4)
+	func position_ttip():
+		if not ttip: return
+		ttip.position.x = global_position.x + size.x/2 - ttip.size.x/2
+		ttip.position.y = global_position.y + size.y
+		while ttip.position.y + ttip.size.y > get_window().size.y:
+			ttip.position.y -= 1
+			if ttip.position.y < 0:
+				ttip.position.y = 0
+				break
 
 func _ready() -> void:
 	super()
@@ -50,6 +129,8 @@ func _ready() -> void:
 	var image = datapack.load_image(image_path)
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	size_flags_vertical = Control.SIZE_EXPAND_FILL
+	focus_mode = Control.FOCUS_CLICK
+	mouse_filter = Control.MOUSE_FILTER_STOP
 	await get_tree().process_frame
 	if image:
 		map.texture = ImageTexture.create_from_image(image)

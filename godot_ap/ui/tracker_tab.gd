@@ -31,13 +31,16 @@ func init_tracker():
 	
 	if not TrackerManager.tracking:
 		info_part.text = "Tracking Disabled"
+		info_part.tooltip = ""
 		info_console.queue_redraw()
 		return
 	if Archipelago.is_not_connected():
 		info_part.text = "Not Connected"
+		info_part.tooltip = ""
 		info_console.queue_redraw()
 		return
 	info_part.text = "Loading"
+	info_part.tooltip = ""
 	info_console.queue_redraw()
 	var game := Archipelago.conn.get_game_for_player()
 	var pack := TrackerManager.get_tracker(game)

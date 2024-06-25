@@ -66,24 +66,41 @@ color = Color(0.174028, 0.174028, 0.174028, 1)
 
 [node name="Margin" type="MarginContainer" parent="Tabs/Settings" index="1"]
 layout_mode = 2
-theme_override_constants/margin_left = 12
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 12
-theme_override_constants/margin_bottom = 12
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
 
-[node name="Row" type="HBoxContainer" parent="Tabs/Settings/Margin" index="0"]
+[node name="Tabs" type="TabContainer" parent="Tabs/Settings/Margin" index="0"]
 layout_mode = 2
 
-[node name="Col1" type="VBoxContainer" parent="Tabs/Settings/Margin/Row" index="0"]
+[node name="TrackerPack" type="MarginContainer" parent="Tabs/Settings/Margin/Tabs" index="1"]
+layout_mode = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 6
+
+[node name="Row" type="HBoxContainer" parent="Tabs/Settings/Margin/Tabs/TrackerPack" index="0"]
 layout_mode = 2
 
-[node name="TrackVerbose" parent="Tabs/Settings/Margin/Row/Col1" index="0" instance=ExtResource("5_7ypwu")]
+[node name="Col1" type="VBoxContainer" parent="Tabs/Settings/Margin/Tabs/TrackerPack/Row" index="0"]
 layout_mode = 2
 
-[node name="Label" parent="Tabs/Settings/Margin/Row/Col1/TrackVerbose" index="1"]
+[node name="TrackVerbose" parent="Tabs/Settings/Margin/Tabs/TrackerPack/Row/Col1" index="0" instance=ExtResource("5_7ypwu")]
+layout_mode = 2
+
+[node name="Label" parent="Tabs/Settings/Margin/Tabs/TrackerPack/Row/Col1/TrackVerbose" index="1"]
 text = "Verbose TrackerPack Output"
+
+[node name="TrackHideFinishedMap" parent="Tabs/Settings/Margin/Tabs/TrackerPack/Row/Col1" index="1" instance=ExtResource("5_7ypwu")]
+layout_mode = 2
+
+[node name="Label" parent="Tabs/Settings/Margin/Tabs/TrackerPack/Row/Col1/TrackHideFinishedMap" index="1"]
+text = "Hide Completed Map Locations"
 
 [connection signal="sort_children" from="Tabs/Tracking/Column/Margins/Row" to="Tabs/Tracking/Column/Margins/Row/InfoLabel" method="queue_redraw"]
 
 [editable path="Tabs/Hints/Console"]
-[editable path="Tabs/Settings/Margin/Row/Col1/TrackVerbose"]
+[editable path="Tabs/Settings/Margin/Tabs/TrackerPack/Row/Col1/TrackVerbose"]
+[editable path="Tabs/Settings/Margin/Tabs/TrackerPack/Row/Col1/TrackHideFinishedMap"]

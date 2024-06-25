@@ -40,6 +40,10 @@ layout_mode = 2
 
 [node name="Console" parent="Cont/ConsoleMargin/Row" node_paths=PackedStringArray("scroll_bar") instance=ExtResource("2_qsx70")]
 layout_mode = 2
+focus_neighbor_left = NodePath(".")
+focus_neighbor_top = NodePath(".")
+focus_neighbor_right = NodePath(".")
+focus_neighbor_bottom = NodePath(".")
 scroll_bar = NodePath("../ScrollBar")
 
 [node name="ScrollBar" type="VScrollBar" parent="Cont/ConsoleMargin/Row"]
