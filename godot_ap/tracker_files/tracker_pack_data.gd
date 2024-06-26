@@ -36,6 +36,19 @@ func validate_gui_element(elem) -> bool:
 				if not validate_gui_element(child):
 					return false
 			return true
+		"Grid":
+			if not TrackerPack_Base._expect_keys(elem, ["children","columns","type"]):
+				return false
+			if not TrackerPack_Base._expect_type(elem, "columns", TYPE_INT):
+				return false
+			if elem.get("columns") < 1:
+				elem["columns"] = 1
+			if not TrackerPack_Base._expect_type(elem, "children", TYPE_ARRAY):
+				return false
+			for child in elem.get("children"):
+				if not validate_gui_element(child):
+					return false
+			return true
 		"HSplit", "VSplit":
 			if not TrackerPack_Base._expect_keys(elem, ["children","type"]):
 				return false
@@ -155,6 +168,23 @@ func validate_gui_element(elem) -> bool:
 				TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected 'some_reachable_color' to be 'String'!" % type)
 				return false
 			return true
+		"Label":
+			if not TrackerPack_Base._expect_keys(elem, ["size", "text", "type"], ["color"]):
+				return false
+			if not TrackerPack_Base._expect_type(elem, "size", TYPE_INT):
+				return false
+			if elem["size"] < 0:
+				elem["size"] = absi(elem["size"])
+			elif elem["size"] == 0:
+				elem["size"] = 20
+			if not TrackerPack_Base._expect_type(elem, "text", TYPE_STRING):
+				return false
+			if not TrackerPack_Base._expect_type(elem, "text", TYPE_STRING):
+				return false
+			if elem.has("color"): # Optional
+				if not TrackerPack_Base._expect_color(elem, "color"):
+					return false
+			return true
 		_:
 			if type == null:
 				TrackerPack_Base._output_error("No Type Specified", "Object requires 'type' field!")
@@ -179,6 +209,19 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 		"Row":
 			var cont := HBoxContainer.new()
 			cont.add_theme_constant_override("separation", 0)
+			cont.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			cont.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			var children: Array = elem.get("children")
+			for child in children:
+				var child_elem = _instantiate_gui_element(child)
+				if child_elem:
+					cont.add_child(child_elem)
+			return cont
+		"Grid":
+			var cont := GridContainer.new()
+			cont.columns = elem.get("columns", 2)
+			cont.add_theme_constant_override("h_separation", 0)
+			cont.add_theme_constant_override("v_separation", 0)
 			cont.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			cont.size_flags_vertical = Control.SIZE_EXPAND_FILL
 			var children: Array = elem.get("children")
@@ -271,6 +314,16 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 			scene.map_id = elem.get("id")
 			scene.some_reachable_color = elem.get("some_reachable_color")
 			return scene
+		"Label":
+			var lbl := Label.new()
+			lbl.text = elem["text"]
+			var ls = LabelSettings.new()
+			var font: SystemFont = load("res://godot_ap/ui/console_font.tres")
+			ls.font = font
+			ls.font_size = elem["size"]
+			ls.font_color = AP.color_from_name(elem.get("color", "white"), Color.WHITE)
+			lbl.label_settings = ls
+			return lbl
 	assert(false)
 	return null
 func instantiate() -> TrackerScene_Root:

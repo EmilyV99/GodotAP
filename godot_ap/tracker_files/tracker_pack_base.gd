@@ -195,12 +195,58 @@ static func _output_error(s: String, ttip: String = "") -> void:
 	AP.log(s)
 	if not ttip.is_empty():
 		AP.log(ttip)
-static func _expect_keys(dict: Dictionary, expected: Array[String]):
+static func _expect_keys(dict: Dictionary, expected: Array[String], optional: Array[String] = []) -> bool:
 	var found: Array[String] = []
 	found.assign(dict.keys())
-	found.sort()
-	if found != expected:
-		_output_error("Invalid Keys", "Type '%s' expected keys %s, not %s!" % [dict.get("type", "NULL"), expected, found])
+	var missing: Array[String] = expected.duplicate(true)
+	var extra: Array[String] = []
+	for s in found:
+		if s in expected:
+			missing.erase(s)
+			continue
+		if s in optional:
+			continue
+		if not (s in expected):
+			extra.append(s)
+	if missing or extra:
+		var out_str: String = "Type '%s'" % dict.get("type", "NULL")
+		if missing: out_str += " missing keys %s" % missing
+		if extra: out_str += " unexpected keys %s" % extra
+		_output_error("Invalid Keys", out_str)
+		return false
+	return true
+
+
+static func _type_name(type: int) -> String:
+	match type:
+		TYPE_NIL: return "NULL"
+		TYPE_BOOL: return "bool"
+		TYPE_INT: return "int"
+		TYPE_FLOAT: return "float"
+		TYPE_STRING: return "String"
+		TYPE_DICTIONARY: return "Dictionary"
+		TYPE_ARRAY: return "Array"
+	return "??"
+		
+static func _expect_type(dict: Dictionary, key: String, type: int, custom_name := "") -> bool:
+	if type == TYPE_INT:
+		var v = dict.get(key)
+		if v is float and _check_int(v):
+			dict[key] = roundi(v)
+	if typeof(dict.get(key)) != type:
+		if custom_name.is_empty():
+			custom_name = _type_name(type)
+		_output_error("Invalid Key Type", "Type '%s' expected '%s' to be '%s'!" % [dict.get("type", "NULL"), key, custom_name])
+		return false
+	return true
+
+static func _expect_color(dict: Dictionary, key: String) -> bool:
+	if not _expect_type(dict, key, TYPE_STRING, "ColorName"):
+		return false
+	var cname = dict.get(key)
+	if AP.color_from_name(cname, Color.WHITE) == Color.WHITE and \
+		AP.color_from_name(cname, Color.BLACK) == Color.BLACK:
+		TrackerPack_Base._output_error("Invalid Color", "Type '%s': Color '%s' could not be parsed as a color!" % [dict.get("type", "NULL"), cname])
 		return false
 	return true
 
