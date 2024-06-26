@@ -22,11 +22,24 @@ func validate_gui_element(elem) -> bool:
 	if not elem is Dictionary:
 		TrackerPack_Base._output_error("Bad element!", "Found a non-Dictionary type when looking for a gui element!")
 		return false
-	if elem.is_empty(): return true
+	
 	var type = elem.get("type")
+	#region Handle optional values that are always present
+	var global_optionals := {"halign": "EXPAND_FILL", "valign": "EXPAND_FILL"}
+	match type:
+		"Label":
+			global_optionals["halign"] = "SHRINK_CENTER"
+			global_optionals["valign"] = "SHRINK_CENTER"
+	
+	elem.merge(global_optionals)
+	if not TrackerPack_Base._expect_size_flag(elem, "halign"):
+		return false
+	if not TrackerPack_Base._expect_size_flag(elem, "valign"):
+		return false
+	#endregion
 	match type:
 		"Column", "Row":
-			if not TrackerPack_Base._expect_keys(elem, ["children","type"]):
+			if not TrackerPack_Base._expect_keys(elem, ["children", "type", "halign", "valign"]):
 				return false
 			if not TrackerPack_Base._expect_type(elem, "children", TYPE_ARRAY):
 				return false
@@ -35,7 +48,8 @@ func validate_gui_element(elem) -> bool:
 					return false
 			return true
 		"Grid":
-			if not TrackerPack_Base._expect_keys(elem, ["children","columns","type"]):
+			if not TrackerPack_Base._expect_keys(elem, ["children", "columns",
+				"type", "halign", "valign"]):
 				return false
 			if not TrackerPack_Base._expect_type(elem, "columns", TYPE_INT):
 				return false
@@ -48,7 +62,7 @@ func validate_gui_element(elem) -> bool:
 					return false
 			return true
 		"HSplit", "VSplit":
-			if not TrackerPack_Base._expect_keys(elem, ["children","type"]):
+			if not TrackerPack_Base._expect_keys(elem, ["children", "type", "halign", "valign"]):
 				return false
 			if not TrackerPack_Base._expect_type(elem, "children", TYPE_ARRAY):
 				return false
@@ -61,27 +75,20 @@ func validate_gui_element(elem) -> bool:
 					return false
 			return true
 		"Margin":
-			if not TrackerPack_Base._expect_keys(elem, ["bottom","child","color","left","right","top","type"]):
+			if not TrackerPack_Base._expect_keys(elem, ["bottom", "child",
+				"color", "left", "right", "top", "type", "halign", "valign"]):
 				return false
 			var child = elem.get("child")
 			if not validate_gui_element(child):
 				return false
 			for side in ["top","bottom","left","right"]:
-				var val = elem.get(side)
-				if not TrackerPack_Base._check_int(val):
-					TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected '%s' to be 'int'!" % [side,type])
+				if not TrackerPack_Base._expect_type(elem, side, TYPE_INT):
 					return false
-			var colname = elem.get("color")
-			if not colname is String:
-				TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected 'color' to be 'ColorName'!" % type)
-				return false
-			if AP.color_from_name(colname, Color.WHITE) == Color.WHITE and \
-				AP.color_from_name(colname, Color.BLACK) == Color.BLACK:
-				TrackerPack_Base._output_error("Invalid Color", "Color '%s' could not be parsed as a color!" % colname)
+			if not TrackerPack_Base._expect_color(elem, "color"):
 				return false
 			return true
 		"Tabs":
-			if not TrackerPack_Base._expect_keys(elem, ["tabs","type"]):
+			if not TrackerPack_Base._expect_keys(elem, ["tabs", "type", "halign", "valign"]):
 				return false
 			if not TrackerPack_Base._expect_type(elem, "tabs", TYPE_DICTIONARY):
 				return false
@@ -90,13 +97,14 @@ func validate_gui_element(elem) -> bool:
 					return false
 			return true
 		"LocationConsole":
-			if not TrackerPack_Base._expect_keys(elem, ["hint_status", "type"]):
+			if not TrackerPack_Base._expect_keys(elem, ["hint_status", "type", "halign", "valign"]):
 				return false
 			if not TrackerPack_Base._expect_type(elem, "hint_status", TYPE_BOOL):
 				return false
 			return true
 		"ItemConsole":
-			if not TrackerPack_Base._expect_keys(elem, ["show_index", "show_percent", "show_totals", "type", "values"]):
+			if not TrackerPack_Base._expect_keys(elem, ["show_index", "show_percent",
+				"show_totals", "type", "values", "halign", "valign"]):
 				return false
 			if not TrackerPack_Base._expect_type(elem, "show_totals", TYPE_BOOL):
 				return false
@@ -145,7 +153,8 @@ func validate_gui_element(elem) -> bool:
 						return false
 			return true
 		"LocationMap":
-			if not TrackerPack_Base._expect_keys(elem, ["id", "image", "some_reachable_color", "type"]):
+			if not TrackerPack_Base._expect_keys(elem, ["id", "image",
+				"some_reachable_color", "type", "halign", "valign"]):
 				return false
 			if not TrackerPack_Base._expect_type(elem, "id", TYPE_STRING):
 				return false
@@ -155,7 +164,8 @@ func validate_gui_element(elem) -> bool:
 				return false
 			return true
 		"Label":
-			if not TrackerPack_Base._expect_keys(elem, ["size", "text", "type"], ["color"]):
+			if not TrackerPack_Base._expect_keys(elem, ["size", "text", "type",
+				"halign", "valign"], {"color": "white"}):
 				return false
 			if not TrackerPack_Base._expect_type(elem, "size", TYPE_INT):
 				return false
@@ -165,17 +175,18 @@ func validate_gui_element(elem) -> bool:
 				elem["size"] = 20
 			if not TrackerPack_Base._expect_type(elem, "text", TYPE_STRING):
 				return false
-			if not TrackerPack_Base._expect_type(elem, "text", TYPE_STRING):
+			if not TrackerPack_Base._expect_color(elem, "color"):
 				return false
-			if elem.has("color"): # Optional
-				if not TrackerPack_Base._expect_color(elem, "color"):
-					return false
+			return true
+		null:
+			elem["type"] = "Empty"
+			if not TrackerPack_Base._expect_keys(elem, ["type", "halign", "valign"]):
+				elem.erase("type")
+				return false
+			elem.erase("type")
 			return true
 		_:
-			if type == null:
-				TrackerPack_Base._output_error("No Type Specified", "Object requires 'type' field!")
-			else:
-				TrackerPack_Base._output_error("Unrecognized Type", "Type '%s' is not recognized as a valid GUI object type!" % type)
+			TrackerPack_Base._output_error("Unrecognized Type", "Type '%s' is not recognized as a valid GUI object type!" % type)
 			return false
 func _instantiate_gui_element(elem: Dictionary) -> Node:
 	if elem.is_empty(): return null
@@ -184,8 +195,8 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 		"Column":
 			var cont := VBoxContainer.new()
 			cont.add_theme_constant_override("separation", 0)
-			cont.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			cont.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			cont.size_flags_horizontal = TrackerPack_Base.get_size_flag(elem.get("halign", "EXPAND_FILL"))
+			cont.size_flags_vertical = TrackerPack_Base.get_size_flag(elem.get("valign", "EXPAND_FILL"))
 			var children: Array = elem.get("children")
 			for child in children:
 				var child_elem = _instantiate_gui_element(child)
@@ -195,8 +206,8 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 		"Row":
 			var cont := HBoxContainer.new()
 			cont.add_theme_constant_override("separation", 0)
-			cont.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			cont.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			cont.size_flags_horizontal = TrackerPack_Base.get_size_flag(elem.get("halign", "EXPAND_FILL"))
+			cont.size_flags_vertical = TrackerPack_Base.get_size_flag(elem.get("valign", "EXPAND_FILL"))
 			var children: Array = elem.get("children")
 			for child in children:
 				var child_elem = _instantiate_gui_element(child)
@@ -208,8 +219,8 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 			cont.columns = elem.get("columns", 2)
 			cont.add_theme_constant_override("h_separation", 0)
 			cont.add_theme_constant_override("v_separation", 0)
-			cont.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			cont.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			cont.size_flags_horizontal = TrackerPack_Base.get_size_flag(elem.get("halign", "EXPAND_FILL"))
+			cont.size_flags_vertical = TrackerPack_Base.get_size_flag(elem.get("valign", "EXPAND_FILL"))
 			var children: Array = elem.get("children")
 			for child in children:
 				var child_elem = _instantiate_gui_element(child)
@@ -219,8 +230,8 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 		"HSplit":
 			var cont := HSplitContainer.new()
 			cont.add_theme_constant_override("separation", 0)
-			cont.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			cont.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			cont.size_flags_horizontal = TrackerPack_Base.get_size_flag(elem.get("halign", "EXPAND_FILL"))
+			cont.size_flags_vertical = TrackerPack_Base.get_size_flag(elem.get("valign", "EXPAND_FILL"))
 			var children: Array = elem.get("children")
 			for child in children:
 				var child_elem = _instantiate_gui_element(child)
@@ -230,8 +241,8 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 		"VSplit":
 			var cont := VSplitContainer.new()
 			cont.add_theme_constant_override("separation", 0)
-			cont.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			cont.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			cont.size_flags_horizontal = TrackerPack_Base.get_size_flag(elem.get("halign", "EXPAND_FILL"))
+			cont.size_flags_vertical = TrackerPack_Base.get_size_flag(elem.get("valign", "EXPAND_FILL"))
 			var children: Array = elem.get("children")
 			for child in children:
 				var child_elem = _instantiate_gui_element(child)
@@ -250,8 +261,8 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 			for side in sides:
 				cont.add_theme_constant_override("margin_%s" % side, 0)
 				inner_cont.add_theme_constant_override("margin_%s" % side, elem.get(side))
-			cont.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			cont.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			cont.size_flags_horizontal = TrackerPack_Base.get_size_flag(elem.get("halign", "EXPAND_FILL"))
+			cont.size_flags_vertical = TrackerPack_Base.get_size_flag(elem.get("valign", "EXPAND_FILL"))
 			colorrect.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			colorrect.size_flags_vertical = Control.SIZE_EXPAND_FILL
 			inner_cont.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -267,8 +278,8 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 			bg_box.bg_color = Color8(0x2C,0x2C,0x2C)
 			cont.add_theme_stylebox_override("tabbar_background", bg_box)
 			cont.tab_focus_mode = Control.FOCUS_NONE
-			cont.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			cont.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			cont.size_flags_horizontal = TrackerPack_Base.get_size_flag(elem.get("halign", "EXPAND_FILL"))
+			cont.size_flags_vertical = TrackerPack_Base.get_size_flag(elem.get("valign", "EXPAND_FILL"))
 			var tabs: Dictionary = elem.get("tabs")
 			for tabname in tabs.keys():
 				var child_elem = _instantiate_gui_element(tabs[tabname])
@@ -279,23 +290,23 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 		"LocationConsole":
 			var scene: TrackerScene_Default = load("res://godot_ap/tracker_files/default_tracker.tscn").instantiate()
 			scene.datapack = self
-			scene.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			scene.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			scene.size_flags_horizontal = TrackerPack_Base.get_size_flag(elem.get("halign", "EXPAND_FILL"))
+			scene.size_flags_vertical = TrackerPack_Base.get_size_flag(elem.get("valign", "EXPAND_FILL"))
 			scene.show_hint_status = elem["hint_status"]
 			return scene
 		"ItemConsole":
 			var scene: TrackerScene_ItemDefault = load("res://godot_ap/tracker_files/default_item_tracker.tscn").instantiate()
 			scene.datapack = self
-			scene.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			scene.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			scene.size_flags_horizontal = TrackerPack_Base.get_size_flag(elem.get("halign", "EXPAND_FILL"))
+			scene.size_flags_vertical = TrackerPack_Base.get_size_flag(elem.get("valign", "EXPAND_FILL"))
 			scene.show_totals = elem["show_totals"]
 			scene.base_values.assign(elem["values"])
 			return scene
 		"LocationMap":
 			var scene: TrackerScene_Map = load("res://godot_ap/tracker_files/map_tracker.tscn").instantiate()
 			scene.datapack = self
-			scene.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			scene.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			scene.size_flags_horizontal = TrackerPack_Base.get_size_flag(elem.get("halign", "EXPAND_FILL"))
+			scene.size_flags_vertical = TrackerPack_Base.get_size_flag(elem.get("valign", "EXPAND_FILL"))
 			scene.image_path = elem.get("image")
 			scene.map_id = elem.get("id")
 			scene.some_reachable_color = elem.get("some_reachable_color")
@@ -304,12 +315,19 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 			var lbl := Label.new()
 			lbl.text = elem["text"]
 			var ls = LabelSettings.new()
+			lbl.size_flags_horizontal = TrackerPack_Base.get_size_flag(elem.get("halign", "SHRINK_CENTER"))
+			lbl.size_flags_vertical = TrackerPack_Base.get_size_flag(elem.get("valign", "SHRINK_CENTER"))
 			var font: SystemFont = load("res://godot_ap/ui/console_font.tres")
 			ls.font = font
 			ls.font_size = elem["size"]
 			ls.font_color = AP.color_from_name(elem.get("color", "white"), Color.WHITE)
 			lbl.label_settings = ls
 			return lbl
+		null:
+			var node := Control.new()
+			node.size_flags_horizontal = TrackerPack_Base.get_size_flag(elem.get("halign", "EXPAND_FILL"))
+			node.size_flags_vertical = TrackerPack_Base.get_size_flag(elem.get("valign", "EXPAND_FILL"))
+			return node
 	assert(false)
 	return null
 func instantiate() -> TrackerScene_Root:

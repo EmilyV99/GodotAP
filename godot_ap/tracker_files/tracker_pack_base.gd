@@ -195,16 +195,18 @@ static func _output_error(s: String, ttip: String = "") -> void:
 	AP.log(s)
 	if not ttip.is_empty():
 		AP.log(ttip)
-static func _expect_keys(dict: Dictionary, expected: Array[String], optional: Array[String] = []) -> bool:
+static func _expect_keys(dict: Dictionary, expected: Array[String], optional: Dictionary = {}) -> bool:
 	var found: Array[String] = []
 	found.assign(dict.keys())
 	var missing: Array[String] = expected.duplicate(true)
 	var extra: Array[String] = []
+	var to_add: Dictionary = optional.duplicate(true)
 	for s in found:
 		if s in expected:
 			missing.erase(s)
 			continue
 		if s in optional:
+			to_add.erase(s)
 			continue
 		if not (s in expected):
 			extra.append(s)
@@ -214,8 +216,9 @@ static func _expect_keys(dict: Dictionary, expected: Array[String], optional: Ar
 		if extra: out_str += " unexpected keys %s" % extra
 		_output_error("Invalid Keys", out_str)
 		return false
+	for s in to_add.keys(): # Handle optional values
+		dict[s] = to_add[s]
 	return true
-
 
 static func _type_name(type: int) -> String:
 	match type:
@@ -249,6 +252,25 @@ static func _expect_color(dict: Dictionary, key: String) -> bool:
 		TrackerPack_Base._output_error("Invalid Color", "Type '%s': Color '%s' could not be parsed as a color!" % [dict.get("type", "NULL"), cname])
 		return false
 	return true
+
+static var size_flags_by_name := {
+	"FILL": Control.SIZE_FILL,
+	"EXPAND": Control.SIZE_EXPAND,
+	"EXPAND_FILL": Control.SIZE_EXPAND_FILL,
+	"SHRINK_BEGIN": Control.SIZE_SHRINK_BEGIN,
+	"SHRINK_CENTER": Control.SIZE_SHRINK_CENTER,
+	"SHRINK_END": Control.SIZE_SHRINK_END,
+}
+static func _expect_size_flag(dict: Dictionary, key: String) -> bool:
+	if not _expect_type(dict, key, TYPE_STRING, "SizeFlag"):
+		return false
+	if not (dict[key] in size_flags_by_name.keys()):
+		TrackerPack_Base._output_error("Invalid SizeFlag", "Type '%s': Value '%s' is not one of %s!" % [dict.get("type", "NULL"), dict[key], size_flags_by_name.keys()])
+		return false
+	return true
+
+static func get_size_flag(name: String) -> int:
+	return size_flags_by_name.get(name, Control.SIZE_EXPAND_FILL)
 
 static func _check_int(val: Variant) -> bool:
 	return val is int or (val is float and Util.approx_eq(val, roundi(val)))

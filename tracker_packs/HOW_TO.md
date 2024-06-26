@@ -163,6 +163,13 @@ Value nodes function like [Rules](#rules), but instead of returning a boolean, t
 ## GUI Elements
 GUI elements are used to visually create your tracker. Elements primarily fall into 2 categories, `Containers` and `Content`.
 
+The following keys are valid on EVERY GUI Node:
+| Key      | Value                                                     |
+|----------|-----------------------------------------------------------|
+| "type"   | String, determines the type of node (null for Empty node) |
+| "halign" | A [SizeFlag](#sizeflag) value for horizontal growth       |
+| "valign" | A [SizeFlag](#sizeflag) value for vertical growth         |
+
 ### GUI Column
 | Key        | Value                                  |
 |------------|----------------------------------------|
@@ -178,6 +185,15 @@ Container. Arranges the elements vertically, one after another.
 | "children" | Array of [GUI Elements](#gui-elements) |
 
 Container. Arranges the elements horizontally, one after another.
+
+### GUI Grid
+| Key        | Value                                  |
+|------------|----------------------------------------|
+| "type"     | "Grid"                                 |
+| "columns"  | int, the number of columns             |
+| "children" | Array of [GUI Elements](#gui-elements) |
+
+Container. Arranges the elements in a grid, with the first element in the top left, subsequent elements to the right of that, until it reaches the specified number of columns. After the column limit is reached, the next child starts a new row.
 
 ### GUI HSplit
 | Key        | Value                                         |
@@ -216,6 +232,16 @@ Container. Arranges the single element, with a colored area outside of it.
 
 Container. Displays a tab for each element, with the name displayed on the tab handle.
 
+### GUI Label
+| Key      | Value                                                |
+|----------|------------------------------------------------------|
+| "type"   | "Label"                                              |
+| "text"   | String, The text to display                          |
+| "size"   | int, the font size                                   |
+| "color"  | Optional, [ColorName](#colors) to use for the label. |
+
+Content. Draws the specified text.
+
 ### GUI LocationConsole
 | Key           | Value                                               |
 |---------------|-----------------------------------------------------|
@@ -238,7 +264,7 @@ Content. Displays a map image. Any [MapSpots](#mapspots) on locations with an id
 - If that status is `Reachable`, there is an exception: Unless every location at the [MapSpot](#mapspots) is `Found` or `Reachable`, the `some_reachable_color` will be used in place of `Reachable`'s `map_color`.
 - `Found` is not considered highest-priority for the coloring order, despite it being highest-priority when determining a location's status. This generally means `Found` will be the lowest priority, thus only showing its' color when every location at the [MapSpot](#mapspots) is `Found`.
 
-PLANNED: Tooltip showing more info when hovering over the squares
+When hovering over a square, it will show the list of locations at that spot, and their respective statuses. `Found` locations / fully `Found` squares can be hidden via an option in Settings.
 
 ### GUI ItemConsole
 | Key            | Value                                       |
@@ -248,6 +274,7 @@ PLANNED: Tooltip showing more info when hovering over the squares
 | "show_index"   | bool, if the 'Index' column should appear   |
 | "show_totals"  | bool, if the 'Totals' column should appear  |
 | "show_percent" | bool, if the 'Percent' column should appear |
+
 Content. Displays a console-style list of values. Sortable by the 'Index', 'Name', 'Count', 'Totals', and 'Percent' columns, and filterable by the item flags (on the 'Name' column).
 
 The 'Index' column shows the number index in the values array of the item (allowing it to remain sorted in the order you list the values in, to provide a "defined order").
@@ -270,7 +297,7 @@ Values objects can either be "Items" or "Display Variables"
 | "count"    | [ValueNode](#value-nodes) indicating the current value of this display variable.           |
 | "total"    | Optional, [ValueNode](#value-nodes) indicating a "total" number for this display variable. |
 | "tooltip"  | Optional, String tooltip to display                                                        |
-| "color"    | Optional, [ColorName](#colors) to use for the display name
+| "color"    | Optional, [ColorName](#colors) to use for the display name                                 |
 
 
 ### GUI Empty Element
@@ -281,6 +308,17 @@ A color string can be any of the following:
 - A color in the `archipelago.gd` `rich_colors` list (red, green, yellow, blue, magenta, cyan, white, black, slateblue, plum, salmon, orange, default)
 - A color code in 6-digit hex format (ex. `FF0000` = red)
 - A color name that Godot's `Color.from_string()` recognizes
+
+## SizeFlag
+A string representing a particular type of growth.
+| Flag            | Effect                                                                                 |
+|-----------------|----------------------------------------------------------------------------------------|
+| "FILL"          | Grows to fit its' container, passively.                                                |
+| "EXPAND"        | Grows to fit its' container, pushing other nodes. Other 'EXPAND' nodes will push back. |
+| "EXPAND_FILL"   | Both "FILL" and "EXPAND"?                                                              |
+| "SHRINK_BEGIN"  | Shrinks towards the top/left edge                                                      |
+| "SHRINK_CENTER" | Shrinks towards the center                                                             |
+| "SHRINK_END"    | Shrinks towards the bottom/right edge                                                  |
 
 ## MapSpots
 Intended for indicating a visual position on a [LocationMap](#gui-locationmap) for the location. Format:

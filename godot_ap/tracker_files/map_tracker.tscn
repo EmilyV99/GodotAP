@@ -13,4 +13,5 @@ script = ExtResource("1_xub3u")
 [node name="MapImage" type="TextureRect" parent="."]
 layout_mode = 2
 texture = SubResource("PlaceholderTexture2D_ej443")
+expand_mode = 3
 stretch_mode = 5
