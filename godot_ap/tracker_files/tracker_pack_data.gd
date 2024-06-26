@@ -28,11 +28,9 @@ func validate_gui_element(elem) -> bool:
 		"Column", "Row":
 			if not TrackerPack_Base._expect_keys(elem, ["children","type"]):
 				return false
-			var children = elem.get("children")
-			if not children is Array:
-				TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected 'children' to be 'Array'!" % type)
+			if not TrackerPack_Base._expect_type(elem, "children", TYPE_ARRAY):
 				return false
-			for child in children:
+			for child in elem.get("children"):
 				if not validate_gui_element(child):
 					return false
 			return true
@@ -52,10 +50,9 @@ func validate_gui_element(elem) -> bool:
 		"HSplit", "VSplit":
 			if not TrackerPack_Base._expect_keys(elem, ["children","type"]):
 				return false
-			var children = elem.get("children")
-			if not children is Array:
-				TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected 'children' to be 'Array'!" % type)
+			if not TrackerPack_Base._expect_type(elem, "children", TYPE_ARRAY):
 				return false
+			var children = elem.get("children")
 			if children.size() > 2:
 				TrackerPack_Base._output_error("Invalid Array Size", "Type '%s' expected 'children' to be size 2 or less!" % type)
 				return false
@@ -86,38 +83,30 @@ func validate_gui_element(elem) -> bool:
 		"Tabs":
 			if not TrackerPack_Base._expect_keys(elem, ["tabs","type"]):
 				return false
-			var tabs = elem.get("tabs")
-			if not tabs is Dictionary:
-				TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected 'tabs' to be 'Dictionary'!" % type)
+			if not TrackerPack_Base._expect_type(elem, "tabs", TYPE_DICTIONARY):
 				return false
-			for child in tabs.values():
+			for child in elem.get("tabs").values():
 				if not validate_gui_element(child):
 					return false
 			return true
 		"LocationConsole":
 			if not TrackerPack_Base._expect_keys(elem, ["hint_status", "type"]):
 				return false
-			if not elem.get("hint_status") is bool:
-				TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected 'hint_status' to be 'bool'!" % type)
+			if not TrackerPack_Base._expect_type(elem, "hint_status", TYPE_BOOL):
 				return false
 			return true
 		"ItemConsole":
 			if not TrackerPack_Base._expect_keys(elem, ["show_index", "show_percent", "show_totals", "type", "values"]):
 				return false
-			if not elem.get("show_totals") is bool:
-				TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected 'show_totals' to be 'bool'!" % type)
+			if not TrackerPack_Base._expect_type(elem, "show_totals", TYPE_BOOL):
 				return false
-			if not elem.get("show_index") is bool:
-				TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected 'show_index' to be 'bool'!" % type)
+			if not TrackerPack_Base._expect_type(elem, "show_index", TYPE_BOOL):
 				return false
-			if not elem.get("show_percent") is bool:
-				TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected 'show_percent' to be 'bool'!" % type)
+			if not TrackerPack_Base._expect_type(elem, "show_percent", TYPE_BOOL):
 				return false
-			var vals = elem.get("values")
-			if not vals is Array:
-				TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected 'values' to be 'Array'!" % type)
+			if not TrackerPack_Base._expect_type(elem, "values", TYPE_ARRAY):
 				return false
-			for val in vals:
+			for val in elem.get("values"):
 				var valty = val.get("type")
 				match valty:
 					"ITEM":
@@ -158,14 +147,11 @@ func validate_gui_element(elem) -> bool:
 		"LocationMap":
 			if not TrackerPack_Base._expect_keys(elem, ["id", "image", "some_reachable_color", "type"]):
 				return false
-			if not elem.get("id") is String:
-				TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected 'id' to be 'String'!" % type)
+			if not TrackerPack_Base._expect_type(elem, "id", TYPE_STRING):
 				return false
-			if not elem.get("image") is String:
-				TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected 'image' to be 'String'!" % type)
+			if not TrackerPack_Base._expect_type(elem, "image", TYPE_STRING):
 				return false
-			if not elem.get("some_reachable_color") is String:
-				TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected 'some_reachable_color' to be 'String'!" % type)
+			if not TrackerPack_Base._expect_type(elem, "some_reachable_color", TYPE_STRING):
 				return false
 			return true
 		"Label":
