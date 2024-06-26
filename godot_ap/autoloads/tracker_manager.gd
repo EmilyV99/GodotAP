@@ -129,7 +129,7 @@ func load_tracker_packs() -> void:
 			AP.log(txt)
 		var pack := TrackerPack_Base.load_from(fname)
 		if Archipelago.config.verbose_trackerpack:
-			if TrackerPack_Base.load_error == "Ignored Extension":
+			if TrackerPack_Base.load_error == "Unrecognized Extension":
 				if tpack_verbose_part: tpack_verbose_part.hidden = true
 				if tpack_newline_part: tpack_newline_part.hidden = true
 			else:
@@ -144,8 +144,6 @@ func load_tracker_packs() -> void:
 		match TrackerPack_Base.load_error:
 			"": # Valid
 				pass
-			"Ignored Extension": # Bad filetype, skip
-				continue
 			"Unrecognized Extension": # Bad filetype, skip
 				continue
 			var err: # Print out any other error

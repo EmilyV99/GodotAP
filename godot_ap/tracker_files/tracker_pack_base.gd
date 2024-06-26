@@ -105,7 +105,6 @@ class PackEnvironment:
 			return ERR_FILE_CANT_OPEN
 
 static var load_error := ""
-const IGNORED_EXTENSIONS := [".md",".txt",".gdignore"]
 static func load_from(path: String) -> TrackerPack_Base:
 	load_error = ""
 	if path.ends_with(".zip"):
@@ -145,10 +144,6 @@ static func load_from(path: String) -> TrackerPack_Base:
 			ret.env = PackEnvironment.new(path.get_base_dir(), false)
 		return ret
 	else:
-		for ext in IGNORED_EXTENSIONS:
-			if path.ends_with(ext):
-				load_error = "Ignored Extension"
-				return null
 		load_error = "Unrecognized Extension"
 		return null
 
