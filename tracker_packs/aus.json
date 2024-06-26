@@ -13,10 +13,6 @@
 		"child": {
 			"type": "Tabs",
 			"tabs": {
-				"Locations": {
-					"type": "LocationConsole",
-					"hint_status": false
-				},
 				"Map": {
 					"type": "Row",
 					"children": [
@@ -26,6 +22,140 @@
 							"image": "aus_assets/OverworldMap.png",
 							"some_reachable_color": "gold"
 						}
+					]
+				},
+				"Locations": {
+					"type": "LocationConsole",
+					"hint_status": false
+				},
+				"Items": {
+					"type": "ItemConsole",
+					"show_index": true,
+					"show_totals": true,
+					"show_percent": true,
+					"values": [
+						{
+							"type": "ITEM",
+							"name": "Gold Orb",
+							"flags": 1,
+							"total": 10
+						},
+						{
+							"type": "DISPLAY_VAR",
+							"name": "JumpHeight",
+							"count": "JumpHeight",
+							"total": 8,
+							"tooltip": "2 + jumps + djumps",
+							"color": "gold"
+						},
+						{
+							"type": "ITEM",
+							"name": "Jump Upgrade",
+							"flags": 1,
+							"total": 3
+						},
+						{
+							"type": "ITEM",
+							"name": "Double Jump Upgrade",
+							"flags": 1,
+							"total": 3
+						},
+						{
+							"type": "ITEM",
+							"name": "Progressive Fire Shot",
+							"flags": 1,
+							"total": 2
+						},
+						{
+							"type": "ITEM",
+							"name": "Ice Shot",
+							"flags": 1,
+							"total": 1
+						},
+						{
+							"type": "ITEM",
+							"name": "Progressive Ceiling Stick",
+							"flags": 1,
+							"total": 2
+						},
+						{
+							"type": "ITEM",
+							"name": "Red Energy",
+							"flags": 1,
+							"total": 1
+						},
+						{
+							"type": "ITEM",
+							"name": "Yellow Energy",
+							"flags": 1,
+							"total": 1
+						},
+						{
+							"type": "ITEM",
+							"name": "Hatch",
+							"flags": 1,
+							"total": 1
+						},
+						{
+							"type": "ITEM",
+							"name": "Smash",
+							"visname": "DiveBomb",
+							"flags": 1,
+							"total": 1
+						},
+						{
+							"type": "ITEM",
+							"name": "Duck",
+							"flags": 1,
+							"total": 1
+						},
+						{
+							"type": "ITEM",
+							"name": "Extra Air Capacity",
+							"flags": 1,
+							"total": 2
+						},
+						{
+							"type": "DISPLAY_VAR",
+							"name": "Crystals",
+							"count": {
+								"type": "VAR",
+								"name": "Crystals"
+							},
+							"tooltip": "Money!",
+							"color": "FF8080",
+							"total": 3160
+						},
+						{
+							"type": "ITEM",
+							"name": "Secret Flower",
+							"flags": 1,
+							"total": 20
+						},
+						{
+							"type": "ITEM",
+							"name": "Toughness Upgrade",
+							"flags": 2,
+							"total": 3
+						},
+						{
+							"type": "ITEM",
+							"name": "Money Magnet",
+							"flags": 2,
+							"total": 1
+						},
+						{
+							"type": "ITEM",
+							"name": "Lucky Pots",
+							"flags": 2,
+							"total": 1
+						},
+						{
+							"type": "ITEM",
+							"name": "Heart",
+							"flags": 0,
+							"total": 92
+						},
 					]
 				}
 			}
@@ -350,12 +480,7 @@
 				"type": "ALL",
 				"rules": [
 					"AccessColdKeep",
-					{
-						"type": "VAR",
-						"name": "JumpHeight",
-						"op": ">=",
-						"value": 5
-					}
+					"JUMP_5"
 				]
 			}
 		},
@@ -373,12 +498,7 @@
 				"type": "ALL",
 				"rules": [
 					"AccessColdKeep",
-					{
-						"type": "VAR",
-						"name": "JumpHeight",
-						"op": ">=",
-						"value": 5
-					}
+					"JUMP_5"
 				]
 			}
 		},
@@ -593,12 +713,7 @@
 				"rules": [
 					"AccessDarkGrotto",
 					"YELLOW",
-					{
-						"type": "VAR",
-						"name": "JumpHeight",
-						"op": ">=",
-						"value": 7
-					}
+					"JUMP_7"
 				]
 			}
 		},
@@ -783,12 +898,7 @@
 				"rules": [
 					"AccessDeepDive",
 					"ICE",
-					{
-						"type": "VAR",
-						"name": "JumpHeight",
-						"op": ">=",
-						"value": 8
-					}
+					"JUMP_8"
 				]
 			}
 		},
@@ -930,12 +1040,7 @@
 				"type": "ALL",
 				"rules": [
 					"AccessFarFallLowerLeft",
-					{
-						"type": "VAR",
-						"name": "JumpHeight",
-						"op": ">=",
-						"value": 6
-					}
+					"JUMP_5"
 				]
 			}
 		},
@@ -1025,12 +1130,7 @@
 				"type": "ALL",
 				"rules": [
 					"AccessFarFall",
-					{
-						"type": "VAR",
-						"name": "JumpHeight",
-						"op": ">=",
-						"value": 5
-					}
+					"JUMP_5"
 				]
 			},
 			"Out of Logic": {
@@ -1164,12 +1264,7 @@
 					"AccessFireCageInner",
 					"RED",
 					"YELLOW",
-					{
-						"type": "VAR",
-						"name": "JumpHeight",
-						"op": ">=",
-						"value": 8
-					}
+					"JUMP_8"
 				]
 			},
 			"Out of Logic": {
@@ -1177,12 +1272,7 @@
 				"rules": [
 					"AccessFireCageInner",
 					"RED",
-					{
-						"type": "VAR",
-						"name": "JumpHeight",
-						"op": ">=",
-						"value": 8
-					}
+					"JUMP_8"
 				]
 			}
 		},
@@ -1380,12 +1470,7 @@
 						"value": "Double Jump Upgrade",
 						"count": 2
 					},
-					{
-						"type": "VAR",
-						"name": "JumpHeight",
-						"op": ">=",
-						"value": 4
-					}
+					"JUMP_4"
 				]
 			},
 			"Out of Logic": {
@@ -1396,12 +1481,7 @@
 						"type": "ITEM",
 						"value": "Double Jump Upgrade"
 					},
-					{
-						"type": "VAR",
-						"name": "JumpHeight",
-						"op": ">=",
-						"value": 4
-					}
+					"JUMP_4"
 				]
 			}
 		},
@@ -1600,12 +1680,7 @@
 				"rules": [
 					"AccessDeepDiveRight",
 					"SLIDE",
-					{
-						"type": "VAR",
-						"name": "JumpHeight",
-						"op": ">=",
-						"value": 8
-					}
+					"JUMP_8"
 				]
 			}
 		},
@@ -1776,12 +1851,7 @@
 								"type": "ITEM",
 								"value": "Duck"
 							},
-							{
-								"type": "VAR",
-								"name": "JumpHeight",
-								"op": ">=",
-								"value": 6
-							}
+							"JUMP_6"
 						]
 					}
 				]
@@ -1855,12 +1925,7 @@
 				"type": "ALL",
 				"rules": [
 					"AccessNightWalk",
-					{
-						"type": "VAR",
-						"name": "JumpHeight",
-						"op": ">=",
-						"value": 5
-					}
+					"JUMP_5"
 				]
 			},
 			"Out of Logic": {
@@ -1889,12 +1954,7 @@
 				"type": "ALL",
 				"rules": [
 					"AccessNightWalk",
-					{
-						"type": "VAR",
-						"name": "JumpHeight",
-						"op": ">=",
-						"value": 3
-					}
+					"JUMP_3"
 				]
 			}
 		},
@@ -1912,12 +1972,7 @@
 				"type": "ALL",
 				"rules": [
 					"AccessNightWalk",
-					{
-						"type": "VAR",
-						"name": "JumpHeight",
-						"op": ">=",
-						"value": 3
-					},
+					"JUMP_3",
 					"CanLightTorches"
 				]
 			}
@@ -1943,12 +1998,7 @@
 								"type": "ITEM",
 								"value": "Duck"
 							},
-							{
-								"type": "VAR",
-								"name": "JumpHeight",
-								"op": ">=",
-								"value": 6
-							},
+							"JUMP_6",
 							"RED"
 						]
 					},
@@ -2292,12 +2342,7 @@
 				"rules": [
 					"AccessSkyTown",
 					"FIRE",
-					{
-						"type": "VAR",
-						"name": "JumpHeight",
-						"op": ">=",
-						"value": 5
-					}
+					"JUMP_5"
 				]
 			}
 		},
@@ -2650,12 +2695,7 @@
 				"type": "ALL",
 				"rules": [
 					"AccessStoneCastle",
-					{
-						"type": "VAR",
-						"name": "JumpHeight",
-						"op": ">=",
-						"value": 5
-					}
+					"JUMP_5"
 				]
 			}
 		},
@@ -2839,12 +2879,7 @@
 				"DIVEBOMB"
 			]
 		},
-		"AccessDeepTower": {
-			"type": "VAR",
-			"name": "JumpHeight",
-			"op": ">=",
-			"value": 4
-		},
+		"AccessDeepTower": "JUMP_4",
 		"AccessFarFall": "AccessSkyTown",
 		"AccessFireCage": {
 			"type": "ALL",
@@ -2853,18 +2888,8 @@
 				"DIVEBOMB"
 			]
 		},
-		"AccessGrotto": {
-			"type": "VAR",
-			"name": "JumpHeight",
-			"op": ">=",
-			"value": 4
-		},
-		"AccessGrottoOOL": {
-			"type": "VAR",
-			"name": "JumpHeight",
-			"op": ">=",
-			"value": 3
-		},
+		"AccessGrotto": "JUMP_4",
+		"AccessGrottoOOL": "JUMP_3",
 		"AccessHighLands": {
 			"type": "ALL",
 			"rules": [
@@ -2894,12 +2919,7 @@
 			"type": "ALL",
 			"rules": [
 				"AccessColdKeep",
-				{
-					"type": "VAR",
-					"name": "JumpHeight",
-					"op": ">=",
-					"value": 5
-				},
+				"JUMP_5",
 				"FIRE"
 			]
 		},
@@ -2954,12 +2974,7 @@
 			"type": "ALL",
 			"rules": [
 				"AccessCloudRun",
-				{
-					"type": "VAR",
-					"name": "JumpHeight",
-					"op": ">=",
-					"value": 8
-				},
+				"JUMP_8",
 				"FIRE"
 			]
 		},
@@ -2981,12 +2996,7 @@
 			"type": "ALL",
 			"rules": [
 				"AccessDeepDive",
-				{
-					"type": "VAR",
-					"name": "JumpHeight",
-					"op": ">=",
-					"value": 7
-				}
+				"JUMP_7"
 			]
 		},
 		"AccessFarFallLower": {
@@ -3067,20 +3077,10 @@
 									"value": "Duck"
 								},
 								"RED",
-								{
-									"type": "VAR",
-									"name": "JumpHeight",
-									"op": ">=",
-									"value": 6
-								}
+								"JUMP_6"
 							]
 						},
-						{
-							"type": "VAR",
-							"name": "JumpHeight",
-							"op": ">=",
-							"value": 8
-						}
+						"JUMP_8"
 					]
 				}
 			]
@@ -3125,24 +3125,14 @@
 				"AccessStoneCastle",
 				"RED",
 				"YELLOW",
-				{
-					"type": "VAR",
-					"name": "JumpHeight",
-					"op": ">=",
-					"value": 7
-				}
+				"JUMP_7"
 			]
 		},
 		"AccessTheCurtainUpper": {
 			"type": "ALL",
 			"rules": [
 				"AccessTheCurtain",
-				{
-					"type": "VAR",
-					"name": "JumpHeight",
-					"op": ">=",
-					"value": 8
-				}
+				"JUMP_8"
 			]
 		},
 		"CanLightTorches": {
@@ -3197,22 +3187,62 @@
 			"type": "ITEM",
 			"value": "Progressive Ceiling Stick",
 			"count": 2
+		},
+		"JUMP_3": {
+			"type": "VALUE",
+			"left": "JumpHeight",
+			"op": ">=",
+			"right": 3
+		},
+		"JUMP_4": {
+			"type": "VALUE",
+			"left": "JumpHeight",
+			"op": ">=",
+			"right": 4
+		},
+		"JUMP_5": {
+			"type": "VALUE",
+			"left": "JumpHeight",
+			"op": ">=",
+			"right": 5
+		},
+		"JUMP_6": {
+			"type": "VALUE",
+			"left": "JumpHeight",
+			"op": ">=",
+			"right": 6
+		},
+		"JUMP_7": {
+			"type": "VALUE",
+			"left": "JumpHeight",
+			"op": ">=",
+			"right": 7
+		},
+		"JUMP_8": {
+			"type": "VALUE",
+			"left": "JumpHeight",
+			"op": ">=",
+			"right": 8
+		}
+	},
+	"named_values": {
+		"JumpHeight": {
+			"type": "OP",
+			"op": "+",
+			"vals": [
+				2,
+				{
+					"type": "ITEMCOUNT",
+					"name": "Jump Upgrade"
+				},
+				{
+					"type": "ITEMCOUNT",
+					"name": "Double Jump Upgrade"
+				}
+			]
 		}
 	},
 	"variables": {
-		"JumpHeight": {
-			"value": 2,
-			"item_triggers": {
-				"Jump Upgrade": {
-					"type": "+",
-					"value": 1
-				},
-				"Double Jump Upgrade": {
-					"type": "+",
-					"value": 1
-				}
-			}
-		},
 		"Crystals": {
 			"value": 0,
 			"item_triggers": {
