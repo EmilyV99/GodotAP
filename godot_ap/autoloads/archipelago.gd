@@ -12,6 +12,7 @@ const AP_ALLOW_TRACKERPACKS := true ## Allow loading custom tracker packs
 
 #region Connection packets
 # See `ConnectionInfo` (Archipelago.conn) for more signals
+signal preconnect ## Emitted before connection is attempted
 signal roominfo(conn: ConnectionInfo, json: Dictionary) ## Emitted when `RoomInfo` is received
 signal connectionrefused(conn: ConnectionInfo, json: Dictionary) ## Emitted when `ConnectionRefused` is received
 signal connected(conn: ConnectionInfo, json: Dictionary) ## Emitted when `Connected` is received
@@ -136,6 +137,7 @@ func ap_reconnect() -> void:
 	status = APStatus.SOCKET_CONNECTING
 	_connect_attempts = 1
 	_wss = true
+	preconnect.emit()
 
 ## Connect to Archipelago with the specified connection information
 func ap_connect(room_ip: String, room_port: String, slot_name: String, room_pwd := "") -> void:
@@ -358,6 +360,7 @@ func _handle_command(json: Dictionary) -> void:
 			if idx == 0:
 				refr_items.assign(items)
 			if items:
+				print("RECEIVED %d ITEMS" % items.size())
 				var q := 0
 				while q < items.size():
 					if _receive_item(idx, items[q]):
@@ -580,11 +583,7 @@ func _notification(what):
 func out_item(console: BaseConsole, id: int, flags: int, data: DataCache, add := true) -> BaseConsole.TextPart:
 	if not console: return
 	var ttip = "Type: %s" % AP.get_item_classification(flags)
-	var colorname := COLORNAME_ITEM
-	if flags&ICLASS_PROG:
-		colorname = COLORNAME_ITEM_PROG
-	elif flags&ICLASS_TRAP:
-		colorname = COLORNAME_ITEM_TRAP
+	var colorname := AP.get_item_class_color(flags)
 	var ret := console.make_text(data.get_item_name(id), ttip, rich_colors[colorname])
 	if add: console.add(ret)
 	return ret
@@ -1014,19 +1013,30 @@ func _init():
 	_update_tags()
 	if AP_AUTO_OPEN_CONSOLE:
 		open_console()
-const ICLASS_PROG := 0b001
-const ICLASS_USEFUL := 0b010
-const ICLASS_TRAP := 0b100
+enum ItemClassification {
+	FILLER = 0b000,
+	PROG = 0b001,
+	USEFUL = 0b010,
+	TRAP = 0b100
+}
+
+static func get_item_class_color(flags: int) -> String:
+	var ret := COLORNAME_ITEM
+	if flags & ItemClassification.PROG:
+		ret = COLORNAME_ITEM_PROG
+	elif flags & ItemClassification.TRAP:
+		ret = COLORNAME_ITEM_TRAP
+	return ret
 ## Returns the string name representing the combined item classifications flags
 static func get_item_classification(flags: int) -> String:
 	match flags:
-		0b001:
+		ItemClassification.PROG:
 			return "Progression"
-		0b010:
+		ItemClassification.USEFUL:
 			return "Useful"
-		0b100:
+		ItemClassification.TRAP:
 			return "Trap"
-		0b000:
+		ItemClassification.FILLER:
 			return "Filler"
 		_:
 			var s := ""

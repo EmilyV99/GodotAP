@@ -6,6 +6,7 @@ func get_type() -> String: return "DATA_PACK"
 # TODO set up a structure for listing location reqs, map images, etc etc
 var locations: Array[TrackerLocation] = []
 var named_rules: Dictionary = {}
+var named_values: Dictionary = {}
 var statuses: Array[LocationStatus] = []
 var statuses_by_name: Dictionary = {}
 var starting_variables: Dictionary = {}
@@ -57,12 +58,12 @@ func validate_gui_element(elem) -> bool:
 				return false
 			for side in ["top","bottom","left","right"]:
 				var val = elem.get(side)
-				if not (val is int or (val is float and (Util.approx_eq(roundi(val),val)))):
+				if not TrackerPack_Base._check_int(val):
 					TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected '%s' to be 'int'!" % [side,type])
 					return false
 			var colname = elem.get("color")
 			if not colname is String:
-				TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected 'color' to be 'String'!" % type)
+				TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected 'color' to be 'ColorName'!" % type)
 				return false
 			if AP.color_from_name(colname, Color.WHITE) == Color.WHITE and \
 				AP.color_from_name(colname, Color.BLACK) == Color.BLACK:
@@ -86,6 +87,60 @@ func validate_gui_element(elem) -> bool:
 			if not elem.get("hint_status") is bool:
 				TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected 'hint_status' to be 'bool'!" % type)
 				return false
+			return true
+		"ItemConsole":
+			if not TrackerPack_Base._expect_keys(elem, ["show_index", "show_percent", "show_totals", "type", "values"]):
+				return false
+			if not elem.get("show_totals") is bool:
+				TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected 'show_totals' to be 'bool'!" % type)
+				return false
+			if not elem.get("show_index") is bool:
+				TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected 'show_index' to be 'bool'!" % type)
+				return false
+			if not elem.get("show_percent") is bool:
+				TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected 'show_percent' to be 'bool'!" % type)
+				return false
+			var vals = elem.get("values")
+			if not vals is Array:
+				TrackerPack_Base._output_error("Invalid Key Type", "Type '%s' expected 'values' to be 'Array'!" % type)
+				return false
+			for val in vals:
+				var valty = val.get("type")
+				match valty:
+					"ITEM":
+						var name = val.get("name")
+						if not name is String:
+							TrackerPack_Base._output_error("Invalid ItemConsole Key", "Type '%s' expected 'name' to be 'String'!" % valty)
+							return false
+						if not TrackerPack_Base._check_int(val.get("flags")):
+							TrackerPack_Base._output_error("Invalid ItemConsole Key", "Type '%s' expected 'flags' to be 'int'!" % valty)
+							return false
+						var total = val.get("total")
+						if total != null and TrackerValueNode.from_json_val(total) == null:
+							TrackerPack_Base._output_error("Invalid ValueNode", "DISPLAY_VAR '%s' encounted bad 'total' ValueNode!" % name)
+							return false
+					"DISPLAY_VAR":
+						var name = val.get("name")
+						if not name is String:
+							TrackerPack_Base._output_error("Invalid ItemConsole Key", "Type '%s' expected 'name' to be 'String'!" % valty)
+							return false
+						var count = val.get("count")
+						if TrackerValueNode.from_json_val(count) == null:
+							TrackerPack_Base._output_error("Invalid ValueNode", "DISPLAY_VAR '%s' encounted bad 'count' ValueNode!" % name)
+							return false
+						var total = val.get("total")
+						if total != null and TrackerValueNode.from_json_val(total) == null:
+							TrackerPack_Base._output_error("Invalid ValueNode", "DISPLAY_VAR '%s' encounted bad 'total' ValueNode!" % name)
+							return false
+						if val.get("tooltip") != null and not val.get("tooltip") is String:
+							TrackerPack_Base._output_error("Invalid ItemConsole Key", "Type '%s' expected 'tooltip' to be 'null' or 'String'!" % valty)
+							return false
+						if val.get("color") != null and not val.get("color") is String:
+							TrackerPack_Base._output_error("Invalid ItemConsole Key", "Type '%s' expected 'tooltip' to be 'null' or 'ColorName'!" % valty)
+							return false
+					_:
+						TrackerPack_Base._output_error("Invalid ItemConsole Value", "Expected 'ITEM' or 'DISPLAY_VAR', not '%s'" % str(valty))
+						return false
 			return true
 		"LocationMap":
 			if not TrackerPack_Base._expect_keys(elem, ["id", "image", "some_reachable_color", "type"]):
@@ -195,15 +250,21 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 		"LocationConsole":
 			var scene: TrackerScene_Default = load("res://godot_ap/tracker_files/default_tracker.tscn").instantiate()
 			scene.datapack = self
-			scene.item_register.connect(register_item)
 			scene.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			scene.size_flags_vertical = Control.SIZE_EXPAND_FILL
 			scene.show_hint_status = elem["hint_status"]
 			return scene
+		"ItemConsole":
+			var scene: TrackerScene_ItemDefault = load("res://godot_ap/tracker_files/default_item_tracker.tscn").instantiate()
+			scene.datapack = self
+			scene.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			scene.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			scene.show_totals = elem["show_totals"]
+			scene.base_values.assign(elem["values"])
+			return scene
 		"LocationMap":
 			var scene: TrackerScene_Map = load("res://godot_ap/tracker_files/map_tracker.tscn").instantiate()
 			scene.datapack = self
-			scene.item_register.connect(register_item)
 			scene.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			scene.size_flags_vertical = Control.SIZE_EXPAND_FILL
 			scene.image_path = elem.get("image")
@@ -214,6 +275,7 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 	return null
 func instantiate() -> TrackerScene_Root:
 	var scene := TrackerScene_Root.new()
+	scene.item_register.connect(register_item)
 	if description_bar.is_empty():
 		scene.labeltext = "Showing DataTracker for '%s'" % game
 	else:
@@ -224,6 +286,7 @@ func instantiate() -> TrackerScene_Root:
 	TrackerManager.variables.merge(starting_variables)
 	TrackerManager.load_tracker_locations(locations)
 	TrackerManager.load_named_rules(named_rules)
+	TrackerManager.load_named_values(named_values)
 	TrackerManager.load_statuses(statuses)
 	
 	if gui_layout.is_empty():
@@ -259,6 +322,10 @@ func _save_file(data: Dictionary) -> Error:
 	for name in named_rules.keys():
 		rules_dict[name] = named_rules[name]._to_json_val()
 	data["named_rules"] = rules_dict
+	var vals_dict = {}
+	for name in named_values.keys():
+		vals_dict[name] = named_values[name]._to_json_val()
+	data["named_values"] = vals_dict
 	data["variables"] = _variable_ops
 	return OK
 
@@ -281,9 +348,13 @@ func _load_file(json: Dictionary) -> Error:
 		var loc := TrackerLocation.load_dict(v, self)
 		if loc: locations.append(loc)
 	named_rules.clear()
-	var dict: Dictionary = json.get("named_rules", {})
-	for name in dict.keys():
-		named_rules[name] = TrackerLogicNode.from_json_val(dict[name])
+	var name_dict: Dictionary = json.get("named_rules", {})
+	for name in name_dict.keys():
+		named_rules[name] = TrackerLogicNode.from_json_val(name_dict[name])
+	named_values.clear()
+	var val_dict: Dictionary = json.get("named_values", {})
+	for name in val_dict.keys():
+		named_values[name] = TrackerValueNode.from_json_val(val_dict[name])
 	
 	_variable_ops = json.get("variables", {})
 	for varname in _variable_ops.keys():
@@ -324,6 +395,11 @@ func set_named_rule(name: String, rule: TrackerLogicNode) -> void:
 	if not rule:
 		named_rules.erase(name)
 	else: named_rules[name] = rule
+
+func set_named_val(name: String, val: TrackerValueNode) -> void:
+	if not val:
+		named_values.erase(name)
+	else: named_values[name] = val
 
 func _to_string():
 	return ("TrackerPack_Data(game=%s, locations=%s, named_rules=%s)" % [game,

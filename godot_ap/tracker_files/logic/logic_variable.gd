@@ -1,53 +1,44 @@
 class_name TrackerLogicVariable extends TrackerLogicNode
 
-var iden: String
+var left_val: TrackerValueNode
 var op: String
-var val: Variant
-
-func _init(name: String, operator: String, value: Variant) -> void:
-	iden = name
-	op = operator
-	val = value
+var right_val: TrackerValueNode
 
 func can_access() -> Variant:
-	var curval = TrackerManager.variables.get(iden)
-	if curval is String:
-		match op:
-			"==":
-				return curval == str(val)
-			_: AP.log("Invalid operator '%s' on type String" % op)
-	elif curval is int or curval is float:
-		var fl := curval is float or val is float
-		match op:
-			"==":
-				return Util.approx_eq(curval, val) if fl else (curval == val)
-			"!=":
-				return not Util.approx_eq(curval, val) if fl else (curval == val)
-			">":
-				return curval > val
-			"<":
-				return curval < val
-			">=":
-				return curval >= val
-			"<=":
-				return curval <= val
-			_: AP.log("Invalid operator '%s' on type int/float" % op)
-	else:
-		AP.log("Bad variable datatype '%s'" % typeof(curval))
-	return null
+	var curval = left_val.calculate()
+	var val = right_val.calculate()
+	match op:
+		"==":
+			return curval == val
+		"!=":
+			return curval == val
+		">":
+			return curval > val
+		"<":
+			return curval < val
+		">=":
+			return curval >= val
+		"<=":
+			return curval <= val
+		_:
+			AP.log("Invalid operator '%s'" % op)
+			return 0
 
 func _to_dict() -> Dictionary:
 	return {
 		"type": "VAR",
-		"name": iden,
+		"left": left_val._to_json_val(),
 		"op": op,
-		"value": val,
+		"right": right_val._to_json_val(),
 	}
 
 static func from_dict(vals: Dictionary) -> TrackerLogicNode:
-	if vals.get("type") != "VAR": return TrackerLogicNode.from_dict(vals)
-	
-	return TrackerLogicVariable.new(str(vals.get("name")), vals.get("op", "NULL"), vals.get("value"))
+	if vals.get("type") != "VALUE": return TrackerLogicNode.from_dict(vals)
+	var ret := TrackerLogicVariable.new()
+	ret.op = vals.get("op", "")
+	ret.left_val = TrackerValueNode.from_json_val(vals.get("left"))
+	ret.right_val = TrackerValueNode.from_json_val(vals.get("right"))
+	return ret
 
 func get_repr(indent := 0) -> String:
-	return "\t".repeat(indent) + "VAR '%s' %s %s: %s" % [iden, op, val, can_access()]
+	return "\t".repeat(indent) + "VALUE %s %s %s: %s" % [left_val, op, right_val, can_access()]

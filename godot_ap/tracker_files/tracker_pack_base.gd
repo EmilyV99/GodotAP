@@ -208,3 +208,6 @@ static func _expect_keys(dict: Dictionary, expected: Array[String]):
 		_output_error("Invalid Keys", "Type '%s' expected keys %s, not %s!" % [dict.get("type", "NULL"), expected, found])
 		return false
 	return true
+
+static func _check_int(val: Variant) -> bool:
+	return val is int or (val is float and Util.approx_eq(val, roundi(val)))

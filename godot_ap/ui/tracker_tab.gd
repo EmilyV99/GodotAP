@@ -25,9 +25,12 @@ func _ready():
 func init_tracker():
 	if tracker:
 		tracker.queue_free()
+		await tracker.tree_exited
 		tracker = null
 	TrackerManager.load_tracker_locations([])
 	TrackerManager.load_named_rules({})
+	TrackerManager.load_named_values({})
+	TrackerManager.variables.clear()
 	
 	if not TrackerManager.tracking:
 		info_part.text = "Tracking Disabled"

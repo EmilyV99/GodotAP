@@ -13,6 +13,10 @@ static func make_name(name: String, item_count := 1) -> TrackerLogicItem:
 	ret.identifier = name
 	ret.count = item_count
 	return ret
+static func make(iden: Variant, item_count := 1) -> TrackerLogicItem:
+	if iden is String: return make_name(iden, item_count)
+	elif iden is int: return make_id(iden, item_count)
+	return null
 
 func get_id() -> int:
 	return identifier if identifier is int else Archipelago.conn.get_gamedata_for_player().get_item_id(identifier)
@@ -40,12 +44,7 @@ func _to_dict() -> Dictionary:
 
 static func from_dict(vals: Dictionary) -> TrackerLogicNode:
 	if vals.get("type") != "ITEM": return TrackerLogicNode.from_dict(vals)
-	
-	var ret := TrackerLogicItem.new()
-	ret.identifier = str(vals.get("value"))
-	ret.count = vals.get("count", 1)
-		
-	return ret
+	return make(vals.get("value"), vals.get("count", 1))
 
 func get_repr(indent := 0) -> String:
 	return "\t".repeat(indent) + "ITEM '%s' x%d: %s" % [identifier, count, can_access()]

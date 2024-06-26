@@ -47,6 +47,9 @@ An array of Location objects. A Location object is defined as:
 ### named_rules
 A dictionary of [Rules](#rules), keyed by arbitrary names.
 
+### named_values
+A dictionary of [ValueNodes](#value-nodes), keyed by arbitrary names
+
 ### variables
 A dictionary of values, keyed by arbitrary names.
 Each entry should be a `Variable`, defined as:
@@ -154,6 +157,9 @@ This rule isn't really that useful, though it is used internally by the tracker 
 
 Returns `true` if the specified location has been `Found`.
 
+## Value Nodes
+Value nodes function like [Rules](#rules), but instead of returning a boolean, they return an int.
+
 ## GUI Elements
 GUI elements are used to visually create your tracker. Elements primarily fall into 2 categories, `Containers` and `Content`.
 
@@ -233,6 +239,39 @@ Content. Displays a map image. Any [MapSpots](#mapspots) on locations with an id
 - `Found` is not considered highest-priority for the coloring order, despite it being highest-priority when determining a location's status. This generally means `Found` will be the lowest priority, thus only showing its' color when every location at the [MapSpot](#mapspots) is `Found`.
 
 PLANNED: Tooltip showing more info when hovering over the squares
+
+### GUI ItemConsole
+| Key            | Value                                       |
+|----------------|---------------------------------------------|
+| "type"         | "ItemConsole"                               |
+| "values"       | An array of objects, as defined below       |
+| "show_index"   | bool, if the 'Index' column should appear   |
+| "show_totals"  | bool, if the 'Totals' column should appear  |
+| "show_percent" | bool, if the 'Percent' column should appear |
+Content. Displays a console-style list of values. Sortable by the 'Index', 'Name', 'Count', 'Totals', and 'Percent' columns, and filterable by the item flags (on the 'Name' column).
+
+The 'Index' column shows the number index in the values array of the item (allowing it to remain sorted in the order you list the values in, to provide a "defined order").
+
+The 'Count' and 'Total' columns values are determined by [ValueNodes](#value-nodes) in the objects (see below). The 'Percent' column will automatically calculate 'count * 100 / total'.
+
+#### ItemConsole "values" Objects
+Values objects can either be "Items" or "Display Variables"
+| Key        | Value                                                                                 |
+|------------|---------------------------------------------------------------------------------------|
+| "type"     | "ITEM"                                                                                |
+| "name"     | Archipelago Item Name                                                                 |
+| "total"    | Optional, [ValueNode](#value-nodes) indicating the total number of this item present. |
+| "flags"    | The archipelago item flags to use by default (if none have been received). (0 = filler, 1 = progression, 2 = useful, 4 = trap) |
+
+| Key        | Value                                                                                      |
+|------------|--------------------------------------------------------------------------------------------|
+| "type"     | "DISPLAY_VAR"                                                                              |
+| "name"     | Display name (arbitrary)                                                                   |
+| "count"    | [ValueNode](#value-nodes) indicating the current value of this display variable.           |
+| "total"    | Optional, [ValueNode](#value-nodes) indicating a "total" number for this display variable. |
+| "tooltip"  | Optional, String tooltip to display                                                        |
+| "color"    | Optional, [ColorName](#colors) to use for the display name
+
 
 ### GUI Empty Element
 A completely empty dictionary `{}` is also a valid element- or rather, represents the LACK of an element. Useful as a placeholder while designing, so you can test while the gui is partly-completed.

@@ -34,7 +34,7 @@ func refresh() -> void:
 			if hint.item.src_player_id == Archipelago.conn.player_id and \
 				hint.item.loc_id == id:
 				if hint.status == NetworkHint.Status.NOT_FOUND and \
-					hint.item.flags & Archipelago.ICLASS_TRAP:
+					hint.item.flags & Archipelago.ItemClassification.TRAP:
 					s = NetworkHint.Status.AVOID
 				else: s = hint.status
 				break

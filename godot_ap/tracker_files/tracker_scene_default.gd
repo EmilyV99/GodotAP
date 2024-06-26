@@ -30,7 +30,7 @@ class ColumnData:
 var cols_in_order := [ColumnData.new(COL_LOCATION,1000,0,sort_by_name),
 	ColumnData.new(COL_HINT_STAT,500,1,sort_by_hint_status,false).set_filter(_hint_status_filter)]
 var sort_cols := [cols_in_order[1],cols_in_order[0]]
-var cols_by_name := {COL_LOCATION: cols_in_order[0], COL_HINT_STAT: cols_in_order[1]}
+var cols_by_name := {}
 
 var datapack: TrackerPack_Data
 
@@ -41,8 +41,7 @@ var hint_status_filters: Dictionary = {
 }
 var status_filters: Dictionary = {}
 
-signal item_register(name: String)
-class LocationPart extends BaseConsole.ArrangedColumnsPart: ## A part representing a hint info
+class LocationPart extends BaseConsole.ArrangedColumnsPart: ## A part representing a Location
 	var loc: APLocation
 	var datapack: TrackerPack_Data
 	var parent: TrackerScene_Default
@@ -104,7 +103,7 @@ func sort_click(event: InputEventMouseButton, column_name: String) -> bool:
 		queue_refresh()
 		return true
 	elif event.button_index == MOUSE_BUTTON_RIGHT:
-		if column_name == COL_LOCATION:
+		if not cols_by_name[column_name].filter:
 			return false # Nothing to show
 		var vbox := headings[column.index].pop_dropdown(console)
 		# Create action buttons
@@ -151,6 +150,10 @@ func sort_click(event: InputEventMouseButton, column_name: String) -> bool:
 		return true
 	return false
 
+func _init():
+	super()
+	for col in cols_in_order:
+		cols_by_name[col.name] = col
 func _ready() -> void:
 	if datapack:
 		cols_in_order[0].col_width = -1
@@ -191,11 +194,6 @@ func _ready() -> void:
 	loc_container = console.add(BaseConsole.ContainerPart.new())
 	super()
 	Archipelago.conn.set_hint_notify(func(_hints): queue_refresh())
-	
-	for itm in Archipelago.conn.received_items:
-		item_register.emit(itm.get_name())
-	Archipelago.conn.obtained_item.connect(func(itm: NetworkItem):
-		item_register.emit(itm.get_name()))
 
 ## Refresh due to general status update (refresh everything)
 ## if `fresh_connection` is true, the tracker is just initializing
@@ -228,7 +226,7 @@ func on_resize() -> void:
 ## Refresh due to item collection
 func on_items_get(_items: Array[NetworkItem]) -> void:
 	if datapack:
-		refresh_tracker() # Accessibility can change
+		queue_refresh() # Accessibility can change
 
 ## Refresh due to location being checked
 func on_loc_checked(_locid: int) -> void:

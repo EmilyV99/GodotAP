@@ -19,7 +19,7 @@ func _to_dict() -> Dictionary:
 	}
 
 static func from_json_val(v: Variant) -> TrackerLogicNode:
-	if not v is String: return TrackerLogicNode.from_dict(v)
+	if not v is String: return TrackerLogicNode.from_json_val(v)
 	return TrackerLogicNamedRule.new(v)
 static func from_dict(vals: Dictionary) -> TrackerLogicNode:
 	if vals.get("type") != "NAMED_RULE": return TrackerLogicNode.from_dict(vals)

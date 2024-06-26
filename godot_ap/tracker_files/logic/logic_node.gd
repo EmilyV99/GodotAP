@@ -10,7 +10,6 @@ func _to_dict() -> Dictionary:
 func _to_json_val() -> Variant:
 	return _to_dict()
 
-const DEFAULT_NODE_STRING = "{DEFNODE: DEFAULT}"
 static func from_json_val(val: Variant) -> TrackerLogicNode:
 	if val is Dictionary: return from_dict(val)
 	if val is bool:
@@ -30,8 +29,10 @@ static func from_dict(vals: Dictionary) -> TrackerLogicNode:
 			return TrackerLogicItem.from_dict(vals)
 		"NAMED_RULE":
 			return TrackerLogicNamedRule.from_dict(vals)
-		"VAR":
+		"VALUE":
 			return TrackerLogicVariable.from_dict(vals)
+		"LOCATION_COLLECTED":
+			return TrackerLogicLocCollected.from_dict(vals)
 	return null
 
 func get_repr(indent := 0) -> String:

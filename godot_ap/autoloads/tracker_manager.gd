@@ -20,6 +20,7 @@ func get_tracker(game: String) -> TrackerPack_Base:
 	return ret
 
 var named_rules: Dictionary = {}
+var named_values: Dictionary = {}
 var statuses: Array[LocationStatus] = [LocationStatus.ACCESS_FOUND,
 	LocationStatus.ACCESS_UNKNOWN, LocationStatus.ACCESS_UNREACHABLE,
 	LocationStatus.ACCESS_NOT_FOUND, LocationStatus.ACCESS_LOGIC_BREAK,
@@ -34,6 +35,8 @@ func get_loc_by_name(loc_name: String) -> APLocation:
 	return locs_by_name.get(loc_name, APLocation.nil())
 func get_named_rule(rule_name: String) -> TrackerLogicNode:
 	return named_rules.get(rule_name)
+func get_named_value(val_name: String) -> TrackerValueNode:
+	return named_values.get(val_name)
 func get_status(status_name: String) -> LocationStatus:
 	for s in statuses:
 		if s.text == status_name:
@@ -57,6 +60,8 @@ func load_tracker_locations(locs: Array[TrackerLocation]) -> void:
 		loc.get_loc().loaded_tracker_loc = loc
 func load_named_rules(rules: Dictionary) -> void:
 	named_rules = rules
+func load_named_values(values: Dictionary) -> void:
+	named_values = values
 func load_statuses(status_array: Array[LocationStatus]):
 	statuses = status_array
 
@@ -67,9 +72,10 @@ func _init():
 	def_pack.scene = scene
 	trackers[""] = def_pack
 	# Set up hook
-	Archipelago.connected.connect(func(_conn,_json):
-		load_locations()
+	Archipelago.preconnect.connect(func():
 		tracking = "Tracker" in Archipelago.AP_GAME_TAGS or Archipelago.config.is_tracking)
+	Archipelago.connected.connect(func(_conn,_json):
+		load_locations())
 	if Archipelago.AP_ALLOW_TRACKERPACKS:
 		if Archipelago.output_console:
 			load_tracker_packs()

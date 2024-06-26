@@ -7,8 +7,6 @@ var map_id: String = ""
 var datapack: TrackerPack_Data
 var some_reachable_color: String = "gold"
 
-signal item_register(name: String)
-
 var offset: Vector2
 var diff_scale: Vector2
 
@@ -122,10 +120,6 @@ class MapPin extends Control:
 
 func _ready() -> void:
 	super()
-	for itm in Archipelago.conn.received_items:
-		item_register.emit(itm.get_name())
-	Archipelago.conn.obtained_item.connect(func(itm: NetworkItem):
-		item_register.emit(itm.get_name()))
 	var image = datapack.load_image(image_path)
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	size_flags_vertical = Control.SIZE_EXPAND_FILL

@@ -244,11 +244,11 @@ func filter_allow(hint: NetworkHint) -> bool:
 	if hint.is_local() and not recv_filters.get(LOCAL_ITEMS, true):
 		return false
 	var flags := hint.item.flags
-	if (flags & AP.ICLASS_PROG) and not item_filters.get(ITEMS_PROG, true):
+	if (flags & AP.ItemClassification.PROG) and not item_filters.get(ITEMS_PROG, true):
 		return false
-	if (flags & AP.ICLASS_USEFUL) and not item_filters.get(ITEMS_USEFUL, true):
+	if (flags & AP.ItemClassification.USEFUL) and not item_filters.get(ITEMS_USEFUL, true):
 		return false
-	if (flags & AP.ICLASS_TRAP) and not item_filters.get(ITEMS_TRAP, true):
+	if (flags & AP.ItemClassification.TRAP) and not item_filters.get(ITEMS_TRAP, true):
 		return false
 	if (not flags) and not item_filters.get(ITEMS_FILLER, true):
 		return false
