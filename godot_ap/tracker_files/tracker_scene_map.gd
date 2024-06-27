@@ -123,8 +123,6 @@ func refresh_tracker(fresh_connection: bool = false) -> void:
 	if map_id.is_empty(): return
 	if fresh_connection:
 		var image = trackerpack.load_image(image_path)
-		size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		size_flags_vertical = Control.SIZE_EXPAND_FILL
 		focus_mode = Control.FOCUS_CLICK
 		mouse_filter = Control.MOUSE_FILTER_STOP
 		if image:
@@ -153,13 +151,13 @@ func refresh_tracker(fresh_connection: bool = false) -> void:
 			pin.custom_minimum_size = Vector2(10, 10)
 			pins.append(pin)
 			map.add_child(pin)
-		on_resize()
 	queue_redraw()
 	for pin in pins:
 		pin.queue_redraw()
+	size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 
-## Handle this node being resized; fit child nodes into place
-func on_resize() -> void:
+func _handle_sizing() -> Vector2:
 	var tex_size = map.texture.get_size()
 	var targ_size := Vector2.ZERO
 	if abs(tex_size.x - map.size.x) < abs(tex_size.y - map.size.y):
@@ -168,9 +166,22 @@ func on_resize() -> void:
 	else:
 		targ_size.y = map.size.y
 		targ_size.x = tex_size.x * (map.size.y / tex_size.y)
-	var diff_sz = map.size - targ_size
-	offset = diff_sz / 2
+	offset = Vector2.ZERO
 	diff_scale = Vector2(targ_size.x / tex_size.x, targ_size.y / tex_size.y)
+	return targ_size
+
+func handle_sizing() -> void:
+	map.custom_minimum_size = Vector2.ZERO
+	map.size = get_parent().size
+	var new_size = _handle_sizing()
+	map.custom_minimum_size = new_size
+	map.size = new_size
+	size = new_size
+func handle_sizing_2() -> void:
+	map.custom_minimum_size = Vector2.ZERO
+
+## Handle this node being resized; fit child nodes into place
+func on_resize() -> void:
 	queue_redraw()
 
 ## Refresh due to item collection

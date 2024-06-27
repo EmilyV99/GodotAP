@@ -228,7 +228,7 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 	var type = elem.get("type")
 	match type:
 		"Column":
-			var cont := VBoxContainer.new()
+			var cont := CustomColumn.new()
 			cont.add_theme_constant_override("separation", elem.get("spacing", 0))
 			cont.size_flags_horizontal = TrackerPack_Base.get_size_flag(elem.get("halign", "EXPAND_FILL"))
 			cont.size_flags_vertical = TrackerPack_Base.get_size_flag(elem.get("valign", "EXPAND_FILL"))
@@ -240,7 +240,7 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 					cont.add_child(child_elem)
 			return cont
 		"Row":
-			var cont := HBoxContainer.new()
+			var cont := CustomRow.new()
 			cont.add_theme_constant_override("separation", elem.get("spacing", 0))
 			cont.size_flags_horizontal = TrackerPack_Base.get_size_flag(elem.get("halign", "EXPAND_FILL"))
 			cont.size_flags_vertical = TrackerPack_Base.get_size_flag(elem.get("valign", "EXPAND_FILL"))
@@ -252,7 +252,7 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 					cont.add_child(child_elem)
 			return cont
 		"Grid":
-			var cont := GridContainer.new()
+			var cont := CustomGrid.new()
 			cont.columns = elem.get("columns", 2)
 			cont.add_theme_constant_override("h_separation", elem.get("hspacing", 0))
 			cont.add_theme_constant_override("v_separation", elem.get("vspacing", 0))
@@ -266,7 +266,7 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 					cont.add_child(child_elem)
 			return cont
 		"HSplit":
-			var cont := HSplitContainer.new()
+			var cont := CustomHSplit.new()
 			cont.add_theme_constant_override("separation", 0)
 			cont.size_flags_horizontal = TrackerPack_Base.get_size_flag(elem.get("halign", "EXPAND_FILL"))
 			cont.size_flags_vertical = TrackerPack_Base.get_size_flag(elem.get("valign", "EXPAND_FILL"))
@@ -278,7 +278,7 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 					cont.add_child(child_elem)
 			return cont
 		"VSplit":
-			var cont := VSplitContainer.new()
+			var cont := CustomVSplit.new()
 			cont.add_theme_constant_override("separation", 0)
 			cont.size_flags_horizontal = TrackerPack_Base.get_size_flag(elem.get("halign", "EXPAND_FILL"))
 			cont.size_flags_vertical = TrackerPack_Base.get_size_flag(elem.get("valign", "EXPAND_FILL"))
@@ -290,7 +290,7 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 					cont.add_child(child_elem)
 			return cont
 		"Margin":
-			var cont := MarginContainer.new()
+			var cont := CustomMargin.new()
 			var colorrect := ColorRect.new()
 			var color_name: String = elem["color"]
 			colorrect.color = AP.color_from_name(color_name, AP.color_from_name("default"))

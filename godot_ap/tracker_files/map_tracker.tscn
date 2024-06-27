@@ -8,6 +8,10 @@ size = Vector2(256, 256)
 [node name="MapTracker" type="MarginContainer"]
 offset_right = 256.0
 offset_bottom = 1.0
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
 script = ExtResource("1_xub3u")
 
 [node name="MapImage" type="TextureRect" parent="."]
