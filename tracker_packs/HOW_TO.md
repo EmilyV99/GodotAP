@@ -164,17 +164,19 @@ Value nodes function like [Rules](#rules), but instead of returning a boolean, t
 GUI elements are used to visually create your tracker. Elements primarily fall into 2 categories, `Containers` and `Content`.
 
 The following keys are valid on EVERY GUI Node:
-| Key      | Value                                                     |
-|----------|-----------------------------------------------------------|
-| "type"   | String, determines the type of node (null for Empty node) |
-| "halign" | A [SizeFlag](#sizeflag) value for horizontal growth       |
-| "valign" | A [SizeFlag](#sizeflag) value for vertical growth         |
+| Key             | Value                                                     |
+|-----------------|-----------------------------------------------------------|
+| "type"          | String, determines the type of node (null for Empty node) |
+| "halign"        | A [SizeFlag](#sizeflag) value for horizontal growth       |
+| "valign"        | A [SizeFlag](#sizeflag) value for vertical growth         |
+| "stretch_ratio" | A float that weightedly affects `EXPAND` SizeFlags        |
 
 ### GUI Column
 | Key        | Value                                  |
 |------------|----------------------------------------|
 | "type"     | "Column"                               |
 | "children" | Array of [GUI Elements](#gui-elements) |
+| "spacing"  | Optional int, spacing between elements |
 
 Container. Arranges the elements vertically, one after another.
 
@@ -183,15 +185,18 @@ Container. Arranges the elements vertically, one after another.
 |------------|----------------------------------------|
 | "type"     | "Column"                               |
 | "children" | Array of [GUI Elements](#gui-elements) |
+| "spacing"  | Optional int, spacing between elements |
 
 Container. Arranges the elements horizontally, one after another.
 
 ### GUI Grid
-| Key        | Value                                  |
-|------------|----------------------------------------|
-| "type"     | "Grid"                                 |
-| "columns"  | int, the number of columns             |
-| "children" | Array of [GUI Elements](#gui-elements) |
+| Key        | Value                                             |
+|------------|---------------------------------------------------|
+| "type"     | "Grid"                                            |
+| "columns"  | int, the number of columns                        |
+| "children" | Array of [GUI Elements](#gui-elements)            |
+| "hspacing" | Optional int, horizontal spacing between elements |
+| "vspacing" | Optional int, vertical spacing between elements   |
 
 Container. Arranges the elements in a grid, with the first element in the top left, subsequent elements to the right of that, until it reaches the specified number of columns. After the column limit is reached, the next child starts a new row.
 
@@ -241,6 +246,34 @@ Container. Displays a tab for each element, with the name displayed on the tab h
 | "color"  | Optional, [ColorName](#colors) to use for the label. |
 
 Content. Draws the specified text.
+
+### GUI Icon
+
+| Key       | Value                                              |
+|-----------|----------------------------------------------------|
+| "type"    | "Icon"                                             |
+| "image"   | String, relative path from the json to the image   |
+| "width"   | Optional int, set the width of the icon            |
+| "height"  | Optional int, set the height of the icon           |
+| "tooltip" | Optional String, tooltip to show when hovered over |
+| "value"   | Optionally relate a value to the icon. See below.  |
+
+Content. Displays an image.
+
+Defaults to image source size, if width/height are not specified. If only one is specified, the other defaults to maintain the source aspect ratio.
+
+"value" should contain the following information, if given:
+| Key         | Value                                                         |
+|-------------|---------------------------------------------------------------|
+| "val"       | [ValueNode](#value-nodes) giving the value                    |
+| "max"       | Optional, [ValueNode](#value-nodes) giving the max value.     |
+| "color"     | Optional, [ColorName](#colors) to use for the display         |
+| "max_color" | Optional, [ColorName](#colors) to use instead when val >= max |
+
+- If the "val" is 0, no number will be shown, and the icon will be grayscaled.
+- If the "max" is 1, no number will be shown regardless of val.
+- If no max is given, it uses a default of 999.
+- The default "color" is "white", and the default "max_color" is "green"
 
 ### GUI LocationConsole
 | Key           | Value                                               |
@@ -302,6 +335,12 @@ Values objects can either be "Items" or "Display Variables"
 
 ### GUI Empty Element
 A completely empty dictionary `{}` is also a valid element- or rather, represents the LACK of an element. Useful as a placeholder while designing, so you can test while the gui is partly-completed.
+
+Empty elements can take the properties listed under [GUI Elements](#gui-elements) that apply for all nodes, as well as the following extra optional properties:
+| Key      | Value                                     |
+|----------|-------------------------------------------|
+| "width"  | Optional int, sets the width of the node  |
+| "height" | Optional int, sets the height of the node |
 
 ## Colors
 A color string can be any of the following:

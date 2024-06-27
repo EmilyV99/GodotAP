@@ -360,7 +360,6 @@ func _handle_command(json: Dictionary) -> void:
 			if idx == 0:
 				refr_items.assign(items)
 			if items:
-				print("RECEIVED %d ITEMS" % items.size())
 				var q := 0
 				while q < items.size():
 					if _receive_item(idx, items[q]):
@@ -907,7 +906,7 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 							var vars_folder := outer_folder.add(mgr.console.make_foldable("[ VARIABLES ]", "", mgr.console.COLOR_UI_MSG))
 							for varname in vars:
 								vars_folder.add(mgr.console.make_text(varname+": ", "", mgr.console.COLOR_UI_MSG))
-								var val = TrackerManager.variables.get(varname)
+								var val = TrackerManager.get_variable(varname)
 								vars_folder.add(mgr.console.make_text(str(val), "", AP.color_from_name("green")))
 								vars_folder.add(mgr.console.make_header_spacing(0))
 						outer_folder.add(mgr.console.make_indent(-20))

@@ -8,6 +8,7 @@ func instantiate() -> TrackerScene_Root:
 	if scene and scene.can_instantiate():
 		var root_scene := TrackerScene_Root.new()
 		root_scene.add_child(scene.instantiate())
+		_done_instantiating(root_scene)
 		return root_scene
 	return super()
 	

@@ -35,8 +35,6 @@ var cols_in_order := [ColumnData.new(COL_VALUE,1000,sort_by_name).set_filter(_it
 var sort_cols := [cols_in_order[0],cols_in_order[1]]
 var cols_by_name := {}
 
-var datapack: TrackerPack_Data
-
 var show_index := true
 var show_totals := true
 var show_percent := true
@@ -247,46 +245,6 @@ func _init():
 		item_class_filters[AP.get_item_classification(flag)] = true
 	item_class_filters["Non-Item"] = true
 
-func _ready() -> void:
-	cols_by_name[COL_VALUE].col_width = -1
-	cols_by_name[COL_COUNT].col_width = 100
-	if show_index: # Add index column
-		cols_in_order.push_front(ColumnData.new(COL_INDEX, 100, sort_by_index))
-		sort_cols.push_front(cols_in_order.front())
-		cols_by_name[COL_INDEX] = cols_in_order.front()
-	if show_totals: # Add totals column
-		cols_in_order.append(ColumnData.new(COL_TOTAL, 100, sort_by_total, false))
-		cols_by_name[COL_TOTAL] = cols_in_order.back()
-		sort_cols.push_back(cols_in_order.back())
-	if show_percent: # Add percent column
-		cols_in_order.append(ColumnData.new(COL_PERC, 100, sort_by_percent, false))
-		cols_by_name[COL_PERC] = cols_in_order.back()
-		var found := false
-		for q in sort_cols.size():
-			if sort_cols[q].name == COL_COUNT:
-				sort_cols.insert(q, cols_in_order.back())
-				found = true
-				break
-		if not found:
-			sort_cols.append(cols_in_order.back())
-	if show_index: # Change default sorting
-		sort_cols.erase(cols_by_name[COL_VALUE])
-		sort_cols.append(cols_by_name[COL_VALUE])
-	
-	var header := BaseConsole.ArrangedColumnsPart.new()
-	var ind := 0
-	while ind < cols_in_order.size():
-		var col = cols_in_order[ind]
-		col.index = ind
-		var heading = header.add(console.make_c_text(col.name), col.col_width)
-		heading.on_click = func(evt): return sort_click(evt, col.name)
-		headings.append(heading)
-		ind += 1
-	console.add(header)
-	headings[sort_cols[0].index].text += (" ↑" if sort_cols[0].sort_ascending else " ↓")
-	itm_container = console.add(BaseConsole.ContainerPart.new())
-	super()
-
 func _construct_values() -> void:
 	itm_container.clear()
 	var ind := 0
@@ -313,7 +271,43 @@ func _construct_values() -> void:
 ## if `fresh_connection` is true, the tracker is just initializing
 func refresh_tracker(fresh_connection: bool = false) -> void:
 	if fresh_connection: # Generate the list
-		itm_container.clear()
+		cols_by_name[COL_VALUE].col_width = -1
+		cols_by_name[COL_COUNT].col_width = 100
+		if show_index: # Add index column
+			cols_in_order.push_front(ColumnData.new(COL_INDEX, 100, sort_by_index))
+			sort_cols.push_front(cols_in_order.front())
+			cols_by_name[COL_INDEX] = cols_in_order.front()
+		if show_totals: # Add totals column
+			cols_in_order.append(ColumnData.new(COL_TOTAL, 100, sort_by_total, false))
+			cols_by_name[COL_TOTAL] = cols_in_order.back()
+			sort_cols.push_back(cols_in_order.back())
+		if show_percent: # Add percent column
+			cols_in_order.append(ColumnData.new(COL_PERC, 100, sort_by_percent, false))
+			cols_by_name[COL_PERC] = cols_in_order.back()
+			var found := false
+			for q in sort_cols.size():
+				if sort_cols[q].name == COL_COUNT:
+					sort_cols.insert(q, cols_in_order.back())
+					found = true
+					break
+			if not found:
+				sort_cols.append(cols_in_order.back())
+		if show_index: # Change default sorting
+			sort_cols.erase(cols_by_name[COL_VALUE])
+			sort_cols.append(cols_by_name[COL_VALUE])
+		
+		var header := BaseConsole.ArrangedColumnsPart.new()
+		var ind := 0
+		while ind < cols_in_order.size():
+			var col = cols_in_order[ind]
+			col.index = ind
+			var heading = header.add(console.make_c_text(col.name), col.col_width)
+			heading.on_click = func(evt): return sort_click(evt, col.name)
+			headings.append(heading)
+			ind += 1
+		console.add(header)
+		headings[sort_cols[0].index].text += (" ↑" if sort_cols[0].sort_ascending else " ↓")
+		itm_container = console.add(BaseConsole.ContainerPart.new())
 		if Archipelago.datapack_pending:
 			await Archipelago.all_datapacks_loaded
 		_construct_values()

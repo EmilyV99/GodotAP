@@ -32,8 +32,6 @@ var cols_in_order := [ColumnData.new(COL_LOCATION,1000,0,sort_by_name),
 var sort_cols := [cols_in_order[1],cols_in_order[0]]
 var cols_by_name := {}
 
-var datapack: TrackerPack_Data
-
 var show_hint_status := true
 
 var hint_status_filters: Dictionary = {
@@ -43,12 +41,12 @@ var status_filters: Dictionary = {}
 
 class LocationPart extends BaseConsole.ArrangedColumnsPart: ## A part representing a Location
 	var loc: APLocation
-	var datapack: TrackerPack_Data
+	var trackerpack: TrackerPack_Data
 	var parent: TrackerScene_Default
 	
 	func _init(tracker_loc: APLocation, pack: TrackerPack_Data, parent_scene: TrackerScene_Default):
 		loc = tracker_loc
-		datapack = pack
+		trackerpack = pack
 		parent = parent_scene
 	func draw(c: BaseConsole, data: ConsoleDrawData) -> void:
 		if dont_draw(): return
@@ -80,7 +78,7 @@ class LocationPart extends BaseConsole.ArrangedColumnsPart: ## A part representi
 			locpart.text = dispname
 		if parent.cols_by_name.has(COL_HINT_STAT):
 			add(NetworkHint.make_hint_status(c, loc.hint_status).centered(), parent.cols_by_name[COL_HINT_STAT].col_width)
-		if datapack and parent.cols_by_name.has(COL_LOC_STAT):
+		if trackerpack and parent.cols_by_name.has(COL_LOC_STAT):
 			var stat: String = TrackerManager.get_location(loc.id).get_status()
 			var stats: Array = TrackerManager.statuses.filter(func(s): return s.text == stat)
 			if stats:
@@ -154,56 +152,54 @@ func _init():
 	super()
 	for col in cols_in_order:
 		cols_by_name[col.name] = col
-func _ready() -> void:
-	if datapack:
-		cols_in_order[0].col_width = -1
-		cols_in_order[1].col_width = 120
-		cols_in_order.append(ColumnData.new(COL_LOC_STAT, 120, 2, sort_by_loc_status, false).set_filter(_status_filter))
-		cols_by_name[COL_LOC_STAT] = cols_in_order.back()
-		for q in NetworkHint.Status.values():
-			var statname: String = NetworkHint.status_names[q]
-			var font := console.get_font()
-			var sz := font.get_string_size(statname)
-			cols_in_order[1].col_width = max(cols_in_order[1].col_width, sz.x)
-		for stat in TrackerManager.statuses:
-			var font := console.get_font()
-			var sz := font.get_string_size(stat.text)
-			cols_in_order[2].col_width = max(cols_in_order[2].col_width, sz.x)
-		cols_in_order[1].col_width += 10
-		cols_in_order[2].col_width += 10
-		
-		sort_cols.push_front(cols_in_order[2])
-	
-	var to_hide := [false, not show_hint_status, false]
-	var header := BaseConsole.ArrangedColumnsPart.new()
-	var ind := 0
-	while ind < cols_in_order.size():
-		if to_hide.pop_front():
-			var colmn = cols_in_order.pop_at(ind)
-			sort_cols.erase(colmn)
-			cols_by_name.erase(colmn.name)
-			continue
-		var col = cols_in_order[ind]
-		col.index = ind
-		var heading = header.add(console.make_c_text(col.name), col.col_width)
-		heading.on_click = func(evt): return sort_click(evt, col.name)
-		headings.append(heading)
-		ind += 1
-	console.add(header)
-	headings[sort_cols[0].index].text += (" ↑" if sort_cols[0].sort_ascending else " ↓")
-	loc_container = console.add(BaseConsole.ContainerPart.new())
-	super()
-	Archipelago.conn.set_hint_notify(func(_hints): queue_refresh())
 
 ## Refresh due to general status update (refresh everything)
 ## if `fresh_connection` is true, the tracker is just initializing
 func refresh_tracker(fresh_connection: bool = false) -> void:
 	if fresh_connection: # Generate the list
-		loc_container.clear()
+		if trackerpack:
+			cols_in_order[0].col_width = -1
+			cols_in_order[1].col_width = 120
+			cols_in_order.append(ColumnData.new(COL_LOC_STAT, 120, 2, sort_by_loc_status, false).set_filter(_status_filter))
+			cols_by_name[COL_LOC_STAT] = cols_in_order.back()
+			for q in NetworkHint.Status.values():
+				var statname: String = NetworkHint.status_names[q]
+				var font := console.get_font()
+				var sz := font.get_string_size(statname)
+				cols_in_order[1].col_width = max(cols_in_order[1].col_width, sz.x)
+			for stat in TrackerManager.statuses:
+				var font := console.get_font()
+				var sz := font.get_string_size(stat.text)
+				cols_in_order[2].col_width = max(cols_in_order[2].col_width, sz.x)
+			cols_in_order[1].col_width += 10
+			cols_in_order[2].col_width += 10
+			
+			sort_cols.push_front(cols_in_order[2])
+		
+		var to_hide := [false, not show_hint_status, false]
+		var header := BaseConsole.ArrangedColumnsPart.new()
+		var ind := 0
+		while ind < cols_in_order.size():
+			if to_hide.pop_front():
+				var colmn = cols_in_order.pop_at(ind)
+				sort_cols.erase(colmn)
+				cols_by_name.erase(colmn.name)
+				continue
+			var col = cols_in_order[ind]
+			col.index = ind
+			var heading = header.add(console.make_c_text(col.name), col.col_width)
+			heading.on_click = func(evt): return sort_click(evt, col.name)
+			headings.append(heading)
+			ind += 1
+		console.add(header)
+		headings[sort_cols[0].index].text += (" ↑" if sort_cols[0].sort_ascending else " ↓")
+		loc_container = console.add(BaseConsole.ContainerPart.new())
+		Archipelago.conn.set_hint_notify(func(_hints): queue_refresh())
+		
 		if Archipelago.datapack_pending:
 			await Archipelago.all_datapacks_loaded
 		for locid in Archipelago.location_list():
-			var new_part := LocationPart.new(TrackerManager.get_location(locid), datapack, self)
+			var new_part := LocationPart.new(TrackerManager.get_location(locid), trackerpack, self)
 			loc_container._add(new_part)
 		await get_tree().process_frame
 		console.scroll_by_abs(-console.scroll)
@@ -225,7 +221,7 @@ func on_resize() -> void:
 
 ## Refresh due to item collection
 func on_items_get(_items: Array[NetworkItem]) -> void:
-	if datapack:
+	if trackerpack:
 		queue_refresh() # Accessibility can change
 
 ## Refresh due to location being checked
@@ -233,7 +229,7 @@ func on_loc_checked(_locid: int) -> void:
 	queue_refresh()
 
 func _status_filter(part: LocationPart) -> bool:
-	return not datapack or status_filters.get(part.loc.get_status(), true)
+	return not trackerpack or status_filters.get(part.loc.get_status(), true)
 func _hint_status_filter(part: LocationPart) -> bool:
 	return hint_status_filters.get(part.loc.hint_status, true)
 func filter_allow(part: LocationPart) -> bool:
@@ -253,10 +249,10 @@ func sort_by_loc_status(a: LocationPart, b: LocationPart) -> int:
 	var bi := -1
 	var astat: String = a.loc.get_status()
 	var bstat: String = b.loc.get_status()
-	for q in datapack.statuses.size():
-		if datapack.statuses[q].text == astat:
+	for q in trackerpack.statuses.size():
+		if trackerpack.statuses[q].text == astat:
 			ai = q
-		if datapack.statuses[q].text == bstat:
+		if trackerpack.statuses[q].text == bstat:
 			bi = q
 	return (ai - bi)
 func sort_by_prev_index(a: LocationPart, b: LocationPart) -> int:

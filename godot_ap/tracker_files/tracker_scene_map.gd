@@ -4,7 +4,6 @@ class_name TrackerScene_Map extends TrackerScene_Base
 
 var image_path: String = ""
 var map_id: String = ""
-var datapack: TrackerPack_Data
 var some_reachable_color: String = "gold"
 
 var offset: Vector2
@@ -118,27 +117,24 @@ class MapPin extends Control:
 				ttip.position.y = 0
 				break
 
-func _ready() -> void:
-	super()
-	var image = datapack.load_image(image_path)
-	size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	size_flags_vertical = Control.SIZE_EXPAND_FILL
-	focus_mode = Control.FOCUS_CLICK
-	mouse_filter = Control.MOUSE_FILTER_STOP
-	await get_tree().process_frame
-	if image:
-		map.texture = ImageTexture.create_from_image(image)
-	else:
-		map_id = ""
-		for pin in pins:
-			pin.queue_free()
-		pins.clear()
-
 ## Refresh due to general status update (refresh everything)
 ## if `fresh_connection` is true, the tracker is just initializing
 func refresh_tracker(fresh_connection: bool = false) -> void:
 	if map_id.is_empty(): return
 	if fresh_connection:
+		var image = trackerpack.load_image(image_path)
+		size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		size_flags_vertical = Control.SIZE_EXPAND_FILL
+		focus_mode = Control.FOCUS_CLICK
+		mouse_filter = Control.MOUSE_FILTER_STOP
+		if image:
+			map.texture = ImageTexture.create_from_image(image)
+		else:
+			map_id = ""
+			for pin in pins:
+				pin.queue_free()
+			pins.clear()
+		
 		var spot_dict := {}
 		for loc in TrackerManager.locations.values():
 			var track_loc: TrackerLocation = loc.loaded_tracker_loc
@@ -159,6 +155,8 @@ func refresh_tracker(fresh_connection: bool = false) -> void:
 			map.add_child(pin)
 		on_resize()
 	queue_redraw()
+	for pin in pins:
+		pin.queue_redraw()
 
 ## Handle this node being resized; fit child nodes into place
 func on_resize() -> void:
@@ -177,8 +175,7 @@ func on_resize() -> void:
 
 ## Refresh due to item collection
 func on_items_get(_items: Array[NetworkItem]) -> void:
-	if datapack:
-		refresh_tracker() # Accessibility can change
+	queue_refresh()
 
 ## Refresh due to location being checked
 func on_loc_checked(_locid: int) -> void:

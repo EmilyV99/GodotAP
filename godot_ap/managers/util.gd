@@ -128,9 +128,6 @@ static func move_toward_directional(v1: Vector2, v2: Vector2) -> Vector2:
 	else: ret.y = move_toward(v1.y, v2.y, abs(v2.y)*.75)
 	return ret
 
-static func gray(v: float, a: float) -> Color:
-	return Color(v,v,v,a)
-
 static func split_args(msg: String) -> Array[String]:
 	var raw_args = msg.split(" ")
 	var args: Array[String] = []
@@ -174,3 +171,17 @@ static func poll_timer(timer: Timer, dur: float) -> bool:
 			timer.start(dur)
 		return true
 	return false
+
+static func grayscale(img: Image) -> Image:
+	var ret = Image.new()
+	ret.copy_from(img)
+	for x in ret.get_width():
+		for y in ret.get_height():
+			var px = ret.get_pixel(x, y)
+			if px.a8 == 255:
+				ret.set_pixel(x, y, gray(px))
+	return ret
+
+static func gray(c: Color) -> Color:
+	var g = (c.r * 0.299) + (c.g * 0.587) + (c.b * 0.114)
+	return Color(g, g, g)

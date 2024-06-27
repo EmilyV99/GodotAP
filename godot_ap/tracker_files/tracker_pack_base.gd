@@ -33,6 +33,13 @@ func load_image(relpath: String) -> Image:
 		return ret
 	return null
 
+signal instantiated(scene: TrackerScene_Root)
+signal readied(scene: TrackerScene_Root)
+func _done_instantiating(scene: TrackerScene_Root) -> void:
+	instantiated.emit(scene)
+	await scene.ready
+	readied.emit(scene)
+
 func instantiate() -> TrackerScene_Root:
 	assert(false) # Override with a valid return!
 	return null
@@ -195,7 +202,9 @@ static func _output_error(s: String, ttip: String = "") -> void:
 	AP.log(s)
 	if not ttip.is_empty():
 		AP.log(ttip)
-static func _expect_keys(dict: Dictionary, expected: Array[String], optional: Dictionary = {}) -> bool:
+static func _expect_gui_keys(dict: Dictionary, expected: Array[String], optional: Dictionary = {}) -> bool:
+	return _expect_keys("Type '%s'" % dict.get("type", "NULL"),  dict, expected, optional)
+static func _expect_keys(pref: String, dict: Dictionary, expected: Array[String], optional: Dictionary = {}) -> bool:
 	var found: Array[String] = []
 	found.assign(dict.keys())
 	var missing: Array[String] = expected.duplicate(true)
@@ -210,11 +219,13 @@ static func _expect_keys(dict: Dictionary, expected: Array[String], optional: Di
 			continue
 		if not (s in expected):
 			extra.append(s)
-	if missing or extra:
-		var out_str: String = "Type '%s'" % dict.get("type", "NULL")
-		if missing: out_str += " missing keys %s" % missing
-		if extra: out_str += " unexpected keys %s" % extra
-		_output_error("Invalid Keys", out_str)
+	if not (missing.is_empty() and extra.is_empty()):
+		var strs := [pref]
+		if missing:
+			strs.append("missing keys %s" % str(missing))
+		if extra:
+			strs.append(" unexpected keys %s" % str(extra))
+		_output_error("Invalid Keys", " ".join(strs))
 		return false
 	for s in to_add.keys(): # Handle optional values
 		dict[s] = to_add[s]
@@ -231,7 +242,9 @@ static func _type_name(type: int) -> String:
 		TYPE_ARRAY: return "Array"
 	return "??"
 		
-static func _expect_type(dict: Dictionary, key: String, type: int, custom_name := "") -> bool:
+static func _expect_gui_type(dict: Dictionary, key: String, type: int, custom_name := "") -> bool:
+	return _expect_type("Type '%s'" % dict.get("type", "NULL"),  dict, key, type, custom_name)
+static func _expect_type(pref: String, dict: Dictionary, key: String, type: int, custom_name := "") -> bool:
 	if type == TYPE_INT:
 		var v = dict.get(key)
 		if v is float and _check_int(v):
@@ -239,17 +252,19 @@ static func _expect_type(dict: Dictionary, key: String, type: int, custom_name :
 	if typeof(dict.get(key)) != type:
 		if custom_name.is_empty():
 			custom_name = _type_name(type)
-		_output_error("Invalid Key Type", "Type '%s' expected '%s' to be '%s'!" % [dict.get("type", "NULL"), key, custom_name])
+		_output_error("Invalid Key Type", "%s expected '%s' to be '%s'!" % [pref, key, custom_name])
 		return false
 	return true
 
-static func _expect_color(dict: Dictionary, key: String) -> bool:
-	if not _expect_type(dict, key, TYPE_STRING, "ColorName"):
+static func _expect_gui_color(dict: Dictionary, key: String) -> bool:
+	return _expect_color("Type '%s'" % dict.get("type", "NULL"), dict, key)
+static func _expect_color(pref: String, dict: Dictionary, key: String) -> bool:
+	if not _expect_type(pref, dict, key, TYPE_STRING, "ColorName"):
 		return false
 	var cname = dict.get(key)
 	if AP.color_from_name(cname, Color.WHITE) == Color.WHITE and \
 		AP.color_from_name(cname, Color.BLACK) == Color.BLACK:
-		TrackerPack_Base._output_error("Invalid Color", "Type '%s': Color '%s' could not be parsed as a color!" % [dict.get("type", "NULL"), cname])
+		TrackerPack_Base._output_error("Invalid Color", "%s: Color '%s' could not be parsed as a color!" % [pref, cname])
 		return false
 	return true
 
@@ -261,8 +276,10 @@ static var size_flags_by_name := {
 	"SHRINK_CENTER": Control.SIZE_SHRINK_CENTER,
 	"SHRINK_END": Control.SIZE_SHRINK_END,
 }
-static func _expect_size_flag(dict: Dictionary, key: String) -> bool:
-	if not _expect_type(dict, key, TYPE_STRING, "SizeFlag"):
+static func _expect_gui_size_flag(dict: Dictionary, key: String) -> bool:
+	return _expect_size_flag("Type '%s'" % dict.get("type", "NULL"), dict, key)
+static func _expect_size_flag(pref: String, dict: Dictionary, key: String) -> bool:
+	if not _expect_type(pref, dict, key, TYPE_STRING, "SizeFlag"):
 		return false
 	if not (dict[key] in size_flags_by_name.keys()):
 		TrackerPack_Base._output_error("Invalid SizeFlag", "Type '%s': Value '%s' is not one of %s!" % [dict.get("type", "NULL"), dict[key], size_flags_by_name.keys()])

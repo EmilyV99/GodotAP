@@ -1,6 +1,7 @@
 class_name TrackerTab extends MarginContainer
 
 @onready var tracker_button: CheckButton = $Column/Margins/Row/TrackingButton
+@onready var refr_button: TextureButton = $Column/Margins/Row/Reload
 @onready var info_console: BaseConsole = $Column/Margins/Row/InfoLabel
 @onready var column: VBoxContainer = $Column
 
@@ -20,12 +21,16 @@ func _ready():
 	tracker_button.toggled.connect(func(state):
 		TrackerManager.tracking = state
 		Archipelago.set_tag("Tracker", state))
+	refr_button.pressed.connect(func():
+		Archipelago.cmd_manager.call_cmd("/tracker refresh"))
 	refr_tags()
 
 func init_tracker():
 	if tracker:
+		tracker.visible = false
 		tracker.queue_free()
 		await tracker.tree_exited
+		await get_tree().process_frame
 		tracker = null
 	TrackerManager.load_tracker_locations([])
 	TrackerManager.load_named_rules({})

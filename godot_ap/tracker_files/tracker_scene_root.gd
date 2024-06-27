@@ -15,7 +15,8 @@ func _init() -> void:
 
 func _ready():
 	for itm in Archipelago.conn.received_items:
-		item_register.emit(itm.get_name())
+		var iname = itm.get_name()
+		item_register.emit(iname)
 
 func _enter_tree():
 	Archipelago.conn.obtained_item.connect(__register_item)

@@ -1,10 +1,13 @@
-[gd_scene load_steps=7 format=3 uid="uid://cn7ah7d3ep4de"]
+[gd_scene load_steps=10 format=3 uid="uid://cn7ah7d3ep4de"]
 
 [ext_resource type="PackedScene" uid="uid://cgq7n1figlpu3" path="res://godot_ap/ui/base_client.tscn" id="1_i5jgm"]
 [ext_resource type="Script" path="res://godot_ap/ui/tracker_tab.gd" id="2_h31sw"]
 [ext_resource type="PackedScene" uid="uid://bwamxuo3s7c8n" path="res://godot_ap/ui/plain_console.tscn" id="3_0ejly"]
+[ext_resource type="Texture2D" uid="uid://dvhxfj3wda717" path="res://godot_ap/ui/refresh.png" id="3_fi14g"]
 [ext_resource type="Script" path="res://godot_ap/ui/SettingsTab.gd" id="4_h5bt6"]
+[ext_resource type="Texture2D" uid="uid://bd4dd3r6vt17p" path="res://godot_ap/ui/refresh_pressed.png" id="4_kmxjf"]
 [ext_resource type="PackedScene" uid="uid://cn2jx75qawc6k" path="res://godot_ap/ui/settings_cbox_entry.tscn" id="5_7ypwu"]
+[ext_resource type="Texture2D" uid="uid://cjc7g6m7tklr1" path="res://godot_ap/ui/refresh_hov.png" id="5_cfwis"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ov043"]
 
@@ -42,9 +45,18 @@ text = "Enable Tracking:"
 [node name="TrackingButton" type="CheckButton" parent="Tabs/Tracking/Column/Margins/Row" index="1"]
 layout_mode = 2
 size_flags_horizontal = 0
+mouse_default_cursor_shape = 2
 theme_override_styles/focus = SubResource("StyleBoxEmpty_ov043")
 
-[node name="InfoLabel" parent="Tabs/Tracking/Column/Margins/Row" index="2" instance=ExtResource("3_0ejly")]
+[node name="Reload" type="TextureButton" parent="Tabs/Tracking/Column/Margins/Row" index="2"]
+layout_mode = 2
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("3_fi14g")
+texture_pressed = ExtResource("4_kmxjf")
+texture_hover = ExtResource("5_cfwis")
+stretch_mode = 5
+
+[node name="InfoLabel" parent="Tabs/Tracking/Column/Margins/Row" index="3" instance=ExtResource("3_0ejly")]
 custom_minimum_size = Vector2(0, 0)
 layout_mode = 2
 focus_next = NodePath("")

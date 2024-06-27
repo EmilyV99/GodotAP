@@ -37,6 +37,9 @@ func get_named_rule(rule_name: String) -> TrackerLogicNode:
 	return named_rules.get(rule_name)
 func get_named_value(val_name: String) -> TrackerValueNode:
 	return named_values.get(val_name)
+func get_variable(var_name: String) -> int:
+	var val: int = variables.get(var_name, 0)
+	return val
 func get_status(status_name: String) -> LocationStatus:
 	for s in statuses:
 		if s.text == status_name:
@@ -66,6 +69,7 @@ func load_statuses(status_array: Array[LocationStatus]):
 	statuses = status_array
 
 func _init():
+	tracking = "Tracker" in Archipelago.AP_GAME_TAGS or Archipelago.config.is_tracking
 	# Set up default pack
 	var def_pack: TrackerPack_Scene = TrackerPack_Scene.new()
 	var scene: PackedScene = load("res://godot_ap/tracker_files/default_tracker.tscn")

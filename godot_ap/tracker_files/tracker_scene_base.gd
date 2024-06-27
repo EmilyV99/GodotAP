@@ -1,5 +1,7 @@
 class_name TrackerScene_Base extends Container
 
+var trackerpack: TrackerPack_Base
+
 func _init() -> void:
 	# Initialize signal connections
 	Archipelago.conn.obtained_items.connect(on_items_get)
@@ -9,6 +11,8 @@ func _init() -> void:
 	sort_children.connect(on_resize)
 
 func _ready() -> void:
+	if trackerpack:
+		await trackerpack.readied
 	# Handle starting refresh
 	refresh_tracker(true)
 

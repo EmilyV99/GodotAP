@@ -6,7 +6,7 @@ func _init(varname: String):
 	name = varname
 
 func calculate() -> Variant:
-	return TrackerManager.variables.get(name, 0)
+	return TrackerManager.get_variable(name)
 
 func _to_dict() -> Dictionary:
 	return {

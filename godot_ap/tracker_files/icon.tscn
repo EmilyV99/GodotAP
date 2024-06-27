@@ -1,0 +1,47 @@
+[gd_scene load_steps=4 format=3 uid="uid://dej2ojim7uy1u"]
+
+[ext_resource type="Script" path="res://godot_ap/ui/tracker_scene_icon.gd" id="1_1mgpc"]
+[ext_resource type="SystemFont" uid="uid://73rjoc23d4ub" path="res://godot_ap/ui/console_font.tres" id="2_dy6v7"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_v7vvm"]
+font = ExtResource("2_dy6v7")
+outline_size = 9
+outline_color = Color(0.172549, 0.172549, 0.172549, 1)
+
+[node name="Icon" type="Container"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+script = ExtResource("1_1mgpc")
+
+[node name="Image" type="TextureRect" parent="."]
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+label_settings = SubResource("LabelSettings_v7vvm")
+horizontal_alignment = 1
+vertical_alignment = 2
+
+[node name="TooltipBG" type="ColorRect" parent="."]
+visible = false
+z_index = 1000
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.150075, 0.150075, 0.150075, 1)
+
+[node name="Tooltip" type="Label" parent="TooltipBG"]
+layout_mode = 2
+offset_top = 8.0
+offset_right = 40.0
+offset_bottom = 31.0
+autowrap_mode = 2
+
+[connection signal="gui_input" from="." to="." method="_on_gui_input"]
+[connection signal="mouse_entered" from="." to="." method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="." to="." method="_on_mouse_exited"]
