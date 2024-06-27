@@ -6,7 +6,8 @@ func _ready():
 	if OS.is_debug_build():
 		Archipelago.cmd_manager.debug_hidden = false
 	
-	Archipelago.AP_CLIENT_VERSION = Version.val(0,0,3) # GodotAP CommonClient version
+	Archipelago.AP_CLIENT_VERSION = Version.val(0,1,0) # GodotAP CommonClient version
+	AP.log(Archipelago.AP_CLIENT_VERSION)
 	Archipelago.set_tags(["TextOnly"])
 	Archipelago.AP_ITEM_HANDLING = Archipelago.ItemHandling.ALL
 	Archipelago.creds.updated.connect(CommonClientMain.save_connection)
