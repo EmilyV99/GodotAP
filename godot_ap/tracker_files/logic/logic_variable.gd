@@ -26,7 +26,7 @@ func can_access() -> Variant:
 
 func _to_dict() -> Dictionary:
 	return {
-		"type": "VAR",
+		"type": "VALUE",
 		"left": left_val._to_json_val(),
 		"op": op,
 		"right": right_val._to_json_val(),

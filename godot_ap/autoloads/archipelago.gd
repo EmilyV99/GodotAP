@@ -421,11 +421,7 @@ func handle_datapackage_checksums(checksums: Dictionary) -> void:
 			var cached = datapack_cache[game]
 			if cached["checksum"] == checksums[game] and cached["fields"] == datapack_cached_fields:
 				continue #already up-to-date, matching checksum
-		match game: # TODO Temporary while Stardew's datapack is broken- stops other games from being broken too
-			"Stardew Valley":
-				pass
-			_:
-				datapack_pending.append(game)
+		datapack_pending.append(game)
 
 ## Caches and stores to disk `data` as the DataCache file for `game`
 func _handle_datapack(game: String, data: Dictionary) -> void:
@@ -435,6 +431,8 @@ func _handle_datapack(game: String, data: Dictionary) -> void:
 		if not key in datapack_cached_fields:
 			data.erase(key)
 	data_file.store_string(JSON.stringify(data, "\t" if READABLE_DATAPACK_FILES else ""))
+	_data_caches[game] = DataCache.from(data)
+	data_file.close()
 func _send_datapack_request() -> void:
 	if datapack_pending:
 		var game = datapack_pending.pop_front()
