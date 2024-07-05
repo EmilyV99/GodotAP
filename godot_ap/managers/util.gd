@@ -172,6 +172,16 @@ static func poll_timer(timer: Timer, dur: float) -> bool:
 		return true
 	return false
 
+static func modulate(img: Image, col: Color) -> Image:
+	var ret = Image.new()
+	ret.copy_from(img)
+	for x in ret.get_width():
+		for y in ret.get_height():
+			var px = ret.get_pixel(x, y)
+			if px.a8 == 255:
+				ret.set_pixel(x, y, px * col)
+	return ret
+
 static func grayscale(img: Image) -> Image:
 	var ret = Image.new()
 	ret.copy_from(img)

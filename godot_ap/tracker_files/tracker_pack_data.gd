@@ -25,13 +25,15 @@ func validate_gui_element(elem) -> bool:
 	
 	var type = elem.get("type")
 	#region Handle optional values that are always present
-	var global_optionals := {"halign": "EXPAND_FILL", "valign": "EXPAND_FILL", "stretch_ratio": 1.0}
+	var global_optionals := {"halign": "EXPAND_FILL", "valign": "EXPAND_FILL", "stretch_ratio": 1.0, "draw_filter": "INHERIT"}
 	match type:
 		"Label", "Icon":
 			global_optionals["halign"] = "SHRINK_CENTER"
 			global_optionals["valign"] = "SHRINK_CENTER"
 	
 	elem.merge(global_optionals)
+	if not TrackerPack_Base._expect_gui_drawfilter(elem, "draw_filter"):
+		return false
 	if not TrackerPack_Base._expect_gui_size_flag(elem, "halign"):
 		return false
 	if not TrackerPack_Base._expect_gui_size_flag(elem, "valign"):
@@ -41,7 +43,8 @@ func validate_gui_element(elem) -> bool:
 	#endregion
 	match type:
 		"Column", "Row":
-			if not TrackerPack_Base._expect_gui_keys(elem, ["children", "type", "halign", "valign", "stretch_ratio"], {"spacing": 0}):
+			if not TrackerPack_Base._expect_gui_keys(elem, ["children", "type", "halign",
+				"valign", "stretch_ratio", "draw_filter"], {"spacing": 0}):
 				return false
 			if not TrackerPack_Base._expect_gui_type(elem, "children", TYPE_ARRAY):
 				return false
@@ -53,7 +56,7 @@ func validate_gui_element(elem) -> bool:
 			return true
 		"Grid":
 			if not TrackerPack_Base._expect_gui_keys(elem, ["children", "columns",
-				"type", "halign", "valign", "stretch_ratio"], {"hspacing": 0, "vspacing": 0}):
+				"type", "halign", "valign", "stretch_ratio", "draw_filter"], {"hspacing": 0, "vspacing": 0}):
 				return false
 			if not TrackerPack_Base._expect_gui_type(elem, "columns", TYPE_INT):
 				return false
@@ -70,7 +73,7 @@ func validate_gui_element(elem) -> bool:
 					return false
 			return true
 		"HSplit", "VSplit":
-			if not TrackerPack_Base._expect_gui_keys(elem, ["children", "type", "halign", "valign", "stretch_ratio"]):
+			if not TrackerPack_Base._expect_gui_keys(elem, ["children", "type", "halign", "valign", "stretch_ratio", "draw_filter"]):
 				return false
 			if not TrackerPack_Base._expect_gui_type(elem, "children", TYPE_ARRAY):
 				return false
@@ -84,7 +87,7 @@ func validate_gui_element(elem) -> bool:
 			return true
 		"Margin":
 			if not TrackerPack_Base._expect_gui_keys(elem, ["bottom", "child",
-				"color", "left", "right", "top", "type", "halign", "valign", "stretch_ratio"]):
+				"color", "left", "right", "top", "type", "halign", "valign", "stretch_ratio", "draw_filter"]):
 				return false
 			var child = elem.get("child")
 			if not validate_gui_element(child):
@@ -96,7 +99,7 @@ func validate_gui_element(elem) -> bool:
 				return false
 			return true
 		"Tabs":
-			if not TrackerPack_Base._expect_gui_keys(elem, ["tabs", "type", "halign", "valign", "stretch_ratio"]):
+			if not TrackerPack_Base._expect_gui_keys(elem, ["tabs", "type", "halign", "valign", "stretch_ratio", "draw_filter"]):
 				return false
 			if not TrackerPack_Base._expect_gui_type(elem, "tabs", TYPE_DICTIONARY):
 				return false
@@ -105,14 +108,14 @@ func validate_gui_element(elem) -> bool:
 					return false
 			return true
 		"LocationConsole":
-			if not TrackerPack_Base._expect_gui_keys(elem, ["hint_status", "type", "halign", "valign", "stretch_ratio"]):
+			if not TrackerPack_Base._expect_gui_keys(elem, ["hint_status", "type", "halign", "valign", "stretch_ratio", "draw_filter"]):
 				return false
 			if not TrackerPack_Base._expect_gui_type(elem, "hint_status", TYPE_BOOL):
 				return false
 			return true
 		"ItemConsole":
 			if not TrackerPack_Base._expect_gui_keys(elem, ["show_index", "show_percent",
-				"show_totals", "type", "values", "halign", "valign", "stretch_ratio"]):
+				"show_totals", "type", "values", "halign", "valign", "stretch_ratio", "draw_filter"]):
 				return false
 			if not TrackerPack_Base._expect_gui_type(elem, "show_totals", TYPE_BOOL):
 				return false
@@ -162,7 +165,7 @@ func validate_gui_element(elem) -> bool:
 			return true
 		"LocationMap":
 			if not TrackerPack_Base._expect_gui_keys(elem, ["id", "image",
-				"some_reachable_color", "type", "halign", "valign", "stretch_ratio"]):
+				"some_reachable_color", "type", "halign", "valign", "stretch_ratio", "draw_filter"]):
 				return false
 			if not TrackerPack_Base._expect_gui_type(elem, "id", TYPE_STRING):
 				return false
@@ -173,7 +176,7 @@ func validate_gui_element(elem) -> bool:
 			return true
 		"Label":
 			if not TrackerPack_Base._expect_gui_keys(elem, ["size", "text", "type",
-				"halign", "valign", "stretch_ratio"], {"color": "white"}):
+				"halign", "valign", "stretch_ratio", "draw_filter"], {"color": "white"}):
 				return false
 			if not TrackerPack_Base._expect_gui_type(elem, "size", TYPE_INT):
 				return false
@@ -187,7 +190,7 @@ func validate_gui_element(elem) -> bool:
 				return false
 			return true
 		"Icon":
-			if not TrackerPack_Base._expect_gui_keys(elem, ["type", "image", "halign", "valign", "stretch_ratio"],
+			if not TrackerPack_Base._expect_gui_keys(elem, ["type", "image", "halign", "valign", "stretch_ratio", "draw_filter"],
 				{"width": -1, "height": -1, "value": null, "tooltip": ""}):
 				return false
 			if not TrackerPack_Base._expect_gui_type(elem, "image", TYPE_STRING):
@@ -203,10 +206,13 @@ func validate_gui_element(elem) -> bool:
 					return false
 				var value_dict = elem["value"]
 				if not TrackerPack_Base._expect_keys("Type 'Icon/value'", value_dict, ["val"],
-					{"max": 999, "color": "white", "max_color": "green"}):
+					{"gray_under": 1, "max": 999, "color": "white", "max_color": "green", "modulate_color": "white"}):
 					return false
 				if TrackerValueNode.from_json_val(value_dict["val"]) == null:
 					TrackerPack_Base._output_error("Invalid ValueNode", "'Icon/value/val' encounted bad 'val' ValueNode!")
+					return false
+				if TrackerValueNode.from_json_val(value_dict["gray_under"]) == null:
+					TrackerPack_Base._output_error("Invalid ValueNode", "'Icon/value/gray_under' encounted bad 'gray_under' ValueNode!")
 					return false
 				if TrackerValueNode.from_json_val(value_dict["max"]) == null:
 					TrackerPack_Base._output_error("Invalid ValueNode", "'Icon/value/max' encounted bad 'max' ValueNode!")
@@ -215,9 +221,11 @@ func validate_gui_element(elem) -> bool:
 					return false
 				if not TrackerPack_Base._expect_color("Type 'Icon/value'", value_dict, "max_color"):
 					return false
+				if not TrackerPack_Base._expect_color("Type 'Icon/value'", value_dict, "modulate_color"):
+					return false
 			return true
 		null:
-			if not TrackerPack_Base._expect_keys("Empty Element", elem, ["halign", "valign", "stretch_ratio"], {"width": 0, "height": 0}):
+			if not TrackerPack_Base._expect_keys("Empty Element", elem, ["halign", "valign", "stretch_ratio", "draw_filter"], {"width": 0, "height": 0}):
 				return false
 			return true
 		_:
@@ -233,6 +241,7 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 			cont.size_flags_horizontal = TrackerPack_Base.get_size_flag(elem.get("halign", "EXPAND_FILL"))
 			cont.size_flags_vertical = TrackerPack_Base.get_size_flag(elem.get("valign", "EXPAND_FILL"))
 			cont.size_flags_stretch_ratio = elem.get("stretch_ratio", 1.0)
+			cont.texture_filter = TrackerPack_Base.get_draw_filter(elem.get("draw_filter", "INHERIT"))
 			var children: Array = elem.get("children")
 			for child in children:
 				var child_elem = _instantiate_gui_element(child)
@@ -245,6 +254,7 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 			cont.size_flags_horizontal = TrackerPack_Base.get_size_flag(elem.get("halign", "EXPAND_FILL"))
 			cont.size_flags_vertical = TrackerPack_Base.get_size_flag(elem.get("valign", "EXPAND_FILL"))
 			cont.size_flags_stretch_ratio = elem.get("stretch_ratio", 1.0)
+			cont.texture_filter = TrackerPack_Base.get_draw_filter(elem.get("draw_filter", "INHERIT"))
 			var children: Array = elem.get("children")
 			for child in children:
 				var child_elem = _instantiate_gui_element(child)
@@ -259,6 +269,7 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 			cont.size_flags_horizontal = TrackerPack_Base.get_size_flag(elem.get("halign", "EXPAND_FILL"))
 			cont.size_flags_vertical = TrackerPack_Base.get_size_flag(elem.get("valign", "EXPAND_FILL"))
 			cont.size_flags_stretch_ratio = elem.get("stretch_ratio", 1.0)
+			cont.texture_filter = TrackerPack_Base.get_draw_filter(elem.get("draw_filter", "INHERIT"))
 			var children: Array = elem.get("children")
 			for child in children:
 				var child_elem = _instantiate_gui_element(child)
@@ -271,6 +282,7 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 			cont.size_flags_horizontal = TrackerPack_Base.get_size_flag(elem.get("halign", "EXPAND_FILL"))
 			cont.size_flags_vertical = TrackerPack_Base.get_size_flag(elem.get("valign", "EXPAND_FILL"))
 			cont.size_flags_stretch_ratio = elem.get("stretch_ratio", 1.0)
+			cont.texture_filter = TrackerPack_Base.get_draw_filter(elem.get("draw_filter", "INHERIT"))
 			var children: Array = elem.get("children")
 			for child in children:
 				var child_elem = _instantiate_gui_element(child)
@@ -283,6 +295,7 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 			cont.size_flags_horizontal = TrackerPack_Base.get_size_flag(elem.get("halign", "EXPAND_FILL"))
 			cont.size_flags_vertical = TrackerPack_Base.get_size_flag(elem.get("valign", "EXPAND_FILL"))
 			cont.size_flags_stretch_ratio = elem.get("stretch_ratio", 1.0)
+			cont.texture_filter = TrackerPack_Base.get_draw_filter(elem.get("draw_filter", "INHERIT"))
 			var children: Array = elem.get("children")
 			for child in children:
 				var child_elem = _instantiate_gui_element(child)
@@ -304,6 +317,7 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 			cont.size_flags_horizontal = TrackerPack_Base.get_size_flag(elem.get("halign", "EXPAND_FILL"))
 			cont.size_flags_vertical = TrackerPack_Base.get_size_flag(elem.get("valign", "EXPAND_FILL"))
 			cont.size_flags_stretch_ratio = elem.get("stretch_ratio", 1.0)
+			cont.texture_filter = TrackerPack_Base.get_draw_filter(elem.get("draw_filter", "INHERIT"))
 			colorrect.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			colorrect.size_flags_vertical = Control.SIZE_EXPAND_FILL
 			inner_cont.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -322,6 +336,7 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 			cont.size_flags_horizontal = TrackerPack_Base.get_size_flag(elem.get("halign", "EXPAND_FILL"))
 			cont.size_flags_vertical = TrackerPack_Base.get_size_flag(elem.get("valign", "EXPAND_FILL"))
 			cont.size_flags_stretch_ratio = elem.get("stretch_ratio", 1.0)
+			cont.texture_filter = TrackerPack_Base.get_draw_filter(elem.get("draw_filter", "INHERIT"))
 			var tabs: Dictionary = elem.get("tabs")
 			for tabname in tabs.keys():
 				var child_elem = _instantiate_gui_element(tabs[tabname])
@@ -335,6 +350,7 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 			scene.size_flags_horizontal = TrackerPack_Base.get_size_flag(elem.get("halign", "EXPAND_FILL"))
 			scene.size_flags_vertical = TrackerPack_Base.get_size_flag(elem.get("valign", "EXPAND_FILL"))
 			scene.size_flags_stretch_ratio = elem.get("stretch_ratio", 1.0)
+			scene.texture_filter = TrackerPack_Base.get_draw_filter(elem.get("draw_filter", "INHERIT"))
 			scene.show_hint_status = elem["hint_status"]
 			return scene
 		"ItemConsole":
@@ -343,6 +359,7 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 			scene.size_flags_horizontal = TrackerPack_Base.get_size_flag(elem.get("halign", "EXPAND_FILL"))
 			scene.size_flags_vertical = TrackerPack_Base.get_size_flag(elem.get("valign", "EXPAND_FILL"))
 			scene.size_flags_stretch_ratio = elem.get("stretch_ratio", 1.0)
+			scene.texture_filter = TrackerPack_Base.get_draw_filter(elem.get("draw_filter", "INHERIT"))
 			scene.show_totals = elem["show_totals"]
 			scene.base_values.assign(elem["values"])
 			return scene
@@ -352,6 +369,7 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 			scene.size_flags_horizontal = TrackerPack_Base.get_size_flag(elem.get("halign", "EXPAND_FILL"))
 			scene.size_flags_vertical = TrackerPack_Base.get_size_flag(elem.get("valign", "EXPAND_FILL"))
 			scene.size_flags_stretch_ratio = elem.get("stretch_ratio", 1.0)
+			scene.texture_filter = TrackerPack_Base.get_draw_filter(elem.get("draw_filter", "INHERIT"))
 			scene.image_path = elem.get("image")
 			scene.map_id = elem.get("id")
 			scene.some_reachable_color = elem.get("some_reachable_color")
@@ -363,6 +381,7 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 			lbl.size_flags_horizontal = TrackerPack_Base.get_size_flag(elem.get("halign", "SHRINK_CENTER"))
 			lbl.size_flags_vertical = TrackerPack_Base.get_size_flag(elem.get("valign", "SHRINK_CENTER"))
 			lbl.size_flags_stretch_ratio = elem.get("stretch_ratio", 1.0)
+			lbl.texture_filter = TrackerPack_Base.get_draw_filter(elem.get("draw_filter", "INHERIT"))
 			var font: SystemFont = load("res://godot_ap/ui/console_font.tres")
 			ls.font = font
 			ls.font_size = elem["size"]
@@ -375,14 +394,17 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 			scene.size_flags_horizontal = TrackerPack_Base.get_size_flag(elem.get("halign", "EXPAND_FILL"))
 			scene.size_flags_vertical = TrackerPack_Base.get_size_flag(elem.get("valign", "EXPAND_FILL"))
 			scene.size_flags_stretch_ratio = elem.get("stretch_ratio", 1.0)
+			scene.texture_filter = TrackerPack_Base.get_draw_filter(elem.get("draw_filter", "INHERIT"))
 			scene.image_path = elem.get("image")
 			scene.width = elem.get("width", -1)
 			scene.height = elem.get("height", -1)
 			var valdict: Dictionary = elem.get("value", {})
 			scene.valnode = TrackerValueNode.from_json_val(valdict.get("val", 0))
+			scene.gray_under_node = TrackerValueNode.from_json_val(valdict.get("gray_under", 1))
 			scene.maxnode = TrackerValueNode.from_json_val(valdict.get("max", 999))
 			scene.colorname = valdict.get("color", "white")
 			scene.max_colorname = valdict.get("max_color", "green")
+			scene.modulate_colorname = valdict.get("modulate_color", "white")
 			scene.tooltip = elem.get("tooltip", "")
 			return scene
 		null:
@@ -390,6 +412,7 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 			node.size_flags_horizontal = TrackerPack_Base.get_size_flag(elem.get("halign", "EXPAND_FILL"))
 			node.size_flags_vertical = TrackerPack_Base.get_size_flag(elem.get("valign", "EXPAND_FILL"))
 			node.size_flags_stretch_ratio = elem.get("stretch_ratio", 1.0)
+			node.texture_filter = TrackerPack_Base.get_draw_filter(elem.get("draw_filter", "INHERIT"))
 			node.custom_minimum_size.x = elem.get("width", 0)
 			node.custom_minimum_size.y = elem.get("height", 0)
 			return node

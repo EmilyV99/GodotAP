@@ -163,13 +163,14 @@ Value nodes function like [Rules](#rules), but instead of returning a boolean, t
 ## GUI Elements
 GUI elements are used to visually create your tracker. Elements primarily fall into 2 categories, `Containers` and `Content`.
 
-The following keys are valid on EVERY GUI Node:
+The following keys are valid on EVERY GUI Node (though only `type` is required, all others have defaults)
 | Key             | Value                                                     |
 |-----------------|-----------------------------------------------------------|
 | "type"          | String, determines the type of node (null for Empty node) |
 | "halign"        | A [SizeFlag](#sizeflag) value for horizontal growth       |
 | "valign"        | A [SizeFlag](#sizeflag) value for vertical growth         |
 | "stretch_ratio" | A float that weightedly affects `EXPAND` SizeFlags        |
+| "draw_filter"   | A [DrawFilter](#drawfilter) value. Default "INHERIT".     |
 
 ### GUI Column
 | Key        | Value                                  |
@@ -263,17 +264,21 @@ Content. Displays an image.
 Defaults to image source size, if width/height are not specified. If only one is specified, the other defaults to maintain the source aspect ratio.
 
 "value" should contain the following information, if given:
-| Key         | Value                                                         |
-|-------------|---------------------------------------------------------------|
-| "val"       | [ValueNode](#value-nodes) giving the value                    |
-| "max"       | Optional, [ValueNode](#value-nodes) giving the max value.     |
-| "color"     | Optional, [ColorName](#colors) to use for the display         |
-| "max_color" | Optional, [ColorName](#colors) to use instead when val >= max |
+| Key              | Value                                                           |
+|------------------|-----------------------------------------------------------------|
+| "val"            | [ValueNode](#value-nodes) giving the value.                     |
+| "gray_under"     | Optional, [ValueNode](#value-nodes) giving the grayscale value. |
+| "max"            | Optional, [ValueNode](#value-nodes) giving the max value.       |
+| "color"          | Optional, [ColorName](#colors) to use for the number display.   |
+| "max_color"      | Optional, [ColorName](#colors) to use instead when val >= max.  |
+| "modulate_color" | Optional, [ColorName](#colors) to modulate the image by.        |
 
-- If the "val" is 0, no number will be shown, and the icon will be grayscaled.
-- If the "max" is 1, no number will be shown regardless of val.
+- If the "val" is less than "gray_under", the icon will be grayscaled.
+- If the "val" is 0 or "max" is 1, no number will be shown.
+- If no gray_under is given, it uses a default of 1.
 - If no max is given, it uses a default of 999.
-- The default "color" is "white", and the default "max_color" is "green"
+- The default "color" is "white", and the default "max_color" is "green".
+- The default "modulate_color" is "white", which indicates "no change" to the image.
 
 ### GUI LocationConsole
 | Key           | Value                                               |
@@ -358,6 +363,14 @@ A string representing a particular type of growth.
 | "SHRINK_BEGIN"  | Shrinks towards the top/left edge                                                      |
 | "SHRINK_CENTER" | Shrinks towards the center                                                             |
 | "SHRINK_END"    | Shrinks towards the bottom/right edge                                                  |
+
+## DrawFilter
+A string representing a draw filter mode.
+| Value     | Effect                                                             |
+|-----------|--------------------------------------------------------------------|
+| "INHERIT" | Uses the draw filter of the parent node.                           |
+| "LINEAR"  | Draws with a linear filter (good for high-res, bad for pixel art)  |
+| "NEAREST" | Drwas with a nearest filter (good for pixel art, bad for high-res) |
 
 ## MapSpots
 Intended for indicating a visual position on a [LocationMap](#gui-locationmap) for the location. Format:

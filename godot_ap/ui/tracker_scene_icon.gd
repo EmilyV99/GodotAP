@@ -9,12 +9,15 @@ var image_path: String
 var width := -1
 var height := -1
 var valnode: TrackerValueNode
+var gray_under_node: TrackerValueNode = TrackerValueInt.new(1)
 var maxnode: TrackerValueNode
 var colorname := "white"
 var max_colorname := "green"
+var modulate_colorname := "white"
 
 var tooltip: String = ""
 
+var _base_image: Image
 var image: Image
 var gray_image: Image
 
@@ -26,6 +29,13 @@ func show_image(img: Image) -> void:
 	image_rect.texture = ImageTexture.create_from_image(img)
 	last_shown_image = img
 
+func is_gray() -> bool:
+	var v = valnode.calculate()
+	if not v is int: v = 0
+	var gray = gray_under_node.calculate()
+	if not gray is int: gray = 1
+	return v < gray
+
 ## Refresh due to general status update (refresh everything)
 ## if `fresh_connection` is true, the tracker is just initializing
 func refresh_tracker(fresh_connection: bool = false) -> void:
@@ -33,15 +43,17 @@ func refresh_tracker(fresh_connection: bool = false) -> void:
 		assert(valnode)
 		assert(maxnode)
 		assert(trackerpack as TrackerPack_Data)
-		image = trackerpack.load_image(image_path)
+		_base_image = trackerpack.load_image(image_path)
+		image = Util.modulate(_base_image, AP.color_from_name(modulate_colorname))
 		gray_image = Util.grayscale(image)
 	await TrackerManager.on_tracker_load()
 	var v = valnode.calculate()
 	var maxval = maxnode.calculate()
-	label.visible = maxval > 1
+	var gray := is_gray()
+	label.visible = maxval > 1 and v != 0
 	label.text = str(min(v,maxval))
-	show_image(gray_image if v <= 0 else image)
-	var mod_c = .3 if v <= 0 else 1.0
+	show_image(gray_image if gray else image)
+	var mod_c = .3 if gray else 1.0
 	image_rect.modulate = Color(mod_c,mod_c,mod_c)
 	label.label_settings.font_color = AP.color_from_name(colorname if v < maxval else max_colorname)
 	

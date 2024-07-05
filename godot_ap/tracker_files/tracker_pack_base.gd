@@ -289,5 +289,23 @@ static func _expect_size_flag(pref: String, dict: Dictionary, key: String) -> bo
 static func get_size_flag(name: String) -> int:
 	return size_flags_by_name.get(name, Control.SIZE_EXPAND_FILL)
 
+static var draw_filters_by_name := {
+	"INHERIT": CanvasItem.TEXTURE_FILTER_PARENT_NODE,
+	"LINEAR": CanvasItem.TEXTURE_FILTER_LINEAR,
+	"NEAREST": CanvasItem.TEXTURE_FILTER_NEAREST,
+}
+static func _expect_gui_drawfilter(dict: Dictionary, key: String) -> bool:
+	return _expect_drawfilter("Type '%s'" % dict.get("type", "NULL"), dict, key)
+static func _expect_drawfilter(pref: String, dict: Dictionary, key: String) -> bool:
+	if not _expect_type(pref, dict, key, TYPE_STRING, "DrawFilter"):
+		return false
+	if not (dict[key] in draw_filters_by_name.keys()):
+		TrackerPack_Base._output_error("Invalid DrawFilter", "Type '%s': Value '%s' is not one of %s!" % [dict.get("type", "NULL"), dict[key], draw_filters_by_name.keys()])
+		return false
+	return true
+
+static func get_draw_filter(name: String) -> CanvasItem.TextureFilter:
+	return draw_filters_by_name.get(name, CanvasItem.TEXTURE_FILTER_PARENT_NODE)
+
 static func _check_int(val: Variant) -> bool:
 	return val is int or (val is float and Util.approx_eq(val, roundi(val)))
