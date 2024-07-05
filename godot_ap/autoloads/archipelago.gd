@@ -1,14 +1,23 @@
 class_name AP extends Node
 
-var AP_GAME_NAME := "" ## The game name to connect to. Empty string for TextOnly or HintGame clients.
-var AP_GAME_TAGS: Array[String] = [] ## The tags for your game
-var AP_CLIENT_VERSION := Version.val(0,0,0) ## The version of your client. Arbitrary number for you to manage.
-var AP_VERSION := Version.val(0,5,0) ## The target AP version. Not arbitrary - used in `Connect` packet
-var AP_ITEM_HANDLING := ItemHandling.ALL ## The ItemHandling to use when connecting
-var AP_PRINT_ITEMS_ON_CONNECT := false ## Prints what items have been previously collected when reconnecting to a slot
-var AP_HIDE_NONLOCAL_ITEMSENDS := true ## Hide item send messages that don't involve the client
-const AP_AUTO_OPEN_CONSOLE := false ## Automatically opens a default AP text console
-const AP_ALLOW_TRACKERPACKS := true ## Allow loading custom tracker packs
+@export var AP_GAME_NAME := "" ## The game name to connect to. Empty string for TextOnly or HintGame clients.
+@export var AP_GAME_TAGS: Array[String] = [] ## The tags for your game.
+@export var AP_CLIENT_VERSION := Version.val(0,0,0) ## The version of your client. Arbitrary number for you to manage.
+@export var AP_VERSION := Version.val(0,5,0) ## The target AP version. Not arbitrary - used in `Connect` packet.
+@export var AP_ITEM_HANDLING := ItemHandling.ALL ## The ItemHandling to use when connecting.
+@export_group("Client Settings")
+@export var AP_PRINT_ITEMS_ON_CONNECT := false ## Prints what items have been previously collected when reconnecting to a slot.
+@export var AP_HIDE_NONLOCAL_ITEMSENDS := true ## Hide item send messages that don't involve the client.
+@export var AP_AUTO_OPEN_CONSOLE := false ## Automatically opens a default AP text console.
+@export var AP_ALLOW_TRACKERPACKS := true ## Allow loading custom tracker packs.
+
+@export_subgroup("Logging")
+@export var AP_LOG_COMMUNICATION := false ## Enables additional logging.
+@export var AP_LOG_RECIEVED := false ## Enables additional logging.
+@export_subgroup("Data Packs")
+@export var READABLE_DATAPACK_FILES = true ## If true, datapackage local files will be stringified in a readable mode.
+@export var datapack_cached_fields = ["item_name_to_id","location_name_to_id","checksum"] ## Which fields should be saved from received DataPacks.
+@export_group("")
 
 #region Connection packets
 # See `ConnectionInfo` (Archipelago.conn) for more signals
@@ -29,10 +38,6 @@ signal on_attach_console
 #endregion
 
 
-#region LOGGING (godot console, not richtext console)
-const AP_LOG_COMMUNICATION := false ## Enables additional logging
-const AP_LOG_RECIEVED := false ## Enables additional logging
-#endregion
 #region COLORS
 const COLORNAME_PLAYER: StringName = "magenta"
 const COLORNAME_ITEM_PROG: StringName = "plum"
@@ -68,11 +73,11 @@ static var rich_colors: Dictionary = {
 #endregion COLORS
 
 enum ItemHandling {
-	NONE = 0,
-	OTHER = 1,
-	OWN_OTHER = 3,
-	STARTING_OTHER = 5,
-	ALL = 7,
+	NONE = 0, ## Don't receive any items from the server.
+	OTHER = 1, ## Receive your items in other worlds from the server.
+	OWN_AND_OTHER = 3, ## Receive your items from your world and other worlds from the server.
+	STARTING_AND_OTHER = 5, ## Receive your items from your starting inventory and other worlds from the server.
+	ALL = 7, ## Receive your items from your starting inventory, your world, and other worlds from the server.
 }
 
 ## The current connection credentials to be used
@@ -179,7 +184,7 @@ static func log(s: Variant) -> void:
 		if OS.is_debug_build(): logging_file.flush()
 	print("[AP] %s" % str(s))
 ## Logs a message to the GodotAP log, but only if AP_LOG_COMMUNICATION is true
-static func comm_log(pref: String, s: Variant) -> void:
+func comm_log(pref: String, s: Variant) -> void:
 	if not AP_LOG_COMMUNICATION: return
 	AP.log("[%s] %s" % [pref,str(s)])
 ## Logs a message to the GodotAP log, but only in a Debug build
@@ -254,7 +259,7 @@ func send_command(cmdname: String, args: Dictionary) -> void:
 ## Sends an array of dictionaries as a packet of commands to the server
 func send_packet(obj: Array) -> void:
 	var s := JSON.stringify(obj)
-	AP.comm_log("SEND", s)
+	Archipelago.comm_log("SEND", s)
 	_socket.send_text(s)
 func _handle_command(json: Dictionary) -> void:
 	var command = json["cmd"]
@@ -403,8 +408,6 @@ func _handle_command(json: Dictionary) -> void:
 			AP.log("[UNHANDLED PACKET TYPE] %s" % str(json))
 
 #region DATAPACKS
-const READABLE_DATAPACK_FILES = true ## If true, datapackage local files will be stringified in a readable mode
-const datapack_cached_fields = ["item_name_to_id","location_name_to_id","checksum"]
 var datapack_cache: Dictionary
 var datapack_pending: Array = []
 ## For each game (key) in the checksums dictionary, requests an update for its datapackage

@@ -827,7 +827,7 @@ class HintPart extends ArrangedColumnsPart	: ## A part representing a hint info
 				part.hitboxes[-1] = bot_hb
 	func refresh(c: BaseConsole) -> void:
 		parts.clear()
-		var data := Archipelago.conn.get_gamedata_for_player(hint.item.src_player_id)
+		var data: DataCache = Archipelago.conn.get_gamedata_for_player(hint.item.src_player_id)
 		
 		add(Archipelago.out_player(c, hint.item.dest_player_id, false).centered(), 500)
 		add(hint.item.output(c, false).centered(), 500)
@@ -1123,7 +1123,7 @@ func printjson_command(json: Dictionary) -> String:
 	match json.get("type"):
 		"Chat":
 			var msg = json.get("message","")
-			var name_part := Archipelago.conn.get_player(json["slot"]).output(self)
+			var name_part: TextPart = Archipelago.conn.get_player(json["slot"]).output(self)
 			name_part.text += ": "
 			if not msg.is_empty():
 				add_text(msg)
@@ -1155,7 +1155,7 @@ func printjson_command(json: Dictionary) -> String:
 		"Join", "Part":
 			var data: Array = json["data"]
 			var elem: Dictionary = data.pop_front()
-			var plyr := Archipelago.conn.get_player(json["slot"])
+			var plyr: NetworkPlayer = Archipelago.conn.get_player(json["slot"])
 			var spl := (elem["text"] as String).split(plyr.get_name(), true, 1)
 			if spl.size() == 2:
 				elem["text"] = spl[0]
@@ -1196,13 +1196,13 @@ func printjson_out(elems: Array) -> String:
 			"item_id":
 				var item_id = int(txt)
 				var plyr_id = int(elem["player"])
-				var data := Archipelago.conn.get_gamedata_for_player(plyr_id)
+				var data: DataCache = Archipelago.conn.get_gamedata_for_player(plyr_id)
 				var flags := int(elem["flags"])
 				Archipelago.out_item(self, item_id, flags, data)
 			"location_id":
 				var loc_id = int(txt)
 				var plyr_id = int(elem["player"])
-				var data := Archipelago.conn.get_gamedata_for_player(plyr_id)
+				var data: DataCache = Archipelago.conn.get_gamedata_for_player(plyr_id)
 				Archipelago.out_location(self, loc_id, data)
 			"text":
 				add_text(txt)

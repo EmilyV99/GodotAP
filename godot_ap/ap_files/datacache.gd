@@ -22,11 +22,9 @@ static func from_file(file: FileAccess) -> DataCache:
 	return null
 func get_item_id(name:String) -> int:
 	var id = item_name_to_id.get(name,-1)
-	assert(id > -1)
 	return id
 func get_loc_id(name:String) -> int:
 	var id = location_name_to_id.get(name,-1)
-	assert(id > -1)
 	return id
 func get_item_name(id:int) -> String:
 	var v = item_name_to_id.find_key(id)

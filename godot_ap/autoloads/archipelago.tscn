@@ -1,0 +1,21 @@
+[gd_scene load_steps=5 format=3 uid="uid://c0ovofocoscyg"]
+
+[ext_resource type="Script" path="res://godot_ap/autoloads/archipelago.gd" id="1_41ph8"]
+[ext_resource type="Script" path="res://godot_ap/ap_files/version.gd" id="2_2e7gq"]
+
+[sub_resource type="Resource" id="Resource_pmgvy"]
+script = ExtResource("2_2e7gq")
+major = 0
+minor = 0
+build = 0
+
+[sub_resource type="Resource" id="Resource_m1v20"]
+script = ExtResource("2_2e7gq")
+major = 0
+minor = 5
+build = 0
+
+[node name="AP" type="Node"]
+script = ExtResource("1_41ph8")
+AP_CLIENT_VERSION = SubResource("Resource_pmgvy")
+AP_VERSION = SubResource("Resource_m1v20")

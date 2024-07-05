@@ -67,7 +67,7 @@ class LocationPart extends BaseConsole.ArrangedColumnsPart: ## A part representi
 	func refresh(c: BaseConsole) -> void:
 		loc.refresh()
 		clear()
-		var data := Archipelago.conn.get_gamedata_for_player()
+		var data: DataCache = Archipelago.conn.get_gamedata_for_player()
 		
 		var locpart: BaseConsole.TextPart
 		if parent.cols_by_name.has(COL_LOCATION):

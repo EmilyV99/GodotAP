@@ -1,8 +1,8 @@
-class_name Version
+class_name Version extends Resource
 
-var major := 0
-var minor := 0
-var build := 0
+@export var major := 0
+@export var minor := 0
+@export var build := 0
 
 static func from(json: Dictionary) -> Version:
 	if json["class"] != "Version":
