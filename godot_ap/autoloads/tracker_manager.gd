@@ -76,11 +76,11 @@ func load_tracker_locations(locs: Array[TrackerLocation]) -> void:
 	is_loaded = true
 	tracker_locations_loaded.emit()
 func load_named_rules(rules: Dictionary) -> void:
-	named_rules = rules
+	named_rules = rules.duplicate(true)
 func load_named_values(values: Dictionary) -> void:
-	named_values = values
+	named_values = values.duplicate(true)
 func load_statuses(status_array: Array[LocationStatus]):
-	statuses = status_array
+	statuses = status_array.duplicate(true)
 
 func clear_tracker() -> void:
 	for id in locations:
