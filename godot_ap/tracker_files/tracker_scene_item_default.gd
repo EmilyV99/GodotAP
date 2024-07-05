@@ -175,9 +175,11 @@ class VariablePart extends ValuePart: ## A part representing a variable
 		return self
 	
 	func count() -> int:
-		return count_value.calculate()
+		var ret = count_value.calculate()
+		return ret if ret is int else 0
 	func total() -> int:
-		return specified_total.calculate()
+		var ret = specified_total.calculate()
+		return ret if ret is int else 0
 	func tooltip() -> String:
 		return ttip
 	func colorname() -> String:
