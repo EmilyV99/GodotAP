@@ -32,4 +32,6 @@ static func from_dict(vals: Dictionary) -> TrackerValueNode:
 			return TrackerValueOperator.from_dict(vals)
 		"VAR":
 			return TrackerValueVariable.from_dict(vals)
+		"SWITCH":
+			return TrackerValueSwitch.from_dict(vals)
 	return null

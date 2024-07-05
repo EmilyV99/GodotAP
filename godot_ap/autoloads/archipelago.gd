@@ -988,6 +988,14 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 			.add_help("", "Prints out your connection tags")
 			.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, _msg: String):
 				mgr.console.add_line(str(AP_GAME_TAGS), "", mgr.console.COLOR_UI_MSG)))
+		cmd_manager.register_command(ConsoleCommand.new("/slot_data").debug()
+			.add_help("", "Prints slot_data")
+			.add_disable(is_not_connected)
+			.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, _msg: String):
+				var folder := mgr.console.add_foldable("[ SLOT_DATA ]", "/slot_data", mgr.console.COLOR_UI_MSG)
+				folder.add(mgr.console.make_indented_block(JSON.stringify(Archipelago.conn.slot_data, "\t"), 25))
+				folder.fold(false)
+				))
 		cmd_manager.setup_debug_commands()
 
 func _autofill_track(msg: String) -> Array[String]:

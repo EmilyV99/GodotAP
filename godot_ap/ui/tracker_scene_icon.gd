@@ -49,6 +49,8 @@ func refresh_tracker(fresh_connection: bool = false) -> void:
 	await TrackerManager.on_tracker_load()
 	var v = valnode.calculate()
 	var maxval = maxnode.calculate()
+	if not v is int: v = 0
+	if not maxval is int: maxval = 999
 	var gray := is_gray()
 	label.visible = maxval > 1 and v != 0
 	label.text = str(min(v,maxval))

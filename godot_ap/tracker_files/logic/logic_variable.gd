@@ -13,12 +13,16 @@ func can_access() -> Variant:
 		"!=":
 			return curval == val
 		">":
+			if not (curval is int and val is int): return null
 			return curval > val
 		"<":
+			if not (curval is int and val is int): return null
 			return curval < val
 		">=":
+			if not (curval is int and val is int): return null
 			return curval >= val
 		"<=":
+			if not (curval is int and val is int): return null
 			return curval <= val
 		_:
 			AP.log("Invalid operator '%s'" % op)
