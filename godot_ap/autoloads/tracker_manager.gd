@@ -29,6 +29,14 @@ var locations: Dictionary = {}
 var locs_by_name: Dictionary = {}
 var variables: Dictionary = {}
 
+signal locations_loaded
+signal tracker_locations_loaded
+var is_loaded := false
+func on_tracker_load() -> bool:
+	if not is_loaded:
+		await tracker_locations_loaded
+	return true
+
 func get_location(locid: int) -> APLocation:
 	return locations.get(locid, APLocation.nil())
 func get_loc_by_name(loc_name: String) -> APLocation:
@@ -48,25 +56,41 @@ func get_status(status_name: String) -> LocationStatus:
 func load_locations() -> void:
 	locations.clear()
 	locs_by_name.clear()
+	is_loaded = false
 	if Archipelago.datapack_pending:
 		await Archipelago.all_datapacks_loaded
 	for locid in Archipelago.location_list():
 		var loc := APLocation.make(locid)
 		locations[locid] = loc
 		locs_by_name[loc.name] = loc
+	locations_loaded.emit()
 func load_tracker_locations(locs: Array[TrackerLocation]) -> void:
+	if locations.is_empty():
+		await locations_loaded
 	for id in locations:
 		var loc := get_location(id)
 		if loc:
 			loc.reset_tracker_loc()
 	for loc in locs:
 		loc.get_loc().loaded_tracker_loc = loc
+	is_loaded = true
+	tracker_locations_loaded.emit()
 func load_named_rules(rules: Dictionary) -> void:
 	named_rules = rules
 func load_named_values(values: Dictionary) -> void:
 	named_values = values
 func load_statuses(status_array: Array[LocationStatus]):
 	statuses = status_array
+
+func clear_tracker() -> void:
+	for id in locations:
+		var loc := get_location(id)
+		if loc:
+			loc.reset_tracker_loc()
+	named_rules.clear()
+	named_values.clear()
+	variables.clear()
+	is_loaded = false
 
 func _init():
 	tracking = "Tracker" in Archipelago.AP_GAME_TAGS or Archipelago.config.is_tracking

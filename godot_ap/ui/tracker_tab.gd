@@ -32,10 +32,7 @@ func init_tracker():
 		await tracker.tree_exited
 		await get_tree().process_frame
 		tracker = null
-	TrackerManager.load_tracker_locations([])
-	TrackerManager.load_named_rules({})
-	TrackerManager.load_named_values({})
-	TrackerManager.variables.clear()
+	TrackerManager.clear_tracker()
 	
 	if not TrackerManager.tracking:
 		info_part.text = "Tracking Disabled"

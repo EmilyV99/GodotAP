@@ -196,8 +196,7 @@ func refresh_tracker(fresh_connection: bool = false) -> void:
 		loc_container = console.add(BaseConsole.ContainerPart.new())
 		Archipelago.conn.set_hint_notify(func(_hints): queue_refresh())
 		
-		if Archipelago.datapack_pending:
-			await Archipelago.all_datapacks_loaded
+		await TrackerManager.on_tracker_load()
 		for locid in Archipelago.location_list():
 			var new_part := LocationPart.new(TrackerManager.get_location(locid), trackerpack, self)
 			loc_container._add(new_part)

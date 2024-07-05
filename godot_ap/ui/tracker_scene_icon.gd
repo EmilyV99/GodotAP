@@ -35,6 +35,7 @@ func refresh_tracker(fresh_connection: bool = false) -> void:
 		assert(trackerpack as TrackerPack_Data)
 		image = trackerpack.load_image(image_path)
 		gray_image = Util.grayscale(image)
+	await TrackerManager.on_tracker_load()
 	var v = valnode.calculate()
 	var maxval = maxnode.calculate()
 	label.visible = maxval > 1

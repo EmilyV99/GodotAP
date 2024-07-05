@@ -134,6 +134,7 @@ func refresh_tracker(fresh_connection: bool = false) -> void:
 			pins.clear()
 		
 		var spot_dict := {}
+		await TrackerManager.on_tracker_load()
 		for loc in TrackerManager.locations.values():
 			var track_loc: TrackerLocation = loc.loaded_tracker_loc
 			if not track_loc: continue
