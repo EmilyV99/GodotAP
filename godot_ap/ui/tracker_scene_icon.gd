@@ -8,6 +8,7 @@ class_name TrackerScene_Icon extends TrackerScene_Base
 var image_path: String
 var width := -1
 var height := -1
+var show_max := false
 var valnode: TrackerValueNode
 var gray_under_node: TrackerValueNode = TrackerValueInt.new(1)
 var maxnode: TrackerValueNode
@@ -31,9 +32,9 @@ func show_image(img: Image) -> void:
 
 func is_gray() -> bool:
 	var v = valnode.calculate()
-	if not v is int: v = 0
+	if not TrackerPack_Base._check_int(v): v = 0
 	var gray = gray_under_node.calculate()
-	if not gray is int: gray = 1
+	if not TrackerPack_Base._check_int(gray): gray = 1
 	return v < gray
 
 ## Refresh due to general status update (refresh everything)
@@ -47,13 +48,21 @@ func refresh_tracker(fresh_connection: bool = false) -> void:
 		image = Util.modulate(_base_image, AP.color_from_name(modulate_colorname))
 		gray_image = Util.grayscale(image)
 	await TrackerManager.on_tracker_load()
+	
 	var v = valnode.calculate()
 	var maxval = maxnode.calculate()
-	if not v is int: v = 0
-	if not maxval is int: maxval = 999
+	
+	if TrackerPack_Base._check_int(v): v = roundi(v)
+	else: v = 0
+	
+	if TrackerPack_Base._check_int(maxval): maxval = roundi(maxval)
+	else: maxval = 999
+	
 	var gray := is_gray()
-	label.visible = maxval > 1 and v != 0
+	label.visible = show_max or (maxval > 1 and v != 0)
 	label.text = str(min(v,maxval))
+	if show_max:
+		label.text += " / %d" % maxval
 	show_image(gray_image if gray else image)
 	var mod_c = .3 if gray else 1.0
 	image_rect.modulate = Color(mod_c,mod_c,mod_c)

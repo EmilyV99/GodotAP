@@ -250,18 +250,20 @@ Content. Draws the specified text.
 
 ### GUI Icon
 
-| Key       | Value                                              |
-|-----------|----------------------------------------------------|
-| "type"    | "Icon"                                             |
-| "image"   | String, relative path from the json to the image   |
-| "width"   | Optional int, set the width of the icon            |
-| "height"  | Optional int, set the height of the icon           |
-| "tooltip" | Optional String, tooltip to show when hovered over |
-| "value"   | Optionally relate a value to the icon. See below.  |
+| Key              | Value                                                    |
+|------------------|----------------------------------------------------------|
+| "type"           | "Icon"                                                   |
+| "image"          | String, relative path from the json to the image         |
+| "width"          | Optional int, set the width of the icon                  |
+| "height"         | Optional int, set the height of the icon                 |
+| "tooltip"        | Optional String, tooltip to show when hovered over       |
+| "modulate_color" | Optional, [ColorName](#colors) to modulate the image by. |
+| "value"          | Optionally relate a value to the icon. See below.        |
 
 Content. Displays an image.
 
-Defaults to image source size, if width/height are not specified. If only one is specified, the other defaults to maintain the source aspect ratio.
+- Size defaults to image source size, if width/height are not specified. If only one is specified, the other defaults to maintain the source aspect ratio.
+- The default "modulate_color" is "white", which indicates "no change" to the image.
 
 "value" should contain the following information, if given:
 | Key              | Value                                                           |
@@ -269,16 +271,16 @@ Defaults to image source size, if width/height are not specified. If only one is
 | "val"            | [ValueNode](#value-nodes) giving the value.                     |
 | "gray_under"     | Optional, [ValueNode](#value-nodes) giving the grayscale value. |
 | "max"            | Optional, [ValueNode](#value-nodes) giving the max value.       |
+| "show_max"       | Optional, bool. If true, always shows the max value.            |
 | "color"          | Optional, [ColorName](#colors) to use for the number display.   |
 | "max_color"      | Optional, [ColorName](#colors) to use instead when val >= max.  |
-| "modulate_color" | Optional, [ColorName](#colors) to modulate the image by.        |
 
 - If the "val" is less than "gray_under", the icon will be grayscaled.
-- If the "val" is 0 or "max" is 1, no number will be shown.
+- If the "val" is 0 or "max" is 1, no number will be shown (unless "show_max" is true)
+- If "show_max" is true, the value will be shown as a fraction, ex. `1 / 5`, `2 / 2` instead of just showing the current value.
 - If no gray_under is given, it uses a default of 1.
 - If no max is given, it uses a default of 999.
 - The default "color" is "white", and the default "max_color" is "green".
-- The default "modulate_color" is "white", which indicates "no change" to the image.
 
 ### GUI LocationConsole
 | Key           | Value                                               |

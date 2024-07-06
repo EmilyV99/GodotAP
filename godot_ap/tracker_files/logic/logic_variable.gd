@@ -13,16 +13,16 @@ func can_access() -> Variant:
 		"!=":
 			return curval == val
 		">":
-			if not (curval is int and val is int): return null
+			if not ((curval is int or curval is float) and (val is int or val is float)): return null
 			return curval > val
 		"<":
-			if not (curval is int and val is int): return null
+			if not ((curval is int or curval is float) and (val is int or val is float)): return null
 			return curval < val
 		">=":
-			if not (curval is int and val is int): return null
+			if not ((curval is int or curval is float) and (val is int or val is float)): return null
 			return curval >= val
 		"<=":
-			if not (curval is int and val is int): return null
+			if not ((curval is int or curval is float) and (val is int or val is float)): return null
 			return curval <= val
 		_:
 			AP.log("Invalid operator '%s'" % op)

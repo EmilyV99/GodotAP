@@ -10,6 +10,7 @@ var named_values: Dictionary = {}
 var statuses: Array[LocationStatus] = []
 var statuses_by_name: Dictionary = {}
 var starting_variables: Dictionary = {}
+var metadata: Dictionary = {}
 
 var gui_layout: Dictionary = TrackerPack_Data.DEFAULT_GUI.duplicate(true)
 
@@ -191,7 +192,7 @@ func validate_gui_element(elem) -> bool:
 			return true
 		"Icon":
 			if not TrackerPack_Base._expect_gui_keys(elem, ["type", "image", "halign", "valign", "stretch_ratio", "draw_filter"],
-				{"width": -1, "height": -1, "value": null, "tooltip": ""}):
+				{"width": -1, "height": -1, "value": null, "tooltip": "", "modulate_color": "white"}):
 				return false
 			if not TrackerPack_Base._expect_gui_type(elem, "image", TYPE_STRING):
 				return false
@@ -201,27 +202,29 @@ func validate_gui_element(elem) -> bool:
 				return false
 			if not TrackerPack_Base._expect_gui_type(elem, "tooltip", TYPE_STRING):
 				return false
+			if not TrackerPack_Base._expect_color("Type 'Icon'", elem, "modulate_color"):
+				return false
 			if elem.get("value"):
 				if not TrackerPack_Base._expect_gui_type(elem, "value", TYPE_DICTIONARY):
 					return false
 				var value_dict = elem["value"]
 				if not TrackerPack_Base._expect_keys("Type 'Icon/value'", value_dict, ["val"],
-					{"gray_under": 1, "max": 999, "color": "white", "max_color": "green", "modulate_color": "white"}):
+					{"max": 999, "color": "white", "max_color": "green", "gray_under": 1, "show_max": false}):
 					return false
 				if TrackerValueNode.from_json_val(value_dict["val"]) == null:
-					TrackerPack_Base._output_error("Invalid ValueNode", "'Icon/value/val' encounted bad 'val' ValueNode!")
+					TrackerPack_Base._output_error("Invalid ValueNode", "'Icon/value' encounted bad 'val' ValueNode!")
 					return false
 				if TrackerValueNode.from_json_val(value_dict["gray_under"]) == null:
-					TrackerPack_Base._output_error("Invalid ValueNode", "'Icon/value/gray_under' encounted bad 'gray_under' ValueNode!")
+					TrackerPack_Base._output_error("Invalid ValueNode", "'Icon/value' encounted bad 'gray_under' ValueNode!")
 					return false
 				if TrackerValueNode.from_json_val(value_dict["max"]) == null:
-					TrackerPack_Base._output_error("Invalid ValueNode", "'Icon/value/max' encounted bad 'max' ValueNode!")
+					TrackerPack_Base._output_error("Invalid ValueNode", "'Icon/value' encounted bad 'max' ValueNode!")
 					return false
 				if not TrackerPack_Base._expect_color("Type 'Icon/value'", value_dict, "color"):
 					return false
 				if not TrackerPack_Base._expect_color("Type 'Icon/value'", value_dict, "max_color"):
 					return false
-				if not TrackerPack_Base._expect_color("Type 'Icon/value'", value_dict, "modulate_color"):
+				if not TrackerPack_Base._expect_type("Type 'Icon/value'", value_dict, "show_max", TYPE_BOOL):
 					return false
 			return true
 		null:
@@ -398,13 +401,15 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 			scene.image_path = elem.get("image")
 			scene.width = elem.get("width", -1)
 			scene.height = elem.get("height", -1)
+			
+			scene.modulate_colorname = elem.get("modulate_color", "white")
 			var valdict: Dictionary = elem.get("value", {})
 			scene.valnode = TrackerValueNode.from_json_val(valdict.get("val", 0))
 			scene.gray_under_node = TrackerValueNode.from_json_val(valdict.get("gray_under", 1))
 			scene.maxnode = TrackerValueNode.from_json_val(valdict.get("max", 999))
+			scene.show_max = valdict.get("show_max", false)
 			scene.colorname = valdict.get("color", "white")
 			scene.max_colorname = valdict.get("max_color", "green")
-			scene.modulate_colorname = valdict.get("modulate_color", "white")
 			scene.tooltip = elem.get("tooltip", "")
 			return scene
 		null:
@@ -428,7 +433,8 @@ func instantiate() -> TrackerScene_Root:
 	if not description_ttip.is_empty():
 		scene.labelttip = description_ttip
 	TrackerManager.variables.clear()
-	TrackerManager.variables.merge(starting_variables)
+	for key in starting_variables:
+		TrackerManager.variables[key] = starting_variables[key].calculate()
 	TrackerManager.load_tracker_locations(locations)
 	TrackerManager.load_named_rules(named_rules)
 	TrackerManager.load_named_values(named_values)
@@ -460,6 +466,7 @@ func _save_file(data: Dictionary) -> Error:
 		stat_vals.append(stat.save_dict())
 	data["description_bar"] = description_bar
 	data["description_ttip"] = description_ttip
+	data["metadata"] = metadata
 	data["GUI"] = gui_layout
 	data["statuses"] = stat_vals
 	data["locations"] = loc_vals
@@ -482,6 +489,7 @@ func _load_file(json: Dictionary) -> Error:
 	var ret := OK
 	description_bar = json.get("description_bar", "")
 	description_ttip = json.get("description_ttip", "")
+	metadata = json.get("metadata", {"author": "", "url": ""})
 	gui_layout = json.get("GUI", TrackerPack_Data.DEFAULT_GUI)
 	if not validate_gui():
 		ret = ERR_INVALID_DATA
@@ -504,7 +512,8 @@ func _load_file(json: Dictionary) -> Error:
 	_variable_ops = json.get("variables", {})
 	for varname in _variable_ops.keys():
 		var varvals: Dictionary = _variable_ops[varname]
-		starting_variables[varname] = varvals.get("value", 0)
+		var val_node := TrackerValueNode.from_json_val(varvals.get("value", 0))
+		starting_variables[varname] = val_node
 		var itemtrigs: Dictionary = varvals.get("item_triggers", {})
 		for iname in itemtrigs.keys():
 			var op: Dictionary = itemtrigs[iname]

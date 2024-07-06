@@ -34,4 +34,8 @@ static func from_dict(vals: Dictionary) -> TrackerValueNode:
 			return TrackerValueVariable.from_dict(vals)
 		"SWITCH":
 			return TrackerValueSwitch.from_dict(vals)
+		"SLOT_DATA":
+			return TrackerValueSlotData.from_dict(vals)
+		"COND":
+			return TrackerValueCond.from_dict(vals)
 	return null

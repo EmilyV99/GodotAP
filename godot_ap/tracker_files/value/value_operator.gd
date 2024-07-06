@@ -28,7 +28,7 @@ func _to_dict() -> Dictionary:
 	return {
 		"type": "OP",
 		"op": op,
-		"vals": values.map(func(v: TrackerValueNode): v._to_json_val()),
+		"vals": values.map(func(v: TrackerValueNode): return v._to_json_val()),
 	}
 
 static func from_dict(vals: Dictionary) -> TrackerValueNode:

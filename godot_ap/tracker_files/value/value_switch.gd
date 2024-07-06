@@ -5,9 +5,10 @@ var cases: Dictionary
 
 func calculate() -> Variant:
 	var v = keynode.calculate()
-	if v is int: v = str(v)
+	if v is int or v is float: v = str(v)
 	var node = cases.get(v)
-	if node: return node.calculate()
+	if node:
+		return node.calculate()
 	return null
 
 func _to_dict() -> Dictionary:

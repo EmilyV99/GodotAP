@@ -899,6 +899,21 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 									rule.get_repr(0), 25, mgr.console.COLOR_UI_MSG))
 								cont.textpart_replace("true", "true", true, "", rich_colors["green"])
 								cont.textpart_replace("false", "false", true, "", rich_colors["red"])
+						var named_vals = TrackerManager.named_values.keys()
+						if not named_vals.is_empty():
+							if needs_spacing:
+								outer_folder.add(mgr.console.make_header_spacing())
+							else: needs_spacing = true
+							var vals_folder := outer_folder.add(mgr.console.make_foldable("[ NAMED VALUES ]", "", mgr.console.COLOR_UI_MSG))
+							for valname in named_vals:
+								var val_node := TrackerManager.get_named_value(valname)
+								var value = val_node.calculate()
+								var inner_folder: BaseConsole.FoldablePart = vals_folder.add(
+									mgr.console.make_foldable("%s = %s" % [valname,value], "", mgr.console.COLOR_UI_MSG))
+								var val_str: String = "%s" % JSON.stringify(val_node._to_dict(), "\t", false)
+								var cont: BaseConsole.ContainerPart = inner_folder.add(mgr.console.make_indented_block(val_str, 25))
+								cont.textpart_replace("true", "true", true, "", rich_colors["green"])
+								cont.textpart_replace("false", "false", true, "", rich_colors["red"])
 						var vars = TrackerManager.variables.keys()
 						if not vars.is_empty():
 							if needs_spacing:
