@@ -90,7 +90,7 @@ var aplock: APLock = null
 
 var _socket := WebSocketPeer.new()
 
-var config := APConfigManager.new()
+var config : APConfigManager
 
 #region CONNECTION
 var conn: ConnectionInfo ## The active Archipelago connection
@@ -1036,6 +1036,14 @@ func _init():
 	_update_tags()
 	if AP_AUTO_OPEN_CONSOLE:
 		open_console()
+func _ready():
+	for node in get_children():
+		if node is APConfigManager:
+			config = node
+			break
+	if not config:
+		config = APConfigManager.new()
+		add_child(config)
 enum ItemClassification {
 	FILLER = 0b000,
 	PROG = 0b001,
