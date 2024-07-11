@@ -92,7 +92,7 @@ func clear_tracker() -> void:
 	variables.clear()
 	is_loaded = false
 
-func _init():
+func _ready():
 	tracking = "Tracker" in Archipelago.AP_GAME_TAGS or Archipelago.config.is_tracking
 	# Set up default pack
 	var def_pack: TrackerPack_Scene = TrackerPack_Scene.new()
