@@ -1,5 +1,6 @@
 class_name APConfigManager extends Node
 
+var _pause_saving := false
 var is_tracking := false :
 	set(val):
 		if val != is_tracking:
@@ -24,10 +25,13 @@ func load_cfg() -> bool:
 	var file: FileAccess = FileAccess.open("user://ap/settings.dat", FileAccess.READ)
 	if not file:
 		return false
+	_pause_saving = true
 	_load_cfg(file)
 	file.close()
+	_pause_saving = false
 	return true
 func save_cfg() -> void:
+	if _pause_saving: return
 	DirAccess.make_dir_recursive_absolute("user://ap/")
 	var file: FileAccess = FileAccess.open("user://ap/settings.dat", FileAccess.WRITE)
 	_save_cfg(file)
