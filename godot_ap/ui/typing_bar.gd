@@ -181,7 +181,7 @@ func _gui_input(event):
 					if has_select():
 						type("")
 					elif text_pos > 0:
-						if event.ctrl_pressed:
+						if event.is_command_or_control_pressed():
 							var ws := RegEx.new()
 							ws.compile("^[ \t\r\n]+$")
 							var alphanum := RegEx.new()
@@ -201,7 +201,7 @@ func _gui_input(event):
 					if has_select():
 						type("")
 					elif text_pos < text.length():
-						if event.ctrl_pressed:
+						if event.is_command_or_control_pressed():
 							var ws := RegEx.new()
 							ws.compile("^[ \t\r\n]+$")
 							var alphanum := RegEx.new()
@@ -219,7 +219,7 @@ func _gui_input(event):
 						updated_text = true
 				KEY_LEFT:
 					if text_pos:
-						if event.ctrl_pressed:
+						if event.is_command_or_control_pressed():
 							var ws := RegEx.new()
 							ws.compile("^[ \t\r\n]+$")
 							var alphanum := RegEx.new()
@@ -235,7 +235,7 @@ func _gui_input(event):
 							text_pos -= 1
 				KEY_RIGHT:
 					if text_pos < text.length():
-						if event.ctrl_pressed:
+						if event.is_command_or_control_pressed():
 							var ws := RegEx.new()
 							ws.compile("^[ \t\r\n]+$")
 							var alphanum := RegEx.new()
@@ -275,7 +275,7 @@ func _gui_input(event):
 					clear_select()
 				_:
 					var did_something := false
-					if event.ctrl_pressed:
+					if event.is_command_or_control_pressed():
 						did_something = true
 						match event.keycode:
 							KEY_A:
