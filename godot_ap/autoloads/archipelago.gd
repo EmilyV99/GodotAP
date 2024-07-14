@@ -263,6 +263,7 @@ func send_packet(obj: Array) -> void:
 	_socket.send_text(s)
 func _handle_command(json: Dictionary) -> void:
 	var command = json["cmd"]
+	comm_log("RECV", str(json))
 	match command:
 		"RoomInfo":
 			status = APStatus.CONNECTED

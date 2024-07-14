@@ -60,6 +60,7 @@ signal obtained_items(items: Array[NetworkItem]) ## Emitted for each item *packe
 signal refresh_items(items: Array[NetworkItem]) ## Emitted when the server re-sends ALL obtained items
 signal on_hint_update(hints: Array[NetworkHint]) ## Emitted when hints relevant to this client change
 
+signal all_scout_cached ## Emitted when a scout packet containing ALL locations is received (see `force_scout_all`)
 # Outgoing server packets
 var _notified_keys: Dictionary = {}
 var _hint_listening: bool = false
@@ -132,13 +133,16 @@ func scout(location: int, create_as_hint: int, proc: Callable) -> void:
 			_scout_queue[location] = [proc]
 		else: _scout_queue[location].append(proc)
 func _on_locinfo(json: Dictionary) -> void:
-	for loc in json.get("locations", []):
-		var locid = loc["location"]
+	var locs = json.get("locations", [])
+	for loc in locs:
+		var locid = loc["location"] as int
 		_scout_cache[locid] = NetworkItem.from(loc, false)
 		for proc in _scout_queue.get(locid, []):
 			proc.call(_scout_cache[locid])
 		_scout_queue.erase(locid)
-func _force_scout_all() -> void: ## Scouts every location into the local cache
+	if locs.size() == slot_locations.size():
+		all_scout_cached.emit()
+func force_scout_all() -> void: ## Scouts every location into the local cache
 	Archipelago.send_command("LocationScouts", {"locations": slot_locations.keys(), "create_as_hint": 0})
 
 ## Sends a `Bounce` packet with whatever information you like
@@ -160,8 +164,9 @@ func send_deathlink(cause: String = ""):
 	if not Archipelago.is_deathlink():
 		AP.log("Tried to send DeathLink while DeathLink is not enabled!")
 		return
-	var cmd: Dictionary = {}
+	var cmd: Dictionary = {"data": {}}
 	if not cause.is_empty():
-		cmd["cause"] = cause
-	cmd["source"] = get_player_name(-1, false)
+		cmd["data"]["cause"] = cause
+	cmd["data"]["source"] = get_player_name(-1, false)
+	cmd["data"]["time"] = Time.get_unix_time_from_system()
 	send_bounce(cmd, [], [], ["DeathLink"])
