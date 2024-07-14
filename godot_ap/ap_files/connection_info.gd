@@ -154,11 +154,11 @@ func send_bounce(data: Dictionary, target_games: Array[String], target_slots: Ar
 ## Sends a `Bounce` packet designed for the `DeathLink` feature
 ## Requires the client be connected with the `DeathLink` tag
 func send_deathlink(cause: String = ""):
-	if not "DeathLink" in Archipelago.AP_GAME_TAGS:
+	if not Archipelago.is_deathlink():
 		AP.log("Tried to send DeathLink while DeathLink is not enabled!")
 		return
 	var cmd: Dictionary = {}
 	if not cause.is_empty():
 		cmd["cause"] = cause
-	cmd["source"] = get_player_name(false)
+	cmd["source"] = get_player_name(-1, false)
 	send_bounce(cmd, [], [], ["DeathLink"])
