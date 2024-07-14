@@ -1165,3 +1165,6 @@ func _ensure_connected(console: BaseConsole) -> bool:
 
 func set_deathlink(state: bool) -> void:
 	set_tag("DeathLink", state)
+
+func is_deathlink() -> bool:
+	return "DeathLink" in Archipelago.AP_GAME_TAGS
