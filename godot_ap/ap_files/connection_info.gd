@@ -120,12 +120,14 @@ var _scout_queue: Dictionary
 ## Sends a `LocationScouts` packet, and connects the specified `Callable[NetworkItem]->void`
 ## to be called with the returned information.
 ## If the location has already been scouted this session, returns the cached info.
-func scout(location: int, create_as_hint: int, proc: Callable):
+func scout(location: int, create_as_hint: int, proc: Callable) -> void:
 	var item: NetworkItem = _scout_cache.get(location)
+	if create_as_hint or not item: # Always send if `create_as_hint`!
+		Archipelago.send_command("LocationScouts", {"locations": [location], "create_as_hint": create_as_hint})
+	if not proc: return
 	if item:
 		proc.call(item)
 	else:
-		Archipelago.send_command("LocationScouts", {"locations": [location], "create_as_hint": create_as_hint})
 		if not _scout_queue.has(location):
 			_scout_queue[location] = [proc]
 		else: _scout_queue[location].append(proc)
@@ -136,7 +138,8 @@ func _on_locinfo(json: Dictionary) -> void:
 		for proc in _scout_queue.get(locid, []):
 			proc.call(_scout_cache[locid])
 		_scout_queue.erase(locid)
-
+func _force_scout_all() -> void: ## Scouts every location into the local cache
+	Archipelago.send_command("LocationScouts", {"locations": slot_locations.keys(), "create_as_hint": 0})
 
 ## Sends a `Bounce` packet with whatever information you like
 func send_bounce(data: Dictionary, target_games: Array[String], target_slots: Array[String], target_tags: Array[String]) -> void:
