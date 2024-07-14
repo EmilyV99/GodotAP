@@ -31,6 +31,8 @@ static func from_hint(json: Dictionary) -> NetworkItem:
 
 func is_local() -> bool:
 	return src_player_id == dest_player_id
+func is_prog() -> bool:
+	return flags & AP.ItemClassification.PROG
 
 func get_name() -> String:
 	return Archipelago.conn.get_gamedata_for_player(dest_player_id).get_item_name(id)
