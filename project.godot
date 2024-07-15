@@ -33,6 +33,11 @@ window/subwindows/embed_subwindows=false
 
 import/blender/enabled=false
 
+[gui]
+
+theme/custom="res://godot_ap/ui/themes/dark_theme.tres"
+theme/custom_font="res://godot_ap/ui/themes/basic_font.tres"
+
 [rendering]
 
 renderer/rendering_method="mobile"

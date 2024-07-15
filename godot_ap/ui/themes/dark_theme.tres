@@ -1,0 +1,99 @@
+[gd_resource type="Theme" load_steps=32 format=3 uid="uid://cxykl3ktlymdu"]
+
+[ext_resource type="SystemFont" uid="uid://dgq72ioiluq5i" path="res://godot_ap/ui/themes/basic_font.tres" id="1_cpy6y"]
+[ext_resource type="StyleBox" uid="uid://b7l3w40krs8op" path="res://godot_ap/ui/themes/button_shadow.tres" id="2_kur21"]
+[ext_resource type="Texture2D" uid="uid://lx3r4ysmhst6" path="res://godot_ap/ui/themes/graphics/cbox_check.png" id="3_dpqyv"]
+[ext_resource type="Texture2D" uid="uid://cjukwyh6fgvv4" path="res://godot_ap/ui/themes/graphics/cbox_check_dis.png" id="4_fy47w"]
+[ext_resource type="Texture2D" uid="uid://dg4xujj5xi01r" path="res://godot_ap/ui/themes/graphics/radio_check.png" id="5_1fe38"]
+[ext_resource type="Texture2D" uid="uid://7wv3n2652kwn" path="res://godot_ap/ui/themes/graphics/radio_check_dis.png" id="6_2nukh"]
+[ext_resource type="Texture2D" uid="uid://c2p38ss6caiy" path="res://godot_ap/ui/themes/graphics/radio_uncheck.png" id="7_ie3ii"]
+[ext_resource type="Texture2D" uid="uid://xy8oso1rxld7" path="res://godot_ap/ui/themes/graphics/radio_uncheck_dis.png" id="8_dh5d3"]
+[ext_resource type="Texture2D" uid="uid://b1jakuiicisq8" path="res://godot_ap/ui/themes/graphics/cbox_uncheck.png" id="9_dqk21"]
+[ext_resource type="Texture2D" uid="uid://dbfqqrnahvgnr" path="res://godot_ap/ui/themes/graphics/cbox_uncheck_dis.png" id="10_d32ph"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_iball"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_lvqm5"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_74mdv"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_rdp2k"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_su75r"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_bclps"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_u5hwh"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_2pay1"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_uprds"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_v11af"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_52m25"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_q2t2l"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_uc4hb"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_np7rw"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_lw8cl"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_y4tri"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_uhyl3"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_bghaf"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_m8uab"]
+bg_color = Color(0.174028, 0.174028, 0.174028, 1)
+corner_detail = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4qgl6"]
+bg_color = Color(0.174028, 0.174028, 0.174028, 1)
+corner_detail = 5
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_qegls"]
+
+[resource]
+Button/font_sizes/font_size = 20
+Button/fonts/font = ExtResource("1_cpy6y")
+Button/styles/normal = ExtResource("2_kur21")
+CheckBox/constants/check_v_offset = 0
+CheckBox/font_sizes/font_size = 20
+CheckBox/fonts/font = ExtResource("1_cpy6y")
+CheckBox/icons/checked = ExtResource("3_dpqyv")
+CheckBox/icons/checked_disabled = ExtResource("4_fy47w")
+CheckBox/icons/radio_checked = ExtResource("5_1fe38")
+CheckBox/icons/radio_checked_disabled = ExtResource("6_2nukh")
+CheckBox/icons/radio_unchecked = ExtResource("7_ie3ii")
+CheckBox/icons/radio_unchecked_disabled = ExtResource("8_dh5d3")
+CheckBox/icons/unchecked = ExtResource("9_dqk21")
+CheckBox/icons/unchecked_disabled = ExtResource("10_d32ph")
+CheckBox/styles/disabled = SubResource("StyleBoxEmpty_iball")
+CheckBox/styles/hover = SubResource("StyleBoxEmpty_lvqm5")
+CheckBox/styles/hover_pressed = SubResource("StyleBoxEmpty_74mdv")
+CheckBox/styles/normal = SubResource("StyleBoxEmpty_rdp2k")
+CheckBox/styles/pressed = SubResource("StyleBoxEmpty_su75r")
+CheckButton/styles/disabled = SubResource("StyleBoxEmpty_bclps")
+CheckButton/styles/hover = SubResource("StyleBoxEmpty_u5hwh")
+CheckButton/styles/hover_pressed = SubResource("StyleBoxEmpty_2pay1")
+CheckButton/styles/normal = SubResource("StyleBoxEmpty_uprds")
+CheckButton/styles/pressed = SubResource("StyleBoxEmpty_v11af")
+InfoLabel/base_type = &"Label"
+Label/colors/font_color = Color(1, 1, 1, 1)
+Label/font_sizes/font_size = 20
+Label/fonts/font = ExtResource("1_cpy6y")
+OptionButton/styles/disabled = SubResource("StyleBoxEmpty_52m25")
+OptionButton/styles/disabled_mirrored = SubResource("StyleBoxEmpty_q2t2l")
+OptionButton/styles/hover = SubResource("StyleBoxEmpty_uc4hb")
+OptionButton/styles/hover_mirrored = SubResource("StyleBoxEmpty_np7rw")
+OptionButton/styles/normal = SubResource("StyleBoxEmpty_lw8cl")
+OptionButton/styles/normal_mirrored = SubResource("StyleBoxEmpty_y4tri")
+OptionButton/styles/pressed = SubResource("StyleBoxEmpty_uhyl3")
+OptionButton/styles/pressed_mirrored = SubResource("StyleBoxEmpty_bghaf")
+Panel/styles/panel = SubResource("StyleBoxFlat_m8uab")
+PanelContainer/styles/panel = SubResource("StyleBoxFlat_4qgl6")
+TabContainer/styles/panel = SubResource("StyleBoxEmpty_qegls")

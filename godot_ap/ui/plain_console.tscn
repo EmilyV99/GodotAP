@@ -15,14 +15,13 @@ mouse_filter = 1
 script = ExtResource("1_3bobc")
 font = ExtResource("2_w3f10")
 
-[node name="TooltipBG" type="ColorRect" parent="."]
+[node name="TooltipBG" type="Panel" parent="."]
 visible = false
 z_index = 1000
 layout_mode = 2
 offset_right = 40.0
 offset_bottom = 40.0
 mouse_filter = 2
-color = Color(0.150075, 0.150075, 0.150075, 1)
 
 [node name="Tooltip" type="Label" parent="TooltipBG"]
 layout_mode = 2

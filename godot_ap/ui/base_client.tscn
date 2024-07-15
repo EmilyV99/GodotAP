@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://cgq7n1figlpu3"]
+[gd_scene load_steps=11 format=3 uid="uid://cgq7n1figlpu3"]
 
 [ext_resource type="Script" path="res://godot_ap/ui/console_window_container.gd" id="1_gj1xe"]
 [ext_resource type="PackedScene" uid="uid://c51q4vrwhlcl7" path="res://godot_ap/ui/console_tab.tscn" id="2_704wl"]
@@ -8,16 +8,9 @@
 [ext_resource type="Script" path="res://godot_ap/ui/connect_box.gd" id="4_yf1mw"]
 [ext_resource type="SystemFont" uid="uid://73rjoc23d4ub" path="res://godot_ap/ui/console_font.tres" id="5_wdwfc"]
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_rud5c"]
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_1cnti"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5222u"]
-bg_color = Color(0.231373, 0.231373, 0.231373, 1)
-
-[sub_resource type="LabelSettings" id="LabelSettings_w2j8w"]
-font = ExtResource("5_wdwfc")
-font_size = 40
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_sal5b"]
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ksdsn"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_8fs71"]
 font = ExtResource("5_wdwfc")
@@ -26,27 +19,17 @@ font_color = Color(1, 0.443684, 0.375096, 1)
 outline_size = 6
 outline_color = Color(0, 0, 0, 1)
 
-[node name="WindowContainer" type="MarginContainer"]
+[node name="WindowContainer" type="PanelContainer"]
 custom_minimum_size = Vector2(1366, 705)
 offset_right = 1366.0
 offset_bottom = 705.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/margin_left = 0
-theme_override_constants/margin_top = 0
-theme_override_constants/margin_right = 0
-theme_override_constants/margin_bottom = 0
 script = ExtResource("1_gj1xe")
-
-[node name="BG" type="ColorRect" parent="."]
-layout_mode = 2
-color = Color(0.231373, 0.231373, 0.231373, 1)
 
 [node name="Tabs" type="TabContainer" parent="."]
 custom_minimum_size = Vector2(1366, 705)
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxEmpty_rud5c")
-theme_override_styles/tabbar_background = SubResource("StyleBoxFlat_5222u")
 tab_focus_mode = 0
 
 [node name="Console" type="MarginContainer" parent="Tabs"]
@@ -66,31 +49,18 @@ layout_mode = 2
 size_flags_horizontal = 8
 size_flags_vertical = 0
 mouse_filter = 2
-theme_override_constants/margin_left = 0
-theme_override_constants/margin_top = 0
-theme_override_constants/margin_right = 0
-theme_override_constants/margin_bottom = 0
 script = ExtResource("3_1ho76")
 
 [node name="Row" type="HBoxContainer" parent="Tabs/Console/ConnectBox"]
 clip_contents = true
 layout_mode = 2
 mouse_filter = 2
+theme_override_constants/separation = -1
 
-[node name="Handle" type="MarginContainer" parent="Tabs/Console/ConnectBox/Row"]
+[node name="Handle" type="PanelContainer" parent="Tabs/Console/ConnectBox/Row"]
 clip_contents = true
 layout_mode = 2
 size_flags_vertical = 0
-mouse_filter = 0
-theme_override_constants/margin_left = 0
-theme_override_constants/margin_top = 0
-theme_override_constants/margin_right = 0
-theme_override_constants/margin_bottom = 0
-
-[node name="BG" type="ColorRect" parent="Tabs/Console/ConnectBox/Row/Handle"]
-layout_mode = 2
-mouse_filter = 1
-color = Color(0.231373, 0.231373, 0.231373, 1)
 
 [node name="Margin" type="MarginContainer" parent="Tabs/Console/ConnectBox/Row/Handle"]
 layout_mode = 2
@@ -103,22 +73,13 @@ theme_override_constants/margin_bottom = 0
 layout_mode = 2
 size_flags_vertical = 0
 mouse_filter = 1
+theme_override_fonts/font = ExtResource("5_wdwfc")
+theme_override_font_sizes/font_size = 40
 text = "🞀"
-label_settings = SubResource("LabelSettings_w2j8w")
 
-[node name="Box" type="MarginContainer" parent="Tabs/Console/ConnectBox/Row"]
+[node name="Box" type="PanelContainer" parent="Tabs/Console/ConnectBox/Row"]
 clip_contents = true
 layout_mode = 2
-theme_override_constants/margin_left = 0
-theme_override_constants/margin_top = 0
-theme_override_constants/margin_right = 0
-theme_override_constants/margin_bottom = 0
-
-[node name="BG" type="ColorRect" parent="Tabs/Console/ConnectBox/Row/Box"]
-layout_mode = 2
-size_flags_horizontal = 3
-mouse_filter = 1
-color = Color(0.231373, 0.231373, 0.231373, 1)
 
 [node name="Margins" type="MarginContainer" parent="Tabs/Console/ConnectBox/Row/Box"]
 layout_mode = 2
@@ -204,7 +165,8 @@ layout_mode = 2
 
 [node name="ShowPwd" type="CheckBox" parent="Tabs/Console/ConnectBox/Row/Box/Margins/VBox/Content/HBox"]
 layout_mode = 2
-theme_override_styles/focus = SubResource("StyleBoxEmpty_sal5b")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_1cnti")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_ksdsn")
 
 [node name="Label4" type="Label" parent="Tabs/Console/ConnectBox/Row/Box/Margins/VBox/Content/HBox"]
 layout_mode = 2
@@ -237,17 +199,16 @@ label_settings = SubResource("LabelSettings_8fs71")
 
 [node name="ButtonRow" type="HBoxContainer" parent="Tabs/Console/ConnectBox/Row/Box/Margins/VBox"]
 layout_mode = 2
-size_flags_horizontal = 8
 size_flags_vertical = 3
 
 [node name="ConnectBtn" type="Button" parent="Tabs/Console/ConnectBox/Row/Box/Margins/VBox/ButtonRow"]
 layout_mode = 2
-size_flags_horizontal = 2
+size_flags_horizontal = 3
 text = "Connect"
 
 [node name="DisconnectBtn" type="Button" parent="Tabs/Console/ConnectBox/Row/Box/Margins/VBox/ButtonRow"]
 layout_mode = 2
-size_flags_horizontal = 10
+size_flags_horizontal = 3
 disabled = true
 text = "Disconnect"
 
@@ -263,6 +224,9 @@ script = ExtResource("3_iwodb")
 [node name="Console" parent="Tabs/Hints" instance=ExtResource("2_704wl")]
 layout_mode = 2
 size_flags_vertical = 3
+
+[node name="Console" parent="Tabs/Hints/Console/Cont/ConsoleMargin/Row" index="0"]
+font_color = Color(1, 1, 1, 1)
 
 [node name="TypingBar" parent="Tabs/Hints/Console" index="1"]
 visible = false

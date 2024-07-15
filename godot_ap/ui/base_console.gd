@@ -17,7 +17,7 @@ class FontFlags:
 	set(val):
 		font_size = val
 		queue_redraw()
-@export var font_color: Color = Color.WHITE :
+@export var font_color: Color = Color.TRANSPARENT :
 	set(val):
 		font_color = val
 		queue_redraw()
@@ -78,7 +78,7 @@ func get_font_ascent(flags: FontFlags = null) -> float:
 func get_string_size(text: String, flags: FontFlags = null) -> Vector2:
 	return get_font(flags).get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
 
-@onready var tooltip_bg: ColorRect = $TooltipBG
+@onready var tooltip_bg: Panel = $TooltipBG
 @onready var tooltip_label: Label = $TooltipBG/Tooltip
 class ConsoleDrawData:
 	var win_l: float
@@ -395,7 +395,7 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 		if old_hitbox != get_hitbox():
 			hitbox_changed.emit()
 	func _get_color(c: BaseConsole) -> Color:
-		return color if color.a8 else c.font_color
+		return color if color.a8 else (c.font_color if c.font_color.a8 else c.get_theme_color("font_color", "Label"))
 	
 	static func make(txt: String, ttip := "", col := Color.TRANSPARENT) -> TextPart:
 		var part := TextPart.new()
@@ -975,6 +975,10 @@ func _init():
 	mouse_exited.connect(func():
 		has_mouse = false
 		refocus_part())
+
+func _ready():
+	if Engine.is_editor_hint(): return
+	theme_changed.connect(queue_redraw)
 
 func _process(_delta):
 	if Engine.is_editor_hint(): return

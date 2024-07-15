@@ -1,4 +1,4 @@
-@tool class_name ConsoleWindowContainer extends MarginContainer
+@tool class_name ConsoleWindowContainer extends PanelContainer
 
 @onready var tabs: TabContainer = $Tabs
 @onready var console_tab: Control = $Tabs/Console
