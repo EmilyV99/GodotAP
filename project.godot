@@ -13,7 +13,7 @@ config_version=5
 config/name="GodotAP"
 config/description="Archipelago connection handler for Godot.
 See https://github.com/EmilyV99/GodotAP"
-config/version="0.1.3"
+config/version="0.1.4"
 run/main_scene="res://godot_ap/ui/main.tscn"
 config/features=PackedStringArray("4.2", "Mobile")
 config/icon="res://icon.svg"
@@ -28,6 +28,10 @@ TrackerManager="*res://godot_ap/autoloads/tracker_manager.gd"
 
 window/size/extend_to_title=true
 window/subwindows/embed_subwindows=false
+
+[filesystem]
+
+import/blender/enabled=false
 
 [rendering]
 
