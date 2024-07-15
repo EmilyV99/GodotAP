@@ -14,6 +14,7 @@ focus_mode = 2
 mouse_filter = 1
 script = ExtResource("1_3bobc")
 font = ExtResource("2_w3f10")
+font_color = Color(1, 1, 1, 1)
 
 [node name="TooltipBG" type="Panel" parent="."]
 visible = false
@@ -22,6 +23,7 @@ layout_mode = 2
 offset_right = 40.0
 offset_bottom = 40.0
 mouse_filter = 2
+theme_type_variation = &"TooltipPanel"
 
 [node name="Tooltip" type="Label" parent="TooltipBG"]
 layout_mode = 2

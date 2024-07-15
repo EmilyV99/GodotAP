@@ -1,9 +1,9 @@
 extends GridContainer
 
-@onready var ipbox: TypingBar = $IP_Box
-@onready var portbox: TypingBar = $Port_Box
-@onready var slotbox: TypingBar = $Slot_Box
-@onready var pwdbox: TypingBar = $Pwd_Box
+@onready var ipbox: LineEdit = $IP_Box
+@onready var portbox: LineEdit = $Port_Box
+@onready var slotbox: LineEdit = $Slot_Box
+@onready var pwdbox: LineEdit = $Pwd_Box
 @onready var errlbl: Label = $ErrorLabel
 
 func _ready() -> void:
@@ -12,16 +12,16 @@ func _ready() -> void:
 	Archipelago.connected.connect(func(_conn,_json): update_connection(true))
 	Archipelago.disconnected.connect(func(): update_connection(false))
 func refresh_creds(creds: APCredentials) -> void:
-	ipbox.retype(creds.ip)
-	portbox.retype(creds.port)
-	slotbox.retype(creds.slot)
-	pwdbox.retype(creds.pwd)
+	ipbox.text = creds.ip
+	portbox.text = creds.port
+	slotbox.text = creds.slot
+	pwdbox.text = creds.pwd
 
 func update_connection(status: bool) -> void:
-	ipbox.disabled = status
-	portbox.disabled = status
-	slotbox.disabled = status
-	pwdbox.disabled = status
+	ipbox.editable = not status
+	portbox.editable = not status
+	slotbox.editable = not status
+	pwdbox.editable = not status
 func try_connection() -> void:
 	if Archipelago.is_not_connected():
 		Archipelago.ap_connect(ipbox.text, portbox.text, slotbox.text, pwdbox.text)

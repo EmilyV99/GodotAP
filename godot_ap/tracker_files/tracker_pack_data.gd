@@ -96,7 +96,7 @@ func validate_gui_element(elem) -> bool:
 			for side in ["top","bottom","left","right"]:
 				if not TrackerPack_Base._expect_gui_type(elem, side, TYPE_INT):
 					return false
-			if not TrackerPack_Base._expect_gui_color(elem, "color"):
+			if not TrackerPack_Base._expect_gui_color(elem, "color", true):
 				return false
 			return true
 		"Tabs":
@@ -307,10 +307,19 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 			return cont
 		"Margin":
 			var cont := CustomMargin.new()
-			var colorrect := ColorRect.new()
+			var panel := Panel.new()
 			var color_name: String = elem["color"]
-			colorrect.color = AP.color_from_name(color_name, AP.color_from_name("default"))
-			cont.add_child(colorrect)
+			if color_name != "default":
+				var panel_box: StyleBox = panel.get_theme_stylebox("panel").duplicate(true)
+				var def_color: Color = panel_box.bg_color if panel_box is StyleBoxFlat else Color.DIM_GRAY
+				var col := AP.color_from_name(color_name, def_color)
+				if panel_box is StyleBoxFlat:
+					panel_box.bg_color = col
+				else:
+					panel_box = StyleBoxFlat.new()
+					panel_box.bg_color = col
+				panel.add_theme_stylebox_override("panel", panel_box)
+			cont.add_child(panel)
 			var inner_cont := MarginContainer.new()
 			cont.add_child(inner_cont)
 			var sides = ["top","bottom","left","right"]
@@ -321,8 +330,8 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 			cont.size_flags_vertical = TrackerPack_Base.get_size_flag(elem.get("valign", "EXPAND_FILL"))
 			cont.size_flags_stretch_ratio = elem.get("stretch_ratio", 1.0)
 			cont.texture_filter = TrackerPack_Base.get_draw_filter(elem.get("draw_filter", "INHERIT"))
-			colorrect.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			colorrect.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 			inner_cont.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			inner_cont.size_flags_vertical = Control.SIZE_EXPAND_FILL
 			var child_elem = _instantiate_gui_element(elem.get("child"))
@@ -332,9 +341,6 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 		"Tabs":
 			var cont := TabContainer.new()
 			cont.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
-			var bg_box := StyleBoxFlat.new()
-			bg_box.bg_color = Color8(0x2C,0x2C,0x2C)
-			cont.add_theme_stylebox_override("tabbar_background", bg_box)
 			cont.tab_focus_mode = Control.FOCUS_NONE
 			cont.size_flags_horizontal = TrackerPack_Base.get_size_flag(elem.get("halign", "EXPAND_FILL"))
 			cont.size_flags_vertical = TrackerPack_Base.get_size_flag(elem.get("valign", "EXPAND_FILL"))

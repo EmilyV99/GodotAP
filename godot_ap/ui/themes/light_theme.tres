@@ -500,15 +500,15 @@ content_margin_left = 0.0
 content_margin_top = 0.0
 content_margin_right = 0.0
 content_margin_bottom = 0.0
-bg_color = Color(0.571649, 0.571649, 0.571649, 1)
+bg_color = Color(0.572549, 0.572549, 0.572549, 1)
 corner_detail = 1
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_e2ogv"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kqakr"]
 content_margin_left = 0.0
 content_margin_top = 0.0
 content_margin_right = 0.0
 content_margin_bottom = 0.0
-bg_color = Color(0.571649, 0.571649, 0.571649, 1)
+bg_color = Color(0.572549, 0.572549, 0.572549, 1)
 corner_detail = 1
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_myqik"]
@@ -691,17 +691,13 @@ content_margin_top = 0.0
 content_margin_right = 0.0
 content_margin_bottom = 0.0
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1hoh2"]
-content_margin_left = 8.0
-content_margin_top = 2.0
-content_margin_right = 8.0
-content_margin_bottom = 2.0
-bg_color = Color(0, 0, 0, 0.5)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-corner_detail = 5
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ksbrj"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.455817, 0.455817, 0.455817, 1)
+corner_detail = 1
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3ba2q"]
 content_margin_left = 4.0
@@ -1007,7 +1003,7 @@ OptionButton/styles/normal_mirrored = SubResource("StyleBoxEmpty_y4tri")
 OptionButton/styles/pressed = SubResource("StyleBoxEmpty_uhyl3")
 OptionButton/styles/pressed_mirrored = SubResource("StyleBoxEmpty_bghaf")
 Panel/styles/panel = SubResource("StyleBoxFlat_i0641")
-PanelContainer/styles/panel = SubResource("StyleBoxFlat_e2ogv")
+PanelContainer/styles/panel = SubResource("StyleBoxFlat_kqakr")
 PopupDialog/styles/panel = SubResource("StyleBoxFlat_myqik")
 PopupMenu/colors/font_accelerator_color = Color(0.7, 0.7, 0.7, 0.8)
 PopupMenu/colors/font_color = Color(0.875, 0.875, 0.875, 1)
@@ -1082,7 +1078,8 @@ TextEdit/styles/read_only = SubResource("StyleBoxFlat_m440d")
 TooltipLabel/colors/font_color = Color(0.875, 0.875, 0.875, 1)
 TooltipLabel/colors/font_outline_color = Color(0, 0, 0, 0)
 TooltipLabel/colors/font_shadow_color = Color(0, 0, 0, 0)
-TooltipPanel/styles/panel = SubResource("StyleBoxFlat_1hoh2")
+TooltipPanel/base_type = &"Panel"
+TooltipPanel/styles/panel = SubResource("StyleBoxFlat_ksbrj")
 Tree/colors/children_hl_line_color = Color(0.27, 0.27, 0.27, 1)
 Tree/colors/custom_button_font_highlight = Color(0.95, 0.95, 0.95, 1)
 Tree/colors/drop_position_color = Color(1, 1, 1, 1)

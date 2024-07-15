@@ -256,12 +256,13 @@ static func _expect_type(pref: String, dict: Dictionary, key: String, type: int,
 		return false
 	return true
 
-static func _expect_gui_color(dict: Dictionary, key: String) -> bool:
-	return _expect_color("Type '%s'" % dict.get("type", "NULL"), dict, key)
-static func _expect_color(pref: String, dict: Dictionary, key: String) -> bool:
+static func _expect_gui_color(dict: Dictionary, key: String, allow_default := false) -> bool:
+	return _expect_color("Type '%s'" % dict.get("type", "NULL"), dict, key, allow_default)
+static func _expect_color(pref: String, dict: Dictionary, key: String, allow_default := false) -> bool:
 	if not _expect_type(pref, dict, key, TYPE_STRING, "ColorName"):
 		return false
 	var cname = dict.get(key)
+	if allow_default and cname == "default": return true
 	if AP.color_from_name(cname, Color.WHITE) == Color.WHITE and \
 		AP.color_from_name(cname, Color.BLACK) == Color.BLACK:
 		TrackerPack_Base._output_error("Invalid Color", "%s: Color '%s' could not be parsed as a color!" % [pref, cname])

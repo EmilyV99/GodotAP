@@ -71,10 +71,7 @@ class MapPin extends Control:
 			return
 		ttip = ColorRect.new()
 		ttip.top_level = true
-		ttip.color = AP.color_from_name("default")
-		var bg := ColorRect.new()
-		bg.color = AP.color_from_name("black")
-		ttip.add_child(bg)
+		ttip.color = AP.color_from_name("black")
 		
 		var console: BaseConsole = load("res://godot_ap/ui/plain_console.tscn").instantiate()
 		console.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -93,20 +90,17 @@ class MapPin extends Control:
 		console.add(columns)
 		console._calculate_hitboxes()
 		console.custom_minimum_size = Vector2(console._draw_data.max_shown_x+8,console._draw_data.max_shown_y)
-		bg.custom_minimum_size = Vector2(console.custom_minimum_size.x + 8, console.custom_minimum_size.y + 8)
-		ttip.custom_minimum_size = Vector2(bg.custom_minimum_size.x + 8, bg.custom_minimum_size.y + 8)
+		ttip.custom_minimum_size = Vector2(console.custom_minimum_size.x + 8, console.custom_minimum_size.y + 8)
 		
 		
-		bg.add_child(console)
+		
+		ttip.add_child(console)
 		parent.add_child(ttip)
 		position_ttip()
 		console.size = console.custom_minimum_size
-		bg.size = bg.custom_minimum_size
 		ttip.size = ttip.custom_minimum_size
-		bg.top_level = true
 		console.top_level = true
-		bg.position = ttip.position + Vector2(4,4)
-		console.position = bg.position + Vector2(4,4)
+		console.position = ttip.position + Vector2(4,4)
 	func position_ttip():
 		if not ttip: return
 		ttip.position.x = global_position.x + size.x/2 - ttip.size.x/2

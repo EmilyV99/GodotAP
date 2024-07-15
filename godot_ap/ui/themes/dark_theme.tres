@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=32 format=3 uid="uid://cxykl3ktlymdu"]
+[gd_resource type="Theme" load_steps=33 format=3 uid="uid://cxykl3ktlymdu"]
 
 [ext_resource type="SystemFont" uid="uid://dgq72ioiluq5i" path="res://godot_ap/ui/themes/basic_font.tres" id="1_cpy6y"]
 [ext_resource type="StyleBox" uid="uid://b7l3w40krs8op" path="res://godot_ap/ui/themes/button_shadow.tres" id="2_kur21"]
@@ -57,6 +57,10 @@ corner_detail = 5
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_qegls"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jwfkm"]
+bg_color = Color(0.235294, 0.235294, 0.235294, 1)
+corner_detail = 5
+
 [resource]
 Button/font_sizes/font_size = 20
 Button/fonts/font = ExtResource("1_cpy6y")
@@ -97,3 +101,5 @@ OptionButton/styles/pressed_mirrored = SubResource("StyleBoxEmpty_bghaf")
 Panel/styles/panel = SubResource("StyleBoxFlat_m8uab")
 PanelContainer/styles/panel = SubResource("StyleBoxFlat_4qgl6")
 TabContainer/styles/panel = SubResource("StyleBoxEmpty_qegls")
+TooltipPanel/base_type = &"Panel"
+TooltipPanel/styles/panel = SubResource("StyleBoxFlat_jwfkm")
