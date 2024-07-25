@@ -1,4 +1,4 @@
 [gd_resource type="SystemFont" format=3 uid="uid://73rjoc23d4ub"]
 
 [resource]
-font_names = PackedStringArray("Constantia")
+font_names = PackedStringArray("Constantia", "Serif")
