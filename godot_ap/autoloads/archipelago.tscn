@@ -19,3 +19,9 @@ build = 0
 script = ExtResource("1_41ph8")
 AP_CLIENT_VERSION = SubResource("Resource_pmgvy")
 AP_VERSION = SubResource("Resource_m1v20")
+
+[node name="HangTimer" type="Timer" parent="."]
+wait_time = 5.0
+one_shot = true
+
+[connection signal="timeout" from="HangTimer" to="." method="force_disconnect"]

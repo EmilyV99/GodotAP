@@ -19,6 +19,8 @@ class_name AP extends Node
 @export var datapack_cached_fields = ["item_name_to_id","location_name_to_id","checksum"] ## Which fields should be saved from received DataPacks.
 @export_group("")
 
+@onready var hang_clock: Timer = $HangTimer
+
 #region Connection packets
 # See `ConnectionInfo` (Archipelago.conn) for more signals
 signal preconnect ## Emitted before connection is attempted
@@ -94,7 +96,7 @@ var config : APConfigManager
 #region CONNECTION
 var conn: ConnectionInfo ## The active Archipelago connection
 
-
+signal connect_step(message: String)
 enum APStatus {
 	DISCONNECTED, ## Not connected to any Archipelago server
 	SOCKET_CONNECTING, ## Socket attempting to connect
@@ -138,6 +140,7 @@ func ap_reconnect() -> void:
 		ap_disconnect()
 		_queue_reconnect = true
 		return
+	connect_step.emit("Connecting...")
 	status = APStatus.SOCKET_CONNECTING
 	_connect_attempts = 1
 	_wss = true
@@ -156,13 +159,29 @@ func ap_disconnect() -> void:
 	if status == APStatus.DISCONNECTED or status == APStatus.DISCONNECTING:
 		return
 	status = APStatus.DISCONNECTING
+	connect_step.emit("Disconnecting...")
 	_socket.close()
+	hang_clock.start(hang_clock.wait_time)
 	AP.close_logger()
 	if output_console:
 		var part := output_console.add_line("Disconnecting...","%s:%s %s" % [creds.ip,creds.port,creds.slot],output_console.COLOR_UI_MSG)
 		while status != APStatus.DISCONNECTED:
 			await status_updated
 		part.text = "Disconnected from AP."
+
+func force_disconnect() -> void:
+	if status == APStatus.DISCONNECTED: return
+	_socket.close()
+	_socket = WebSocketPeer.new()
+	status = APStatus.DISCONNECTED
+	disconnected.emit()
+	
+	for c in all_datapacks_loaded.get_connections():
+		if c["flags"] & CONNECT_ONE_SHOT:
+			var caller: Callable = c["callable"]
+			if caller.get_method() == "send_command" and caller.get_object() == self:
+				if caller.get_bound_arguments_count() == 2 and caller.get_bound_arguments()[0] == "Connect":
+					all_datapacks_loaded.disconnect(caller)
 #endregion CONNECTION
 
 #region LOGGING TO FILE
@@ -235,6 +254,7 @@ func _poll():
 	_socket.poll()
 	match _socket.get_ready_state():
 		WebSocketPeer.STATE_CLOSED: # Exited; handle reconnection, or concluding intentional disconnection
+			hang_clock.stop()
 			if status == APStatus.DISCONNECTING:
 				status = APStatus.DISCONNECTED
 				disconnected.emit()
@@ -266,6 +286,7 @@ func _handle_command(json: Dictionary) -> void:
 	match command:
 		"RoomInfo":
 			status = APStatus.CONNECTED
+			connect_step.emit("Parsing RoomInfo...")
 			if output_console and _connecting_part:
 				_connecting_part.text = "Authenticating..."
 			conn = ConnectionInfo.new()
@@ -279,7 +300,8 @@ func _handle_command(json: Dictionary) -> void:
 			args["tags"] = AP_GAME_TAGS
 			args["items_handling"] = AP_ITEM_HANDLING
 			roominfo.emit(conn, json)
-			send_command("Connect",args)
+			all_datapacks_loaded.connect(send_command.bind("Connect",args), CONNECT_ONE_SHOT)
+			_send_datapack_request()
 		"ConnectionRefused":
 			var err_str := str(json["errors"])
 			if output_console and _connecting_part:
@@ -287,6 +309,7 @@ func _handle_command(json: Dictionary) -> void:
 				_connecting_part.tooltip += "\nERROR(S): "+err_str
 				_connecting_part = null
 			AP.log("Connection errors: %s" % err_str)
+			connect_step.emit("ERR: %s" % err_str)
 			connectionrefused.emit(conn, json)
 			ap_disconnect()
 		"Connected":
@@ -328,17 +351,17 @@ func _handle_command(json: Dictionary) -> void:
 			# Deathlink stuff?
 			# If deathlink stuff, possibly ConnectUpdate to add DeathLink tag?
 			
-			_send_datapack_request()
-			
 			status = APStatus.PLAYING
 			if output_console and _connecting_part:
 				_connecting_part.text = "Connected Successfully!"
 				_connecting_part = null
 			
+			connect_step.emit("Connected!")
 			if AP_PRINT_ITEMS_ON_CONNECT:
 				_printout_recieved_items = true
 				await get_tree().create_timer(3).timeout
 				_printout_recieved_items = false
+			
 			connected.emit(conn, json)
 		"PrintJSON":
 			var s: String = (output_console.printjson_command(json) if output_console
@@ -351,8 +374,6 @@ func _handle_command(json: Dictionary) -> void:
 				_handle_datapack(game, packs[game])
 			_send_datapack_request()
 		"ReceivedItems":
-			if datapack_pending:
-				await all_datapacks_loaded
 			while status != APStatus.PLAYING:
 				if status == APStatus.CONNECTED:
 					await status_updated
@@ -439,15 +460,18 @@ func _handle_datapack(game: String, data: Dictionary) -> void:
 func _send_datapack_request() -> void:
 	if datapack_pending:
 		var game = datapack_pending.pop_front()
+		connect_step.emit("Fetching DataPackage for '%s'..." % game)
 		var req = [{"cmd":"GetDataPackage","games":[game]}]
-		#var req = [{"cmd":"GetDataPackage","games":datapack_pending}]
-		#datapack_pending = []
 		send_packet(req)
+		_cache_datapacks()
 	else:
-		var cachefile = FileAccess.open("user://ap/datapacks/cache.dat", FileAccess.WRITE)
-		cachefile.store_var(datapack_cache, true)
-		cachefile.close()
+		connect_step.emit("All DataPackages fetched!")
+		_cache_datapacks()
 		all_datapacks_loaded.emit()
+func _cache_datapacks() -> void:
+	var cachefile = FileAccess.open("user://ap/datapacks/cache.dat", FileAccess.WRITE)
+	cachefile.store_var(datapack_cache, true)
+	cachefile.close()
 
 static var _data_caches: Dictionary = {}
 ## Returns a DataCache for the specified game. If it cannot be found, returns an empty (invalid) DataCache, which can still be used, albeit it will not have the desired data within.
