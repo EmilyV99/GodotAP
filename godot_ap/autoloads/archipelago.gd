@@ -89,7 +89,7 @@ var creds: APCredentials = APCredentials.new()
 ## Saving an APLock object in a save file allows you to lock it to a particular room.
 var aplock: APLock = null
 
-var _socket := WebSocketPeer.new()
+var _socket: WebSocketPeer
 
 var config : APConfigManager
 
@@ -172,7 +172,7 @@ func ap_disconnect() -> void:
 func force_disconnect() -> void:
 	if status == APStatus.DISCONNECTED: return
 	_socket.close()
-	_socket = WebSocketPeer.new()
+	create_socket()
 	status = APStatus.DISCONNECTED
 	disconnected.emit()
 	
@@ -182,6 +182,11 @@ func force_disconnect() -> void:
 			if caller.get_method() == "send_command" and caller.get_object() == self:
 				if caller.get_bound_arguments_count() == 2 and caller.get_bound_arguments()[0] == "Connect":
 					all_datapacks_loaded.disconnect(caller)
+
+func create_socket() -> void:
+	const BYTE_PER_MB := 1000000
+	_socket = WebSocketPeer.new()
+	_socket.inbound_buffer_size = 5*BYTE_PER_MB
 #endregion CONNECTION
 
 #region LOGGING TO FILE
@@ -1056,11 +1061,11 @@ func _autofill_track(msg: String) -> Array[String]:
 	return []
 func _init():
 	init_command_manager(true)
-	_socket.inbound_buffer_size = 65535*8
 	_update_tags()
 	if AP_AUTO_OPEN_CONSOLE:
 		open_console()
 func _ready():
+	create_socket()
 	for node in get_children():
 		if node is APConfigManager:
 			config = node
