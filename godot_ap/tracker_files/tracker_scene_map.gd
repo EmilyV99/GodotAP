@@ -14,13 +14,13 @@ class MapPin extends Control:
 	var base_pos: Vector2i
 	var locs: Array[TrackerLocation] = []
 	var parent: TrackerScene_Map
-	
+
 	var skipped := false
 	var showing_ttip := false :
 		set = show_tooltip
-	
+
 	var ttip: ColorRect = null
-	
+
 	func _ready():
 		focus_mode = Control.FOCUS_CLICK
 		mouse_filter = Control.MOUSE_FILTER_STOP
@@ -40,13 +40,13 @@ class MapPin extends Control:
 			if stat == "Found":
 				continue
 			statuses[stat] = statuses.get(stat, 0) + 1
-		
+
 		if Archipelago.config.hide_finished_map_squares and statuses.is_empty():
 			skipped = true
 			showing_ttip = false
 			return
 		skipped = false
-		
+
 		var c_status = "Found"
 		for stat in locs[0]._iter_statuses(false):
 			if stat.text in statuses:
@@ -60,7 +60,7 @@ class MapPin extends Control:
 		var rect := Rect2(Vector2.ZERO, size)
 		draw_rect(rect, color)
 		draw_rect(rect, Color.BLACK, false, 2)
-	
+
 	func show_tooltip(val: bool) -> void:
 		if showing_ttip == val: return
 		showing_ttip = val
@@ -72,7 +72,7 @@ class MapPin extends Control:
 		ttip = ColorRect.new()
 		ttip.top_level = true
 		ttip.color = AP.color_from_name("black")
-		
+
 		var console: BaseConsole = load("res://godot_ap/ui/plain_console.tscn").instantiate()
 		console.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		console.custom_minimum_size = Vector2(9999,9999)
@@ -91,9 +91,9 @@ class MapPin extends Control:
 		console._calculate_hitboxes()
 		console.custom_minimum_size = Vector2(console._draw_data.max_shown_x+8,console._draw_data.max_shown_y)
 		ttip.custom_minimum_size = Vector2(console.custom_minimum_size.x + 8, console.custom_minimum_size.y + 8)
-		
-		
-		
+
+
+
 		ttip.add_child(console)
 		parent.add_child(ttip)
 		position_ttip()
@@ -126,7 +126,7 @@ func refresh_tracker(fresh_connection: bool = false) -> void:
 			for pin in pins:
 				pin.queue_free()
 			pins.clear()
-		
+
 		var spot_dict := {}
 		await TrackerManager.on_tracker_load()
 		for loc in TrackerManager.locations.values():

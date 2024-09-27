@@ -50,7 +50,7 @@ func save_as(path: String) -> Error:
 		var writer := ZIPPacker.new()
 		err = writer.open(path)
 		if err: return err
-		
+
 		err = writer.start_file("pack.json")
 		if err:
 			writer.close()
@@ -70,7 +70,7 @@ func save_as(path: String) -> Error:
 	elif path.ends_with(".json"):
 		var file := FileAccess.open(path, FileAccess.WRITE)
 		if not file: return FileAccess.get_open_error()
-		
+
 		var data: Dictionary = {}
 		err = _save_file(data)
 		if not err:
@@ -120,7 +120,7 @@ static func load_from(path: String) -> TrackerPack_Base:
 		if err:
 			load_error = str(err)
 			return null
-		
+
 		var bytes := reader.read_file("pack.json")
 		if bytes.is_empty():
 			load_error = "Error loading 'pack.json'"
@@ -163,7 +163,7 @@ static func load_json_string(text: String) -> TrackerPack_Base:
 		return null
 	else:
 		json = json_parser.data
-	
+
 	if not json is Dictionary:
 		if not json:
 			load_error = "Invalid JSON"
@@ -241,7 +241,7 @@ static func _type_name(type: int) -> String:
 		TYPE_DICTIONARY: return "Dictionary"
 		TYPE_ARRAY: return "Array"
 	return "??"
-		
+
 static func _expect_gui_type(dict: Dictionary, key: String, type: int, custom_name := "") -> bool:
 	return _expect_type("Type '%s'" % dict.get("type", "NULL"),  dict, key, type, custom_name)
 static func _expect_type(pref: String, dict: Dictionary, key: String, type: int, custom_name := "") -> bool:

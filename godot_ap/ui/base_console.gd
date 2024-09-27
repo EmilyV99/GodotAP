@@ -89,34 +89,34 @@ class ConsoleDrawData:
 		get: return win_l + win_w/2
 	var win_h: float:
 		get: return b
-	
+
 	var l: float
 	var t: float
 	var r: float
 	var b: float
-	
+
 	var x: float :
 		set(val):
 			x = val
 			if not Util.approx_eq(x, l):
 				reset_y = null
 	var y: float
-	
+
 	var w: float:
 		get: return r-l
 	var h: float:
 		get: return b-t
-	
+
 	var cx: float:
 		get: return l + w/2
 	var cy: float:
 		get: return t + h/2
-	
+
 	var max_shown_y: float = 0.0
 	var reset_y: Variant
-	
+
 	var max_shown_x: float = 0.0 ## Only ever reset manually
-	
+
 	func show_x(tx: float) -> void:
 		if tx > max_shown_x:
 			max_shown_x = tx;
@@ -236,7 +236,7 @@ class ConsolePart: ## A base part, for all other parts to inherit from
 				if window.position.x + window.size.x > parent_window.size.x:
 					var diff2 = (window.position.x + window.size.x) - parent_window.size.x
 					window.position.x = max(0, window.position.x - diff2)
-					
+
 			if not window.visible: window.visible = true
 		hitbox_changed.connect(resize_window)
 		window.add_child(vbox)
@@ -259,10 +259,10 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 			_font_flags.bold = bold
 			_font_flags.italic = italic
 			return _font_flags
-	
+
 	func _to_string() -> String:
 		return "TextPart<'%s' '%s' %s>" % [text, tooltip, color]
-	
+
 	func _hitbox_string(c: BaseConsole, subtext: String, data: ConsoleDrawData):
 		var str_sz = c.get_string_size(subtext, _font_flags)
 		str_sz.y = min(str_sz.y, c.get_line_height())
@@ -290,7 +290,7 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 		else:
 			c.tooltip_label.reset_size()
 		c.tooltip_bg.size = c.tooltip_label.size
-		
+
 		var cpos: Vector2 = c.hovered_hitbox.get_center()
 		c.tooltip_bg.position.x = cpos.x - c.tooltip_bg.size.x/2
 		if cpos.y >= c.size.y/2:
@@ -313,7 +313,7 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 		c.tooltip_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 		c.tooltip_label.reset_size()
 		_ttip_calc_size(c,data)
-		
+
 		#region Bound tooltip in-window
 		if c.tooltip_bg.size.x >= data.w: #don't let width overrun
 			c.tooltip_label.autowrap_mode = TextServer.AUTOWRAP_WORD
@@ -396,7 +396,7 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 			hitbox_changed.emit()
 	func _get_color(c: BaseConsole) -> Color:
 		return color if color.a8 else (c.font_color if c.font_color.a8 else c.get_theme_color("font_color", "Label"))
-	
+
 	static func make(txt: String, ttip := "", col := Color.TRANSPARENT) -> TextPart:
 		var part := TextPart.new()
 		part.text = txt
@@ -439,7 +439,7 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 			if not left.is_empty():
 				ret.append(dupe_settings(left))
 		return ret
-	
+
 class CenterTextPart extends TextPart:
 	func _hitbox_string(c: BaseConsole, subtext: String, data: ConsoleDrawData):
 		var str_sz = c.get_string_size(subtext, _font_flags)
@@ -537,7 +537,7 @@ class IteratorPart extends ConsolePart: ## A base part, for parts that contain p
 		for p in iter_parts():
 			if not p: continue
 			p.clear_hitboxes()
-		
+
 	func get_hitboxes() -> Array[Rect2]:
 		var ret: Array[Rect2] = []
 		for p in iter_parts():
@@ -590,7 +590,7 @@ class ContainerPart extends IteratorPart:
 class FoldablePart extends ContainerPart:
 	var folded: bool :
 		set = fold
-	
+
 	signal fold_changed
 	func fold(val: bool) -> void:
 		if folded == val: return
@@ -599,7 +599,7 @@ class FoldablePart extends ContainerPart:
 		var textpart: TextPart = parts[0]
 		textpart.text = textpart.text.rstrip(" 🞂🞃") + (" 🞂" if folded else " 🞃")
 		fold_changed.emit()
-	
+
 	func draw(c: BaseConsole, data: ConsoleDrawData) -> void:
 		if dont_draw():
 			super(c, data)
@@ -614,7 +614,7 @@ class FoldablePart extends ContainerPart:
 		data.ensure_line(c)
 		super(c, data)
 		data.ensure_line(c)
-	
+
 	func try_click(evt: InputEventMouseButton, pos: Vector2) -> bool:
 		if super(evt, pos): return true
 		if not evt.pressed or not evt.button_index == MOUSE_BUTTON_LEFT:
@@ -669,7 +669,7 @@ class ColumnsPart extends ContainerPart:
 		var xs: Array = [data.x]
 		var ys: Array = [dy]
 		var heights: Array = []
-		
+
 		for q in parts.size():
 			var data_copy := data.duplicate()
 			data_copy.max_shown_x = 0.0
@@ -716,7 +716,7 @@ class ColumnsPart extends ContainerPart:
 		data.newline(c)
 class ArrangedColumnsPart extends ContainerPart:
 	var widths: Array[int] = []
-	
+
 	## Adds a part as a 'Column', with an associated width.
 	## Max of 1 part can have a width '-1', which will auto-fill the remaining width
 	func add(part: ConsolePart, w: int) -> ConsolePart:
@@ -828,7 +828,7 @@ class HintPart extends ArrangedColumnsPart	: ## A part representing a hint info
 	func refresh(c: BaseConsole) -> void:
 		parts.clear()
 		var data: DataCache = Archipelago.conn.get_gamedata_for_player(hint.item.src_player_id)
-		
+
 		add(Archipelago.out_player(c, hint.item.dest_player_id, false).centered(), 500)
 		add(hint.item.output(c, false).centered(), 500)
 		add(Archipelago.out_player(c, hint.item.src_player_id, false).centered(), 500)
@@ -930,7 +930,7 @@ func make_indented_block(s: String, indent: float, color := Color.TRANSPARENT) -
 		var sz: int = line.length()
 		line = line.lstrip("\t")
 		sz -= line.length()
-		
+
 		var depth: int = sz - indent_depth
 		if depth: # Update the indent when it changes
 			c._add(make_indent(indent * depth))
@@ -1041,9 +1041,9 @@ func _draw() -> void:
 		part.draw(self, _draw_data)
 	if hovered_part:
 		hovered_part.draw_hover(self, _draw_data)
-	
+
 	if Engine.is_editor_hint(): return
-	
+
 	var max_scroll = _draw_data.max_scroll()
 	if scroll > max_scroll:
 		scroll = max_scroll

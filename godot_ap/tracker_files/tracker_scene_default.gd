@@ -43,7 +43,7 @@ class LocationPart extends BaseConsole.ArrangedColumnsPart: ## A part representi
 	var loc: APLocation
 	var trackerpack: TrackerPack_Data
 	var parent: TrackerScene_Default
-	
+
 	func _init(tracker_loc: APLocation, pack: TrackerPack_Data, parent_scene: TrackerScene_Default):
 		loc = tracker_loc
 		trackerpack = pack
@@ -68,7 +68,7 @@ class LocationPart extends BaseConsole.ArrangedColumnsPart: ## A part representi
 		loc.refresh()
 		clear()
 		var data: DataCache = Archipelago.conn.get_gamedata_for_player()
-		
+
 		var locpart: BaseConsole.TextPart
 		if parent.cols_by_name.has(COL_LOCATION):
 			locpart = add(Archipelago.out_location(c, loc.id, data, false).centered(),parent.cols_by_name[COL_LOCATION].col_width)
@@ -83,7 +83,7 @@ class LocationPart extends BaseConsole.ArrangedColumnsPart: ## A part representi
 			var stats: Array = TrackerManager.statuses.filter(func(s): return s.text == stat)
 			if stats:
 				add(stats[0].make_c_text(c), parent.cols_by_name[COL_LOC_STAT].col_width)
-		
+
 
 func sort_click(event: InputEventMouseButton, column_name: String) -> bool:
 	if not event.pressed: return false
@@ -173,9 +173,9 @@ func refresh_tracker(fresh_connection: bool = false) -> void:
 				cols_in_order[2].col_width = max(cols_in_order[2].col_width, sz.x)
 			cols_in_order[1].col_width += 10
 			cols_in_order[2].col_width += 10
-			
+
 			sort_cols.push_front(cols_in_order[2])
-		
+
 		var to_hide := [false, not show_hint_status, false]
 		var header := BaseConsole.ArrangedColumnsPart.new()
 		var ind := 0
@@ -195,7 +195,7 @@ func refresh_tracker(fresh_connection: bool = false) -> void:
 		headings[sort_cols[0].index].text += (" ↑" if sort_cols[0].sort_ascending else " ↓")
 		loc_container = console.add(BaseConsole.ContainerPart.new())
 		Archipelago.conn.set_hint_notify(func(_hints): queue_refresh())
-		
+
 		await TrackerManager.on_tracker_load()
 		for locid in Archipelago.location_list():
 			var new_part := LocationPart.new(TrackerManager.get_location(locid), trackerpack, self)
@@ -206,12 +206,12 @@ func refresh_tracker(fresh_connection: bool = false) -> void:
 	for part in loc_container.parts:
 		part.hidden = not filter_allow(part)
 		part.refresh(console)
-	
+
 	_sort_index_data.clear()
 	for q in loc_container.parts.size():
 		_sort_index_data[loc_container.parts[q]] = q
 	loc_container.parts.sort_custom(do_sort)
-	
+
 	console.queue_redraw()
 
 ## Handle this node being resized; fit child nodes into place

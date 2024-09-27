@@ -23,7 +23,7 @@ func validate_gui_element(elem) -> bool:
 	if not elem is Dictionary:
 		TrackerPack_Base._output_error("Bad element!", "Found a non-Dictionary type when looking for a gui element!")
 		return false
-	
+
 	var type = elem.get("type")
 	#region Handle optional values that are always present
 	var global_optionals := {"halign": "EXPAND_FILL", "valign": "EXPAND_FILL", "stretch_ratio": 1.0, "draw_filter": "INHERIT"}
@@ -31,7 +31,7 @@ func validate_gui_element(elem) -> bool:
 		"Label", "Icon":
 			global_optionals["halign"] = "SHRINK_CENTER"
 			global_optionals["valign"] = "SHRINK_CENTER"
-	
+
 	elem.merge(global_optionals)
 	if not TrackerPack_Base._expect_gui_drawfilter(elem, "draw_filter"):
 		return false
@@ -407,7 +407,7 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 			scene.image_path = elem.get("image")
 			scene.width = elem.get("width", -1)
 			scene.height = elem.get("height", -1)
-			
+
 			scene.modulate_colorname = elem.get("modulate_color", "white")
 			var valdict: Dictionary = elem.get("value", {})
 			scene.valnode = TrackerValueNode.from_json_val(valdict.get("val", 0))
@@ -445,13 +445,13 @@ func instantiate() -> TrackerScene_Root:
 	TrackerManager.load_named_rules(named_rules)
 	TrackerManager.load_named_values(named_values)
 	TrackerManager.load_statuses(statuses)
-	
+
 	if gui_layout.is_empty():
 		gui_layout = TrackerPack_Data.DEFAULT_GUI.duplicate(true)
 	var child_elem = _instantiate_gui_element(gui_layout)
 	if child_elem:
 		scene.add_child(child_elem)
-	
+
 	_done_instantiating(scene)
 	return scene
 
@@ -514,7 +514,7 @@ func _load_file(json: Dictionary) -> Error:
 	var val_dict: Dictionary = json.get("named_values", {})
 	for name in val_dict.keys():
 		named_values[name] = TrackerValueNode.from_json_val(val_dict[name])
-	
+
 	_variable_ops = json.get("variables", {})
 	for varname in _variable_ops.keys():
 		var varvals: Dictionary = _variable_ops[varname]
@@ -540,7 +540,7 @@ func _load_file(json: Dictionary) -> Error:
 					_item_register.connect(func(name):
 						if name == iname:
 							TrackerManager.variables[varname] /= op.get("value", 1))
-		
+
 	return ret
 
 func get_or_create_loc(identifier) -> TrackerLocation:
@@ -569,7 +569,7 @@ func _to_string():
 func setup_statuses(status_json: Array) -> void:
 	statuses.clear()
 	statuses_by_name.clear()
-	
+
 	var to_add = []
 	var by_name = {}
 	for js in status_json:
@@ -578,49 +578,49 @@ func setup_statuses(status_json: Array) -> void:
 		var color = js.get("color", "white")
 		to_add.append(LocationStatus.new(name, js.get("ttip", ""), color, js.get("map_color", color)))
 		by_name[name] = to_add.back()
-	
+
 	var found = by_name.get("Found")
 	if not found:
 		to_add.push_front(LocationStatus.ACCESS_FOUND)
 		found = 0
 	else:
 		found = to_add.find(found)
-	
+
 	var unknown = by_name.get("Unknown")
 	if not unknown:
 		to_add.insert(found+1, LocationStatus.ACCESS_UNKNOWN)
 		unknown = found+1
 	else:
 		unknown = to_add.find(unknown)
-	
+
 	var unreachable = by_name.get("Unreachable")
 	if not unreachable:
 		to_add.insert(unknown+1, LocationStatus.ACCESS_UNREACHABLE)
 		unreachable = unknown+1
 	else:
 		unreachable = to_add.find(unreachable)
-	
+
 	var not_found = by_name.get("Not Found")
 	if not not_found:
 		to_add.insert(unreachable+1, LocationStatus.ACCESS_NOT_FOUND)
 		not_found = unreachable+1
 	else:
 		not_found = to_add.find(not_found)
-	
+
 	var logic_break = by_name.get("Out of Logic")
 	if not logic_break:
 		to_add.insert(not_found+1, LocationStatus.ACCESS_LOGIC_BREAK)
 		logic_break = not_found+1
 	else:
 		logic_break = to_add.find(logic_break)
-	
+
 	var reachable = by_name.get("Reachable")
 	if not reachable:
 		to_add.insert(logic_break+1, LocationStatus.ACCESS_REACHABLE)
 		reachable = logic_break+1
 	else:
 		reachable = to_add.find(reachable)
-	
+
 	var q := 0
 	for stat in to_add:
 		stat.id = q

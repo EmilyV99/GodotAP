@@ -11,7 +11,7 @@ func instantiate() -> TrackerScene_Root:
 		_done_instantiating(root_scene)
 		return root_scene
 	return super()
-	
+
 func _save_file(_data: Dictionary) -> Error:
 	return ERR_UNAVAILABLE
 

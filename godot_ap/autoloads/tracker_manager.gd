@@ -119,8 +119,8 @@ func load_tracker_packs() -> void:
 				dir = null
 			else:
 				dir = DirAccess.open("tracker_packs/")
-	
-	if not dir: 
+
+	if not dir:
 		AP.log("Failed to load or make `./tracker_packs/` directory!")
 		return
 	do_update_tags = false
@@ -130,13 +130,13 @@ func load_tracker_packs() -> void:
 	trackers.clear()
 	trackers[""] = default_tracker
 	AP.log("Loading Tracker Packs...")
-	
+
 	var file_names: Array[String] = []
 	file_names.assign(dir.get_files())
 	file_names.assign(file_names.map(func(s: String): return "tracker_packs/%s" % s))
-	
+
 	var console: BaseConsole = Archipelago.output_console
-	
+
 	var failcount := 0
 	var successcount := 0
 	var games: Dictionary = {}
@@ -223,4 +223,3 @@ func sort_by_location_status(a: String, b: String) -> int:
 		if statuses[q].text == b:
 			bi = q
 	return (ai - bi)
-

@@ -69,4 +69,3 @@ func _notification(what):
 		NOTIFICATION_MOUSE_EXIT:
 			_has_mouse = false
 			hov_ind = -1
-

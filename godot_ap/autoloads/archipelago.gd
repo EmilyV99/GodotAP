@@ -178,7 +178,7 @@ func force_disconnect() -> void:
 	create_socket()
 	status = APStatus.DISCONNECTED
 	disconnected.emit()
-	
+
 	for c in all_datapacks_loaded.get_connections():
 		if c["flags"] & CONNECT_ONE_SHOT:
 			var caller: Callable = c["callable"]
@@ -341,37 +341,37 @@ func _handle_command(json: Dictionary) -> void:
 						_connecting_part = null
 					ap_disconnect()
 					return
-			
+
 			for loc in json["missing_locations"]:
 				if not location_exists(loc):
 					conn.slot_locations[loc as int] = false
 					#Force this locations to be accessible?
-			
+
 			var server_checked = {}
 			for loc in json["checked_locations"]:
 				_remove_loc(loc)
 				server_checked[loc] = true
-			
+
 			var to_collect: Array[int] = []
 			for loc in conn.slot_locations.keys():
 				if conn.slot_locations[loc] and not loc in server_checked:
 					to_collect.append(loc)
 			collect_locations(to_collect)
-			
+
 			# Deathlink stuff?
 			# If deathlink stuff, possibly ConnectUpdate to add DeathLink tag?
-			
+
 			status = APStatus.PLAYING
 			if output_console and _connecting_part:
 				_connecting_part.text = "Connected Successfully!"
 				_connecting_part = null
-			
+
 			connect_step.emit("Connected!")
 			if AP_PRINT_ITEMS_ON_CONNECT:
 				_printout_recieved_items = true
 				await get_tree().create_timer(3).timeout
 				_printout_recieved_items = false
-			
+
 			connected.emit(conn, json)
 		"PrintJSON":
 			var s: String = (output_console.printjson_command(json) if output_console
@@ -405,7 +405,7 @@ func _handle_command(json: Dictionary) -> void:
 					idx += 1
 				items.make_read_only()
 				conn.obtained_items.emit(items)
-			
+
 			if json["index"] == 0:
 				refr_items.make_read_only()
 				conn.received_items.assign(refr_items)
@@ -527,12 +527,12 @@ func _receive_item(index: int, item: NetworkItem) -> bool:
 			out_location(output_console, item.loc_id, src_data)
 			output_console.add_line(")")
 		msg = "%s found your %s at their %s!" % [conn.get_player_name(item.src_player_id), data.get_item_name(item.id), src_data.get_loc_name(item.loc_id)]
-	
+
 	conn.obtained_item.emit(item)
-	
+
 	if AP_LOG_RECIEVED:
 		AP.log(msg)
-	
+
 	if conn.received_items.size() == index:
 		conn.received_items.append(item)
 	else:
@@ -740,20 +740,20 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 			if not _ensure_connected(mgr.console): return
 			var filt := msg.substr(11)
 			var data := conn.get_gamedata_for_player()
-			
+
 			var columns := BaseConsole.ColumnsPart.new()
 			var title := "LOCATIONS"
 			if filt: title += " (%s)" % filt
 			var folder: BaseConsole.FoldablePart = mgr.console.add_foldable("[ %s ]" % title, msg, mgr.console.COLOR_UI_MSG)
 			folder.add(columns)
 			folder.fold(false)
-			
+
 			var h1 = columns.add(0, mgr.console.make_text("Location Name:"))
 			if filt:
 				h1.tooltip = "Filter: " + filt
 			columns.add(1, mgr.console.make_spacing(Vector2(80,0)))
 			columns.add(2, mgr.console.make_text("Status:"))
-			
+
 			var ids: Array = data.location_name_to_id.values()
 			var _index_dict := {}
 			for q in ids.size(): _index_dict[ids[q]] = q
@@ -768,13 +768,13 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 				if v:
 					return v > 0
 				return _index_dict[b] > _index_dict[a])
-			
+
 			for lid in ids:
 				var loc_name = data.get_loc_name(lid)
 				if not filt or (filt.to_lower() in loc_name.to_lower()):
 					var loc_status = TrackerManager.get_status(_status_getter.call(lid))
 					if not loc_status: loc_status = LocationStatus.new("Not Found","","red")
-					
+
 					columns.add(0, mgr.console.make_text(loc_name, "Location %d" % lid, rich_colors[loc_status.colorname]))
 					columns.add(2, mgr.console.make_text(loc_status.text, loc_status.tooltip, rich_colors[loc_status.colorname]))
 			mgr.console.add_header_spacing()
@@ -785,20 +785,20 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 			if not _ensure_connected(mgr.console): return
 			var filt := msg.substr(7)
 			var data := conn.get_gamedata_for_player()
-			
+
 			var columns := BaseConsole.ColumnsPart.new()
 			var title := "ITEMS"
 			if filt: title += " (%s)" % filt
 			var folder: BaseConsole.FoldablePart = mgr.console.add_foldable("[ %s ]" % title, msg, mgr.console.COLOR_UI_MSG)
 			folder.add(columns)
 			folder.fold(false)
-			
+
 			var h1 = columns.add(0, mgr.console.make_text("Item Name:"))
 			if filt:
 				h1.tooltip = "Filter: " + filt
 			columns.add(1, mgr.console.make_spacing(Vector2(80,0)))
 			columns.add(2, mgr.console.make_text("Num Collected:"))
-			
+
 			var item_dict := {}
 			for item in conn.received_items:
 				var dict = item_dict.get(item.id)
@@ -806,7 +806,7 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 					dict[item.flags] = dict.get(item.flags, 0) + 1
 				else:
 					item_dict[item.id] = {item.flags: 1}
-			
+
 			var ids: Array = data.item_name_to_id.values()
 			var _index_dict := {}
 			for q in ids.size(): _index_dict[ids[q]] = q
@@ -815,10 +815,10 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 				var has_b = item_dict.has(b)
 				if has_a and not has_b:
 					return true
-				if has_a == has_b:	
+				if has_a == has_b:
 					return _index_dict[b] > _index_dict[a]
 				return false)
-			
+
 			var num_counted := 0
 			for iid in ids:
 				var itm_name = data.get_item_name(iid)
@@ -881,7 +881,7 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 						if not _ensure_connected(mgr.console): return
 						var filt: String = args[2].to_lower() if args.size() > 2 else ""
 						var locs: Array[APLocation] = []
-						
+
 						locs.assign(conn.slot_locations.keys() \
 							.map(func(locid: int): return TrackerManager.get_location(locid)) \
 							.filter(func(v: APLocation): return v.loaded_tracker_loc != null and \

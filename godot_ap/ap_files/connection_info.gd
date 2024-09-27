@@ -78,7 +78,7 @@ func _load_hints_from_json(new_hints: Array) -> void:
 	on_hint_update.emit(hints)
 
 
-## Connects the specified `Callable[Array[NetworkHint]]->void` to be called every time 
+## Connects the specified `Callable[Array[NetworkHint]]->void` to be called every time
 ## hints are updated for this client. Will call immediately, if hints are already loaded;
 ## else will immediately call for hints to be loaded, which will trigger an update.
 func set_hint_notify(proc: Callable) -> void:
@@ -87,7 +87,7 @@ func set_hint_notify(proc: Callable) -> void:
 	else: install_hint_listener()
 ## Sends a `SetNotify` packet, and connects the specified `Callable[Variant]->void`
 ## to be called every time the specified `key` is updated on the server.
-func set_notify(key: String, proc: Callable) -> void: ## 
+func set_notify(key: String, proc: Callable) -> void: ##
 	if not _notified_keys.has(key):
 		Archipelago.send_command("SetNotify", {"keys": [key]})
 		_notified_keys[key] = true

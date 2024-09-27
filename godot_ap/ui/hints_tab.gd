@@ -207,7 +207,7 @@ func refresh_hints():
 	for q in _stored_hints.size():
 		_sort_index_data[_stored_hints[q]] = q
 	_stored_hints.sort_custom(do_sort)
-	
+
 	hint_container.clear()
 	old_status_system = true
 	for hint in _stored_hints:

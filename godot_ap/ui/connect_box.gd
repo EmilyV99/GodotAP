@@ -26,7 +26,7 @@ func try_connection() -> void:
 	if Archipelago.is_not_connected():
 		Archipelago.ap_connect(ipbox.text, portbox.text, slotbox.text, pwdbox.text)
 		_connect_signals()
-		
+
 func kill_connection() -> void:
 	Archipelago.ap_disconnect()
 

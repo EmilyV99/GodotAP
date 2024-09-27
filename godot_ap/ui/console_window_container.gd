@@ -40,9 +40,9 @@ func _ready() -> void:
 	get_window().size_changed.connect(update_cont_size)
 	get_viewport().gui_embed_subwindows = true
 	update_cont_size()
-	
+
 	if Engine.is_editor_hint(): return
-	
+
 	var right_bar_ws: Array[float] = []
 	var register_bar_w: Callable = func(n):
 			if n is SliderBox:
@@ -68,4 +68,3 @@ func update_cont_size() -> void:
 
 func close() -> void:
 	get_window().close_requested.emit()
-

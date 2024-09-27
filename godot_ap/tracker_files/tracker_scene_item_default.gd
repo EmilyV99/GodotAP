@@ -46,13 +46,13 @@ class ValuePart extends BaseConsole.ArrangedColumnsPart: ## A part representing 
 	var visname := ""
 	var index
 	var parent: TrackerScene_ItemDefault
-	
+
 	var count_part: BaseConsole.TextPart
 	var total_part: BaseConsole.TextPart
 	var perc_part: BaseConsole.TextPart
-	
+
 	# NOTES: Must call `count()` before calling `tooltip()` or `colorname()` to ensure flags are updated
-	
+
 	func get_name():
 		return name if visname.is_empty() else visname
 	func _init(valname: String, parent_scene: TrackerScene_ItemDefault):
@@ -133,7 +133,7 @@ class ItemPart extends ValuePart: ## A part representing an item that needs show
 	var specified_total: TrackerValueNode
 	var default_flags: AP.ItemClassification
 	var found_flags = null
-	
+
 	func _init(valname: String, parent_scene: TrackerScene_ItemDefault, def_flags := AP.ItemClassification.FILLER, spec_total: TrackerValueNode = null):
 		super(valname, parent_scene)
 		specified_total = spec_total if spec_total else TrackerValueInt.new(-1)
@@ -162,7 +162,7 @@ class VariablePart extends ValuePart: ## A part representing a variable
 	var specified_total: TrackerValueNode
 	var ttip: String = ""
 	var display_color: String = "white"
-	
+
 	func _init(valname: String, parent_scene: TrackerScene_ItemDefault, count_node: TrackerValueNode, spec_total: TrackerValueNode = null):
 		super(valname, parent_scene)
 		count_value = count_node
@@ -173,7 +173,7 @@ class VariablePart extends ValuePart: ## A part representing a variable
 	func set_color(s: String) -> VariablePart:
 		display_color = s
 		return self
-	
+
 	func count() -> int:
 		var ret = count_value.calculate()
 		return ret if ret is int else 0
@@ -297,7 +297,7 @@ func refresh_tracker(fresh_connection: bool = false) -> void:
 		if show_index: # Change default sorting
 			sort_cols.erase(cols_by_name[COL_VALUE])
 			sort_cols.append(cols_by_name[COL_VALUE])
-		
+
 		var header := BaseConsole.ArrangedColumnsPart.new()
 		var ind := 0
 		while ind < cols_in_order.size():
@@ -318,12 +318,12 @@ func refresh_tracker(fresh_connection: bool = false) -> void:
 	for part in itm_container.parts:
 		part.hidden = not filter_allow(part)
 		part.refresh(console)
-	
+
 	_sort_index_data.clear()
 	for q in itm_container.parts.size():
 		_sort_index_data[itm_container.parts[q]] = q
 	itm_container.parts.sort_custom(do_sort)
-	
+
 	console.queue_redraw()
 
 ## Handle this node being resized; fit child nodes into place

@@ -48,16 +48,16 @@ func refresh_tracker(fresh_connection: bool = false) -> void:
 		image = Util.modulate(_base_image, AP.color_from_name(modulate_colorname))
 		gray_image = Util.grayscale(image)
 	await TrackerManager.on_tracker_load()
-	
+
 	var v = valnode.calculate()
 	var maxval = maxnode.calculate()
-	
+
 	if TrackerPack_Base._check_int(v): v = roundi(v)
 	else: v = 0
-	
+
 	if TrackerPack_Base._check_int(maxval): maxval = roundi(maxval)
 	else: maxval = 999
-	
+
 	var gray := is_gray()
 	label.visible = show_max or (maxval > 1 and v != 0)
 	label.text = str(min(v,maxval))
@@ -67,7 +67,7 @@ func refresh_tracker(fresh_connection: bool = false) -> void:
 	var mod_c = .3 if gray else 1.0
 	image_rect.modulate = Color(mod_c,mod_c,mod_c)
 	label.label_settings.font_color = AP.color_from_name(colorname if v < maxval else max_colorname)
-	
+
 	on_resize()
 
 ## Handle this node being resized; fit child nodes into place
@@ -115,7 +115,7 @@ func _ttip_calc_size(clip := false) -> void:
 	else:
 		tooltip_label.reset_size()
 	tooltip_bg.size = tooltip_label.size
-	
+
 	var cpos: Vector2 = size / 2
 	tooltip_bg.position.x = cpos.x - tooltip_bg.size.x/2
 	if cpos.y >= get_window().size.y / 2.0:
@@ -139,7 +139,7 @@ func show_tooltip() -> void:
 	tooltip_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	tooltip_label.reset_size()
 	_ttip_calc_size()
-	
+
 	#region Bound tooltip in-window
 	var win := get_window()
 	if tooltip_bg.size.x >= win.size.x: #don't let width overrun
