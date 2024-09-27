@@ -15,7 +15,7 @@ config/description="Archipelago connection handler for Godot.
 See https://github.com/EmilyV99/GodotAP"
 config/version="0.1.4"
 run/main_scene="res://godot_ap/ui/main.tscn"
-config/features=PackedStringArray("4.2", "Mobile")
+config/features=PackedStringArray("4.3", "Mobile")
 config/icon="res://icon.svg"
 
 [autoload]

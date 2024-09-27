@@ -8,9 +8,9 @@
 [ext_resource type="SystemFont" uid="uid://73rjoc23d4ub" path="res://godot_ap/ui/console_font.tres" id="5_wdwfc"]
 [ext_resource type="Script" path="res://godot_ap/ui/updown_lineedit.gd" id="6_qqcpc"]
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_1cnti"]
-
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ksdsn"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_1cnti"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_8fs71"]
 font = ExtResource("5_wdwfc")
@@ -30,6 +30,7 @@ script = ExtResource("1_gj1xe")
 [node name="Tabs" type="TabContainer" parent="."]
 custom_minimum_size = Vector2(1366, 705)
 layout_mode = 2
+current_tab = 0
 tab_focus_mode = 0
 
 [node name="Console" type="MarginContainer" parent="Tabs"]
@@ -38,6 +39,7 @@ theme_override_constants/margin_left = 0
 theme_override_constants/margin_top = 0
 theme_override_constants/margin_right = 0
 theme_override_constants/margin_bottom = 0
+metadata/_tab_index = 0
 
 [node name="Console" parent="Tabs/Console" instance=ExtResource("2_704wl")]
 layout_mode = 2
@@ -150,8 +152,8 @@ layout_mode = 2
 
 [node name="ShowPwd" type="CheckBox" parent="Tabs/Console/ConnectBox/Row/Box/Margins/VBox/Content/HBox"]
 layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxEmpty_1cnti")
 theme_override_styles/disabled = SubResource("StyleBoxEmpty_ksdsn")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_1cnti")
 
 [node name="Label4" type="Label" parent="Tabs/Console/ConnectBox/Row/Box/Margins/VBox/Content/HBox"]
 layout_mode = 2
@@ -199,13 +201,11 @@ theme_override_constants/margin_top = 0
 theme_override_constants/margin_right = 0
 theme_override_constants/margin_bottom = 0
 script = ExtResource("3_iwodb")
+metadata/_tab_index = 1
 
 [node name="Console" parent="Tabs/Hints" instance=ExtResource("2_704wl")]
 layout_mode = 2
 size_flags_vertical = 3
-
-[node name="Console" parent="Tabs/Hints/Console/Cont/ConsoleMargin/Row" index="0"]
-font_color = Color(1, 1, 1, 1)
 
 [node name="TypingBar" parent="Tabs/Hints/Console" index="1"]
 visible = false

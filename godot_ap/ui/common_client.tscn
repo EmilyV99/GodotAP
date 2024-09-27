@@ -19,6 +19,7 @@
 visible = false
 layout_mode = 2
 script = ExtResource("2_h31sw")
+metadata/_tab_index = 2
 
 [node name="Column" type="VBoxContainer" parent="Tabs/Tracking" index="0"]
 layout_mode = 2
@@ -71,6 +72,7 @@ theme_override_constants/margin_top = 0
 theme_override_constants/margin_right = 0
 theme_override_constants/margin_bottom = 0
 script = ExtResource("4_h5bt6")
+metadata/_tab_index = 3
 
 [node name="Margin" type="MarginContainer" parent="Tabs/Settings" index="0"]
 layout_mode = 2
@@ -81,6 +83,7 @@ theme_override_constants/margin_bottom = 8
 
 [node name="Tabs" type="TabContainer" parent="Tabs/Settings/Margin" index="0"]
 layout_mode = 2
+current_tab = 0
 
 [node name="Theme" type="MarginContainer" parent="Tabs/Settings/Margin/Tabs" index="1"]
 layout_mode = 2
@@ -89,6 +92,7 @@ theme_override_constants/margin_top = 6
 theme_override_constants/margin_right = 6
 theme_override_constants/margin_bottom = 6
 script = ExtResource("8_0a6cn")
+metadata/_tab_index = 0
 
 [node name="Row" type="HBoxContainer" parent="Tabs/Settings/Margin/Tabs/Theme" index="0"]
 layout_mode = 2
@@ -114,6 +118,7 @@ theme_override_constants/margin_left = 6
 theme_override_constants/margin_top = 6
 theme_override_constants/margin_right = 6
 theme_override_constants/margin_bottom = 6
+metadata/_tab_index = 1
 
 [node name="Row" type="HBoxContainer" parent="Tabs/Settings/Margin/Tabs/TrackerPack" index="0"]
 layout_mode = 2
