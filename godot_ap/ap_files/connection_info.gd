@@ -169,4 +169,6 @@ func send_deathlink(cause: String = ""):
 		cmd["data"]["cause"] = cause
 	cmd["data"]["source"] = get_player_name(-1, false)
 	cmd["data"]["time"] = Time.get_unix_time_from_system()
+	assert(not Archipelago.ap_deathlink_sent_key.is_empty())  # Should always be fine while connected
+	cmd["data"]["godotap_key"] = Archipelago.ap_deathlink_sent_key
 	send_bounce(cmd, [], [], ["DeathLink"])

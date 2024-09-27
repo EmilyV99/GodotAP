@@ -81,6 +81,9 @@ enum ItemHandling {
 	ALL = 7, ## Receive your items from your starting inventory, your world, and other worlds from the server.
 }
 
+## Sent deathlink unique identifier to filter out own deaths
+var ap_deathlink_sent_key: String
+
 ## The current connection credentials to be used
 var creds: APCredentials = APCredentials.new()
 ## The current APLock object. A default lock object is "unlocked".
@@ -326,7 +329,9 @@ func _handle_command(json: Dictionary) -> void:
 			var slot_info = json["slot_info"]
 			for key in slot_info:
 				conn.slots.append(NetworkSlot.from(slot_info[key]))
-			
+
+			ap_deathlink_sent_key = "%s-GodotAP-%d" % [conn.get_player_name(-1, false), randi()]
+
 			if aplock:
 				var lock_err := aplock.lock(conn)
 				if lock_err:
@@ -417,9 +422,10 @@ func _handle_command(json: Dictionary) -> void:
 			conn.bounce.emit(json)
 			var tags: Array = json.get("tags", [])
 			if tags.has("DeathLink"):
-				var source: String = json["data"].get("source", "")
-				if source == conn.get_player_name(false):
+				var key: String = json["data"].get("godotap_key", "None")
+				if key == ap_deathlink_sent_key:
 					return # Skip deaths from self
+				var source: String = json["data"].get("source", "")
 				var cause: String = json["data"].get("cause", "")
 				conn.deathlink.emit(source, cause, json)
 		"LocationInfo":
