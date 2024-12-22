@@ -1203,3 +1203,13 @@ func set_deathlink(state: bool) -> void:
 
 func is_deathlink() -> bool:
 	return "DeathLink" in Archipelago.AP_GAME_TAGS
+
+enum ClientStatus {
+	CLIENT_UNKNOWN = 0,
+	CLIENT_CONNECTED = 5,
+	CLIENT_READY = 10,
+	CLIENT_PLAYING = 20,
+	CLIENT_GOAL = 30
+}
+func set_client_status(stat: ClientStatus) -> void:
+	send_command("StatusUpdate", {"status": stat})
