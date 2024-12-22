@@ -1186,6 +1186,11 @@ func printjson_out(elems: Array) -> String:
 		var txt: String = elem["text"]
 		s += txt
 		match elem.get("type", "text"):
+			"hint_status":
+				var stat = elem["hint_status"] as NetworkHint.Status
+				var stat_name: String = NetworkHint.status_names.get(stat, "(unknown)")
+				var col_name: String = NetworkHint.status_colors.get(stat, "red")
+				add_text(txt, stat_name, AP.rich_colors[col_name])
 			"player_name":
 				add_text(txt, "Arbitrary Player Name", AP.rich_colors[AP.COLORNAME_PLAYER])
 			"item_name":
