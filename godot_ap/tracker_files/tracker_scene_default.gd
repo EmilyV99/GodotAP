@@ -39,6 +39,7 @@ var hint_status_filters: Dictionary = {
 }
 var status_filters: Dictionary = {}
 
+@warning_ignore("missing_tool") # HACK: Ignore godot engine bug causing false positive warning (https://github.com/godotengine/godot/issues/103843)
 class LocationPart extends BaseConsole.ArrangedColumnsPart: ## A part representing a Location
 	var loc: APLocation
 	var trackerpack: TrackerPack_Data

@@ -41,6 +41,7 @@ var show_percent := true
 
 var item_class_filters: Dictionary = {}
 
+@warning_ignore("missing_tool") # HACK: Ignore godot engine bug causing false positive warning (https://github.com/godotengine/godot/issues/103843)
 class ValuePart extends BaseConsole.ArrangedColumnsPart: ## A part representing a value that needs showing
 	var name: String
 	var visname := ""
