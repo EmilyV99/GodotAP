@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bwamxuo3s7c8n"]
 
-[ext_resource type="Script" path="res://godot_ap/ui/base_console.gd" id="1_3bobc"]
+[ext_resource type="Script" uid="uid://bt05nk6su6m5r" path="res://godot_ap/ui/base_console.gd" id="1_3bobc"]
 [ext_resource type="SystemFont" uid="uid://73rjoc23d4ub" path="res://godot_ap/ui/console_font.tres" id="2_w3f10"]
 
 [node name="Console" type="Control"]

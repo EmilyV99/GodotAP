@@ -41,7 +41,7 @@ static func from(json: Dictionary) -> NetworkHint:
 		hint.status = json.get("status", Status.NOT_FOUND)
 	hint.entrance = json.get("entrance", "")
 	return hint
-	
+
 func is_local() -> bool:
 	return item.is_local()
 

@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://mdls4sgeu5j0"]
 
-[ext_resource type="Script" path="res://godot_ap/tracker_files/tracker_scene_map.gd" id="1_xub3u"]
+[ext_resource type="Script" uid="uid://bruhq83x03qo" path="res://godot_ap/tracker_files/tracker_scene_map.gd" id="1_xub3u"]
 
 [sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_ej443"]
 size = Vector2(256, 256)

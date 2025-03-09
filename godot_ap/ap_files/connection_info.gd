@@ -51,6 +51,7 @@ func get_gamedata_for_player(plyr_id: int = -1) -> DataCache:
 	return AP.get_datacache(get_game_for_player(plyr_id))
 
 # Incoming server packets
+@warning_ignore_start("unused_signal")
 signal bounce(json: Dictionary) ## Emitted when a `Bounce` packet is received.
 signal deathlink(source: String, cause: String, json: Dictionary) ## Emitted when a `Bounce` packet of type `DeathLink` is received, after the `bounce` signal.
 signal setreply(json: Dictionary) ## Emitted when a `SetReply` packet is received
@@ -61,6 +62,7 @@ signal refresh_items(items: Array[NetworkItem]) ## Emitted when the server re-se
 signal on_hint_update(hints: Array[NetworkHint]) ## Emitted when hints relevant to this client change
 
 signal all_scout_cached ## Emitted when a scout packet containing ALL locations is received (see `force_scout_all`)
+@warning_ignore_restore("unused_signal")
 # Outgoing server packets
 var _notified_keys: Dictionary = {}
 var _hint_listening: bool = false

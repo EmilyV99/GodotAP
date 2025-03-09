@@ -1,12 +1,12 @@
 [gd_scene load_steps=11 format=3 uid="uid://cgq7n1figlpu3"]
 
-[ext_resource type="Script" path="res://godot_ap/ui/console_window_container.gd" id="1_gj1xe"]
+[ext_resource type="Script" uid="uid://ctx0wt81itx32" path="res://godot_ap/ui/console_window_container.gd" id="1_gj1xe"]
 [ext_resource type="PackedScene" uid="uid://c51q4vrwhlcl7" path="res://godot_ap/ui/console_tab.tscn" id="2_704wl"]
-[ext_resource type="Script" path="res://godot_ap/ui/slider_box.gd" id="3_1ho76"]
-[ext_resource type="Script" path="res://godot_ap/ui/hints_tab.gd" id="3_iwodb"]
-[ext_resource type="Script" path="res://godot_ap/ui/connect_box.gd" id="4_yf1mw"]
+[ext_resource type="Script" uid="uid://cs0261v4jx4b" path="res://godot_ap/ui/slider_box.gd" id="3_1ho76"]
+[ext_resource type="Script" uid="uid://bow4x4xntl26h" path="res://godot_ap/ui/hints_tab.gd" id="3_iwodb"]
+[ext_resource type="Script" uid="uid://cyc8jkqjagswj" path="res://godot_ap/ui/connect_box.gd" id="4_yf1mw"]
 [ext_resource type="SystemFont" uid="uid://73rjoc23d4ub" path="res://godot_ap/ui/console_font.tres" id="5_wdwfc"]
-[ext_resource type="Script" path="res://godot_ap/ui/updown_lineedit.gd" id="6_qqcpc"]
+[ext_resource type="Script" uid="uid://cety6nqnci3n6" path="res://godot_ap/ui/updown_lineedit.gd" id="6_qqcpc"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ksdsn"]
 

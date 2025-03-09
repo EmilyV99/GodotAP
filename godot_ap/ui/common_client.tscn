@@ -1,13 +1,13 @@
 [gd_scene load_steps=11 format=3 uid="uid://cn7ah7d3ep4de"]
 
 [ext_resource type="PackedScene" uid="uid://cgq7n1figlpu3" path="res://godot_ap/ui/base_client.tscn" id="1_i5jgm"]
-[ext_resource type="Script" path="res://godot_ap/ui/tracker_tab.gd" id="2_h31sw"]
+[ext_resource type="Script" uid="uid://dmuwjh1jlhnmd" path="res://godot_ap/ui/tracker_tab.gd" id="2_h31sw"]
 [ext_resource type="PackedScene" uid="uid://bwamxuo3s7c8n" path="res://godot_ap/ui/plain_console.tscn" id="3_0ejly"]
 [ext_resource type="Texture2D" uid="uid://dvhxfj3wda717" path="res://godot_ap/ui/refresh.png" id="3_fi14g"]
-[ext_resource type="Script" path="res://godot_ap/ui/SettingsTab.gd" id="4_h5bt6"]
+[ext_resource type="Script" uid="uid://nuk1liowalgx" path="res://godot_ap/ui/SettingsTab.gd" id="4_h5bt6"]
 [ext_resource type="Texture2D" uid="uid://bd4dd3r6vt17p" path="res://godot_ap/ui/refresh_pressed.png" id="4_kmxjf"]
 [ext_resource type="Texture2D" uid="uid://cjc7g6m7tklr1" path="res://godot_ap/ui/refresh_hov.png" id="5_cfwis"]
-[ext_resource type="Script" path="res://godot_ap/ui/theme_manager.gd" id="8_0a6cn"]
+[ext_resource type="Script" uid="uid://b2s7dh7bhjw7m" path="res://godot_ap/ui/theme_manager.gd" id="8_0a6cn"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ov043"]
 

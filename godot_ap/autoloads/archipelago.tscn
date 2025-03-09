@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://c0ovofocoscyg"]
 
-[ext_resource type="Script" path="res://godot_ap/autoloads/archipelago.gd" id="1_41ph8"]
-[ext_resource type="Script" path="res://godot_ap/ap_files/version.gd" id="2_2e7gq"]
+[ext_resource type="Script" uid="uid://0mq4s883pbat" path="res://godot_ap/autoloads/archipelago.gd" id="1_41ph8"]
+[ext_resource type="Script" uid="uid://dc70htepylffm" path="res://godot_ap/ap_files/version.gd" id="2_2e7gq"]
 
 [sub_resource type="Resource" id="Resource_pmgvy"]
 script = ExtResource("2_2e7gq")
