@@ -2,7 +2,7 @@ class_name TrackerLocation
 
 var identifier ## int id or String name
 var descriptive_name: String = ""
-var status_rules: Dictionary
+var status_rules: Dictionary[String, TrackerLogicNode]
 var map_spots: Array[MapSpot] = []
 
 var pack: TrackerPack_Base

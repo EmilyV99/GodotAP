@@ -34,10 +34,10 @@ var cols_by_name := {}
 
 var show_hint_status := true
 
-var hint_status_filters: Dictionary = {
+var hint_status_filters: Dictionary[NetworkHint.Status, bool] = {
 	NetworkHint.Status.FOUND: false,
 }
-var status_filters: Dictionary = {}
+var status_filters: Dictionary[String, bool] = {}
 
 @warning_ignore("missing_tool") # HACK: Ignore godot engine bug causing false positive warning (https://github.com/godotengine/godot/issues/103843)
 class LocationPart extends BaseConsole.ArrangedColumnsPart: ## A part representing a Location
@@ -239,7 +239,7 @@ func filter_allow(part: LocationPart) -> bool:
 			return false
 	return true
 #region Sorting
-var _sort_index_data: Dictionary = {}
+var _sort_index_data: Dictionary[BaseConsole.ConsolePart, int] = {}
 func sort_by_name(a: LocationPart, b: LocationPart) -> int:
 	return a.loc.name.naturalnocasecmp_to(b.loc.name)
 func sort_by_hint_status(a: LocationPart, b: LocationPart) -> int:

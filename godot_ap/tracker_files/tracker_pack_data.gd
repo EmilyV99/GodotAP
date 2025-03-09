@@ -1,20 +1,20 @@
 class_name TrackerPack_Data extends TrackerPack_Base
 
-static var DEFAULT_GUI = {"type": "Column", "children": [{"type": "LocationConsole"}]}
+static var DEFAULT_GUI: Dictionary = {"type": "Column", "children": [{"type": "LocationConsole"}]}
 
 func get_type() -> String: return "DATA_PACK"
 # TODO set up a structure for listing location reqs, map images, etc etc
 var locations: Array[TrackerLocation] = []
-var named_rules: Dictionary = {}
-var named_values: Dictionary = {}
+var named_rules: Dictionary[String, TrackerLogicNode] = {}
+var named_values: Dictionary[String, TrackerValueNode] = {}
 var statuses: Array[LocationStatus] = []
-var statuses_by_name: Dictionary = {}
-var starting_variables: Dictionary = {}
+var statuses_by_name: Dictionary[String, LocationStatus] = {}
+var starting_variables: Dictionary[String, TrackerValueNode] = {}
 var metadata: Dictionary = {}
 
 var gui_layout: Dictionary = TrackerPack_Data.DEFAULT_GUI.duplicate(true)
 
-var _variable_ops: Dictionary = {}
+var _variable_ops: Dictionary[String, Dictionary] = {}
 
 var description_bar: String = ""
 var description_ttip: String = ""
@@ -495,8 +495,8 @@ func _load_file(json: Dictionary) -> Error:
 	var ret := OK
 	description_bar = json.get("description_bar", "")
 	description_ttip = json.get("description_ttip", "")
-	metadata = json.get("metadata", {"author": "", "url": ""})
-	gui_layout = json.get("GUI", TrackerPack_Data.DEFAULT_GUI)
+	metadata.assign(json.get("metadata", {"author": "", "url": ""}))
+	gui_layout.assign(json.get("GUI", TrackerPack_Data.DEFAULT_GUI))
 	if not validate_gui():
 		ret = ERR_INVALID_DATA
 	setup_statuses(json.get("statuses", []))
@@ -515,7 +515,7 @@ func _load_file(json: Dictionary) -> Error:
 	for name in val_dict.keys():
 		named_values[name] = TrackerValueNode.from_json_val(val_dict[name])
 
-	_variable_ops = json.get("variables", {})
+	_variable_ops.assign(json.get("variables", {}))
 	for varname in _variable_ops.keys():
 		var varvals: Dictionary = _variable_ops[varname]
 		var val_node := TrackerValueNode.from_json_val(varvals.get("value", 0))

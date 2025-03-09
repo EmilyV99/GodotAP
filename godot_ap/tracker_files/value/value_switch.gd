@@ -1,7 +1,7 @@
 class_name TrackerValueSwitch extends TrackerValueNode
 
 var keynode: TrackerValueNode
-var cases: Dictionary
+var cases: Dictionary[String, TrackerValueNode]
 
 func calculate() -> Variant:
 	var v = keynode.calculate()

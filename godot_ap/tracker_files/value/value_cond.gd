@@ -3,7 +3,7 @@ class_name TrackerValueCond extends TrackerValueNode
 class CondNode:
 	var rule: TrackerLogicNode
 	var val: TrackerValueNode
-	
+
 	static func from_dict(dict: Dictionary) -> CondNode:
 		if dict.keys() != ["rule", "val"]:
 			return null

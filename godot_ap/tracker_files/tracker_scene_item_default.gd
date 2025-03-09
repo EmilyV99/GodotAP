@@ -39,7 +39,7 @@ var show_index := true
 var show_totals := true
 var show_percent := true
 
-var item_class_filters: Dictionary = {}
+var item_class_filters: Dictionary[String, bool] = {}
 
 @warning_ignore("missing_tool") # HACK: Ignore godot engine bug causing false positive warning (https://github.com/godotengine/godot/issues/103843)
 class ValuePart extends BaseConsole.ArrangedColumnsPart: ## A part representing a value that needs showing
@@ -355,7 +355,7 @@ func filter_allow(part: ValuePart) -> bool:
 			return false
 	return true
 #region Sorting
-var _sort_index_data: Dictionary = {}
+var _sort_index_data: Dictionary[BaseConsole.ConsolePart, int] = {}
 func sort_by_name(a: ValuePart, b: ValuePart) -> int:
 	return a.get_name().naturalnocasecmp_to(b.get_name())
 func sort_by_index(a: ValuePart, b: ValuePart) -> int:

@@ -14,7 +14,7 @@ var slot_data: Dictionary
 var players: Array[NetworkPlayer]
 var slots: Array[NetworkSlot]
 
-var slot_locations: Dictionary = {}
+var slot_locations: Dictionary[int, bool] = {}
 var received_items: Array[NetworkItem] = []
 var hints: Array[NetworkHint] = []
 
@@ -64,7 +64,7 @@ signal on_hint_update(hints: Array[NetworkHint]) ## Emitted when hints relevant 
 signal all_scout_cached ## Emitted when a scout packet containing ALL locations is received (see `force_scout_all`)
 @warning_ignore_restore("unused_signal")
 # Outgoing server packets
-var _notified_keys: Dictionary = {}
+var _notified_keys: Dictionary[String, bool] = {}
 var _hint_listening: bool = false
 func install_hint_listener() -> void:
 	if _hint_listening: return
@@ -97,7 +97,7 @@ func set_notify(key: String, proc: Callable) -> void: ##
 		if json["key"] == key:
 			proc.call(json.get("value")))
 
-var _retrieve_queue: Dictionary
+var _retrieve_queue: Dictionary[String, Array]
 ## Sends a `Get` packet, and connects the specified `Callable[Variant]->void`
 ## to be called once when the result is retrieved
 func retrieve(key: String, proc: Callable) -> void: ## Callable[Variant]->void
@@ -118,8 +118,8 @@ func _on_retrieve(json: Dictionary) -> void:
 func update_hint(loc: int, plyr: int, status: NetworkHint.Status) -> void:
 	Archipelago.send_command("UpdateHint", {"location": loc, "player": plyr, "status": status})
 
-var _scout_cache: Dictionary
-var _scout_queue: Dictionary
+var _scout_cache: Dictionary[int, NetworkItem]
+var _scout_queue: Dictionary[int, Array]
 ## Sends a `LocationScouts` packet, and connects the specified `Callable[NetworkItem]->void`
 ## to be called with the returned information.
 ## If the location has already been scouted this session, returns the cached info.

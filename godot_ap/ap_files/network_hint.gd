@@ -9,7 +9,7 @@ enum Status {
 	NOT_FOUND = 2, # Deprecated by new hint status code https://github.com/ArchipelagoMW/Archipelago/pull/3506, still supported for now
 }
 
-static var status_names: Dictionary = {
+static var status_names: Dictionary[Status, String] = {
 	Status.FOUND: "Found",
 	Status.UNSPECIFIED: "Unspecified",
 	Status.NON_PRIORITY: "No Priority",
@@ -17,7 +17,7 @@ static var status_names: Dictionary = {
 	Status.PRIORITY: "Priority",
 	Status.NOT_FOUND: "Not Found",
 }
-static var status_colors: Dictionary = {
+static var status_colors: Dictionary[Status, String] = {
 	Status.FOUND: "green",
 	Status.UNSPECIFIED: "white",
 	Status.NON_PRIORITY: "slateblue",

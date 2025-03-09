@@ -15,8 +15,8 @@ class_name AP extends Node
 @export var AP_LOG_COMMUNICATION := false ## Enables additional logging.
 @export var AP_LOG_RECIEVED := false ## Enables additional logging.
 @export_subgroup("Data Packs")
-@export var READABLE_DATAPACK_FILES = true ## If true, datapackage local files will be stringified in a readable mode.
-@export var datapack_cached_fields = ["item_name_to_id","location_name_to_id","checksum"] ## Which fields should be saved from received DataPacks.
+@export var READABLE_DATAPACK_FILES := true ## If true, datapackage local files will be stringified in a readable mode.
+@export var datapack_cached_fields: Array[String] = ["item_name_to_id","location_name_to_id","checksum"] ## Which fields should be saved from received DataPacks.
 @export_group("")
 
 @onready var hang_clock: Timer = $HangTimer
@@ -54,7 +54,7 @@ static func color_from_name(colname: String, def := Color.TRANSPARENT) -> Color:
 
 ## The rich-text colors used for console output
 ## Chosen to match Archipelago CommonClient
-static var rich_colors: Dictionary = {
+static var rich_colors: Dictionary[String, Color] = {
 	"red": Color8(0xEE,0x00,0x00),
 	"green": Color8(0x00,0xFF,0x7F),
 	"yellow": Color8(0xFA,0xFA,0xD2),
@@ -441,10 +441,10 @@ func _handle_command(json: Dictionary) -> void:
 
 #region DATAPACKS
 var datapack_cache: Dictionary
-var datapack_pending: Array = []
+var datapack_pending: Array[String] = []
 ## For each game (key) in the checksums dictionary, requests an update for its datapackage
 ## if the locally stored checksum does not match the given value
-func handle_datapackage_checksums(checksums: Dictionary) -> void:
+func handle_datapackage_checksums(checksums: Dictionary[String, String]) -> void:
 	DirAccess.make_dir_recursive_absolute("user://ap/datapacks/") # Ensure the directory exists, for later
 	var cachefile: FileAccess = FileAccess.open("user://ap/datapacks/cache.dat", FileAccess.READ)
 	if cachefile:
@@ -484,7 +484,7 @@ func _cache_datapacks() -> void:
 	cachefile.store_var(datapack_cache, true)
 	cachefile.close()
 
-static var _data_caches: Dictionary = {}
+static var _data_caches: Dictionary[String, DataCache] = {}
 ## Returns a DataCache for the specified game. If it cannot be found, returns an empty (invalid) DataCache, which can still be used, albeit it will not have the desired data within.
 static func get_datacache(game: String) -> DataCache:
 	var ret: DataCache = _data_caches.get(game)

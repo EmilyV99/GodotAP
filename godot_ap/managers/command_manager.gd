@@ -3,7 +3,7 @@ class_name CommandManager extends Node
 signal debug_toggled(disabled: bool)
 
 var _commands: Array[ConsoleCommand]
-var _commands_by_name: Dictionary ##[String: ConsoleCommand]
+var _commands_by_name: Dictionary[String, ConsoleCommand]
 var debug_hidden := true :
 	set(val):
 		if not OS.is_debug_build(): return

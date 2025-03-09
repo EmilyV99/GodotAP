@@ -12,22 +12,22 @@ var tracking: bool = false :
 			Archipelago.config.is_tracking = val
 		Archipelago.set_tag("Tracker", val)
 
-var trackers: Dictionary = {}
+var trackers: Dictionary[String, TrackerPack_Base] = {}
 func get_tracker(game: String) -> TrackerPack_Base:
 	var ret = trackers.get(game)
 	if not ret: ret = trackers.get("")
 	assert(ret)
 	return ret
 
-var named_rules: Dictionary = {}
-var named_values: Dictionary = {}
+var named_rules: Dictionary[String, TrackerLogicNode] = {}
+var named_values: Dictionary[String, TrackerValueNode] = {}
 var statuses: Array[LocationStatus] = [LocationStatus.ACCESS_FOUND,
 	LocationStatus.ACCESS_UNKNOWN, LocationStatus.ACCESS_UNREACHABLE,
 	LocationStatus.ACCESS_NOT_FOUND, LocationStatus.ACCESS_LOGIC_BREAK,
 	LocationStatus.ACCESS_REACHABLE]
-var locations: Dictionary = {}
-var locs_by_name: Dictionary = {}
-var variables: Dictionary = {}
+var locations: Dictionary[int, APLocation] = {}
+var locs_by_name: Dictionary[String, APLocation] = {}
+var variables: Dictionary[String, int] = {}
 
 signal locations_loaded
 signal tracker_locations_loaded
@@ -75,9 +75,9 @@ func load_tracker_locations(locs: Array[TrackerLocation]) -> void:
 		loc.get_loc().loaded_tracker_loc = loc
 	is_loaded = true
 	tracker_locations_loaded.emit()
-func load_named_rules(rules: Dictionary) -> void:
+func load_named_rules(rules: Dictionary[String, TrackerLogicNode]) -> void:
 	named_rules = rules.duplicate(true)
-func load_named_values(values: Dictionary) -> void:
+func load_named_values(values: Dictionary[String, TrackerValueNode]) -> void:
 	named_values = values.duplicate(true)
 func load_statuses(status_array: Array[LocationStatus]):
 	statuses = status_array.duplicate(true)
@@ -139,8 +139,8 @@ func load_tracker_packs() -> void:
 
 	var failcount := 0
 	var successcount := 0
-	var games: Dictionary = {}
-	var errors: Dictionary = {}
+	var games: Dictionary[String, String] = {}
+	var errors: Dictionary[String, String] = {}
 	var timer := Timer.new()
 	add_child(timer)
 	const TIMER_DELAY = 1.0 ## Seconds to process before giving control back for the rest of the frame

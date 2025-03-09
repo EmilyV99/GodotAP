@@ -5,8 +5,8 @@ class_name HintsTab extends MarginContainer
 var hint_container: BaseConsole.ContainerPart
 var headings: Array[BaseConsole.TextPart]
 
-var sort_ascending := [true,true,true,true,false]
-var sort_cols := [4,0,2,1,3]
+var sort_ascending: Array[bool] = [true,true,true,true,false]
+var sort_cols: Array[int] = [4,0,2,1,3]
 
 const FORCE_ALL := "[Force All]"
 const LOCAL_ITEMS := "[Local Items]"
@@ -14,18 +14,18 @@ const ITEMS_PROG := "[Progression]"
 const ITEMS_USEFUL := "[Useful]"
 const ITEMS_TRAP := "[Trap]"
 const ITEMS_FILLER := "[Filler]"
-var status_filters: Dictionary = {
+var status_filters: Dictionary[Variant, bool] = {
 	FORCE_ALL: false,
 	NetworkHint.Status.FOUND: false,
 }
-var recv_filters: Dictionary = {}
-var finding_filters: Dictionary = {}
-var item_filters: Dictionary = {}
-var loc_filters: Dictionary = {}
+var recv_filters: Dictionary[String, bool] = {}
+var finding_filters: Dictionary[String, bool] = {}
+var item_filters: Dictionary[String, bool] = {}
+var loc_filters: Dictionary[String, bool] = {}
 
 var old_status_system := false
 
-var _sort_index_data: Dictionary = {}
+var _sort_index_data: Dictionary[NetworkHint, int] = {}
 func sort_by_dest(a: NetworkHint, b: NetworkHint) -> int:
 	return (Archipelago.conn.get_player_name(a.item.dest_player_id).nocasecmp_to(
 		Archipelago.conn.get_player_name(b.item.dest_player_id)))
@@ -99,7 +99,7 @@ func sort_click(event: InputEventMouseButton, index: int) -> bool:
 		# Add filter options
 		match index:
 			0: # Receiving Player
-				var arr: Array = [LOCAL_ITEMS]
+				var arr: Array[String] = [LOCAL_ITEMS]
 				arr.append_array(recv_filters.keys().filter(func(s): return not s in arr))
 				for s in arr:
 					var proc: Callable
