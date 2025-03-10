@@ -444,7 +444,7 @@ var datapack_cache: Dictionary
 var datapack_pending: Array[String] = []
 ## For each game (key) in the checksums dictionary, requests an update for its datapackage
 ## if the locally stored checksum does not match the given value
-func handle_datapackage_checksums(checksums: Dictionary[String, String]) -> void:
+func handle_datapackage_checksums(checksums: Dictionary) -> void:
 	DirAccess.make_dir_recursive_absolute("user://ap/datapacks/") # Ensure the directory exists, for later
 	var cachefile: FileAccess = FileAccess.open("user://ap/datapacks/cache.dat", FileAccess.READ)
 	if cachefile:
