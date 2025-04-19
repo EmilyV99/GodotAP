@@ -170,6 +170,6 @@ func send_deathlink(cause: String = ""):
 	if not cause.is_empty():
 		cmd["data"]["cause"] = cause
 	cmd["data"]["source"] = get_player_name(-1, false)
-	last_sent_deathlink_time = Time.get_unix_time_from_system()
+	Archipelago.last_sent_deathlink_time = Time.get_unix_time_from_system()
 	cmd["data"]["time"] = Archipelago.last_sent_deathlink_time
 	send_bounce(cmd, [], [], ["DeathLink"])
