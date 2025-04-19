@@ -1065,9 +1065,9 @@ func _autofill_track(msg: String) -> Array[String]:
 func _init():
 	init_command_manager(true)
 	_update_tags()
-	if AP_AUTO_OPEN_CONSOLE:
-		open_console()
 func _ready():
+	if AP_AUTO_OPEN_CONSOLE:
+		open_console.call_deferred()
 	create_socket()
 	for node in get_children():
 		if node is APConfigManager:
