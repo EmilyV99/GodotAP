@@ -10,6 +10,9 @@ class_name AP extends Node
 @export var AP_HIDE_NONLOCAL_ITEMSENDS := true ## Hide item send messages that don't involve the client.
 @export var AP_AUTO_OPEN_CONSOLE := false ## Automatically opens a default AP text console.
 @export var AP_ALLOW_TRACKERPACKS := true ## Allow loading custom tracker packs.
+@export_subgroup("UI")
+@export var AP_CONSOLE_CONNECTION_OPEN := false ## Automatically open the Connection box when the console opens
+@export var AP_CONSOLE_CONNECTION_AUTO := true ## Automatically open/close the Connection box based on connected status
 
 @export_subgroup("Logging")
 @export var AP_LOG_COMMUNICATION := false ## Enables additional logging.
