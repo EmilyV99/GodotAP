@@ -38,7 +38,7 @@ func _ready() -> void:
 	refresh_hidden()
 	typing_bar.grab_focus()
 	get_window().size_changed.connect(update_cont_size)
-	get_viewport().gui_embed_subwindows = true
+	get_window().gui_embed_subwindows = true
 	update_cont_size()
 
 	if Engine.is_editor_hint(): return

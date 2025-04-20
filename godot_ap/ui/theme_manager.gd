@@ -14,9 +14,9 @@ func _ready():
 
 func set_console_theme(path: String) -> void:
 	if path.is_empty(): return
-	var theme := load(path) as Theme
-	if not theme: return
-	get_window().theme = theme
+	var theme_res := load(path) as Theme
+	if not theme_res: return
+	get_window().theme = theme_res
 	Archipelago.config.window_theme_path = path
 
 func refresh_console_theme() -> void:
