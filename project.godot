@@ -40,4 +40,4 @@ theme/custom_font="res://godot_ap/ui/themes/basic_font.tres"
 
 [rendering]
 
-renderer/rendering_method="mobile"
+renderer/rendering_method="gl_compatibility"
