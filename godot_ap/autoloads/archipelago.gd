@@ -663,7 +663,7 @@ func load_console(console_scene: Node, as_child := true) -> bool:
 				return node is ConsoleContainer)
 		if not output_console_container:
 			return false
-	if as_child: add_child(console_scene)
+	if as_child: add_child.call_deferred(console_scene)
 	console_scene.ready.connect(func():
 		output_console = output_console_container.console
 		output_console_container.typing_bar.send_text.connect(func(s: String):
