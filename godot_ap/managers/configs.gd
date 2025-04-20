@@ -1,5 +1,7 @@
 class_name APConfigManager extends Node
 
+const CFG_VERSION: int = 1
+
 var _pause_saving := false
 var is_tracking := false :
 	set(val):
@@ -15,6 +17,11 @@ var hide_finished_map_squares := false :
 	set(val):
 		if val != hide_finished_map_squares:
 			hide_finished_map_squares = val
+			save_cfg()
+var window_theme_path: String :
+	set(val):
+		if val != window_theme_path:
+			window_theme_path = val
 			save_cfg()
 
 func _ready():
@@ -39,12 +46,16 @@ func save_cfg() -> void:
 
 func _load_cfg(file: FileAccess):
 	var byte = file.get_8()
+	var vers := Util.get_32_or(file, 0)
 	is_tracking = (byte & 0b00000001) != 0
 	verbose_trackerpack = (byte & 0b00000010) != 0
 	hide_finished_map_squares = (byte & 0b00000100) != 0
+	window_theme_path = Util.get_pascal_string_or(file, "")
 func _save_cfg(file: FileAccess):
 	var byte = 0
 	if is_tracking: byte |= 0b00000001
 	if verbose_trackerpack: byte |= 0b00000010
 	if hide_finished_map_squares: byte |= 0b00000100
 	file.store_8(byte)
+	file.store_32(CFG_VERSION)
+	file.store_pascal_string(window_theme_path)

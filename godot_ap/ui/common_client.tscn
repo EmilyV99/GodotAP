@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://cn7ah7d3ep4de"]
+[gd_scene load_steps=12 format=3 uid="uid://cn7ah7d3ep4de"]
 
 [ext_resource type="PackedScene" uid="uid://cgq7n1figlpu3" path="res://godot_ap/ui/base_client.tscn" id="1_i5jgm"]
 [ext_resource type="Script" uid="uid://dmuwjh1jlhnmd" path="res://godot_ap/ui/tracker_tab.gd" id="2_h31sw"]
@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://bd4dd3r6vt17p" path="res://godot_ap/ui/refresh_pressed.png" id="4_kmxjf"]
 [ext_resource type="Texture2D" uid="uid://cjc7g6m7tklr1" path="res://godot_ap/ui/refresh_hov.png" id="5_cfwis"]
 [ext_resource type="Script" uid="uid://b2s7dh7bhjw7m" path="res://godot_ap/ui/theme_manager.gd" id="8_0a6cn"]
+[ext_resource type="Script" uid="uid://cttniyxj6oq7h" path="res://godot_ap/ui/theme_box.gd" id="9_n6ui1"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ov043"]
 
@@ -85,13 +86,15 @@ theme_override_constants/margin_bottom = 8
 layout_mode = 2
 current_tab = 0
 
-[node name="Theme" type="MarginContainer" parent="Tabs/Settings/Margin/Tabs" index="1"]
+[node name="Theme" type="MarginContainer" parent="Tabs/Settings/Margin/Tabs" index="1" node_paths=PackedStringArray("themes", "default_theme")]
 layout_mode = 2
 theme_override_constants/margin_left = 6
 theme_override_constants/margin_top = 6
 theme_override_constants/margin_right = 6
 theme_override_constants/margin_bottom = 6
 script = ExtResource("8_0a6cn")
+themes = [NodePath("Row/Col1/DarkTheme"), NodePath("Row/Col1/LightTheme")]
+default_theme = NodePath("Row/Col1/DarkTheme")
 metadata/_tab_index = 0
 
 [node name="Row" type="HBoxContainer" parent="Tabs/Settings/Margin/Tabs/Theme" index="0"]
@@ -105,11 +108,17 @@ layout_mode = 2
 button_pressed = true
 button_group = SubResource("ButtonGroup_oksvb")
 text = "Dark Mode"
+script = ExtResource("9_n6ui1")
+target_theme_path = "res://godot_ap/ui/themes/dark_theme.tres"
+metadata/_custom_type_script = "uid://cttniyxj6oq7h"
 
 [node name="LightTheme" type="CheckBox" parent="Tabs/Settings/Margin/Tabs/Theme/Row/Col1" index="1"]
 layout_mode = 2
 button_group = SubResource("ButtonGroup_oksvb")
 text = "Light Mode"
+script = ExtResource("9_n6ui1")
+target_theme_path = "res://godot_ap/ui/themes/light_theme.tres"
+metadata/_custom_type_script = "uid://cttniyxj6oq7h"
 
 [node name="TrackerPack" type="MarginContainer" parent="Tabs/Settings/Margin/Tabs" index="2"]
 visible = false

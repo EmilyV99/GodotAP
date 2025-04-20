@@ -195,3 +195,20 @@ static func grayscale(img: Image) -> Image:
 static func gray(c: Color) -> Color:
 	var g = (c.r * 0.299) + (c.g * 0.587) + (c.b * 0.114)
 	return Color(g, g, g)
+
+static func get_pascal_string_or(file: FileAccess, default: String) -> String:
+	if not file or file.eof_reached(): return default
+	if file.get_position() >= file.get_length(): return default
+	return file.get_pascal_string()
+static func get_8_or(file: FileAccess, default: int) -> int:
+	if not file or file.eof_reached(): return default
+	if file.get_position() >= file.get_length(): return default
+	return file.get_8()
+static func get_16_or(file: FileAccess, default: int) -> int:
+	if not file or file.eof_reached(): return default
+	if file.get_position() >= file.get_length(): return default
+	return file.get_16()
+static func get_32_or(file: FileAccess, default: int) -> int:
+	if not file or file.eof_reached(): return default
+	if file.get_position() >= file.get_length(): return default
+	return file.get_32()

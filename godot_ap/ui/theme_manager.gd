@@ -1,13 +1,23 @@
 extends MarginContainer
 
-@onready var theme_dark: CheckBox = $Row/Col1/DarkTheme
-@onready var theme_light: CheckBox = $Row/Col1/LightTheme
+@export var themes: Array[ThemeBox]
+@export var default_theme: ThemeBox
 
 func _ready():
-	theme_dark.toggled.connect(func(b): if b: set_program_theme("res://godot_ap/ui/themes/dark_theme.tres"))
-	theme_light.toggled.connect(func(b): if b: set_program_theme("res://godot_ap/ui/themes/light_theme.tres"))
+	for themebox in themes:
+		themebox.set_theme.connect(set_console_theme)
+		themebox.set_pressed_no_signal(themebox.target_theme_path == Archipelago.config.window_theme_path)
+	if Archipelago.config.window_theme_path.is_empty():
+		default_theme.set_pressed(true)
+	else:
+		refresh_console_theme()
 
-func set_program_theme(path: String) -> void:
-	ProjectSettings.set_setting("gui/theme/custom", path)
-	get_tree().root.theme = load(path)
+func set_console_theme(path: String) -> void:
+	if path.is_empty(): return
+	var theme := load(path) as Theme
+	if not theme: return
+	get_window().theme = theme
+	Archipelago.config.window_theme_path = path
 
+func refresh_console_theme() -> void:
+	set_console_theme(Archipelago.config.window_theme_path)
