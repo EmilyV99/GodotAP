@@ -338,6 +338,8 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 		if dont_draw():
 			clear_hitboxes()
 			return
+		if data.l >= data.r:
+			return
 		var text_pos = 0
 		var trim_pos: int
 		var old_hitbox := get_hitbox()
