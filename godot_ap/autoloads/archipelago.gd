@@ -502,7 +502,17 @@ func _receive_item(index: int, item: NetworkItem) -> bool:
 		return false # Already recieved, skip
 	var data := conn.get_gamedata_for_player(conn.player_id)
 	var msg := ""
-	if item.dest_player_id == item.src_player_id:
+	if item.loc_id < 0:
+		if output_console and _printout_recieved_items:
+			conn.get_player().output(output_console)
+			output_console.add_text(" got ")
+			item.output(output_console)
+			output_console.add_text(" (")
+			out_location(output_console, item.loc_id, data)
+			output_console.add_line(")")
+		msg = "You found your %s at %s!" % [data.get_item_name(item.id),data.get_loc_name(item.loc_id)]
+		_remove_loc(item.loc_id)
+	elif item.dest_player_id == item.src_player_id:
 		if output_console and _printout_recieved_items:
 			conn.get_player().output(output_console)
 			output_console.add_text(" found their ")

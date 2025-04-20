@@ -30,6 +30,12 @@ func get_item_name(id: int) -> String:
 	var v: String = item_name_to_id.find_key(id)
 	return v if v else str(id)
 func get_loc_name(id: int) -> String:
+	if id < 0:
+		if id == -1:
+			return "Server"
+		if id == -2:
+			return "Starting Inventory"
+		return "??? #%d" % id
 	var v: String = location_name_to_id.find_key(id)
 	return v if v else str(id)
 
