@@ -30,16 +30,16 @@ func sort_by_dest(a: NetworkHint, b: NetworkHint) -> int:
 	return (Archipelago.conn.get_player_name(a.item.dest_player_id).nocasecmp_to(
 		Archipelago.conn.get_player_name(b.item.dest_player_id)))
 func sort_by_item(a: NetworkHint, b: NetworkHint) -> int:
-	var a_data := Archipelago.conn.get_gamedata_for_player(a.item.dest_player_id)
-	var b_data := Archipelago.conn.get_gamedata_for_player(b.item.dest_player_id)
+	var a_data: DataCache = Archipelago.conn.get_gamedata_for_player(a.item.dest_player_id)
+	var b_data: DataCache = Archipelago.conn.get_gamedata_for_player(b.item.dest_player_id)
 	return (a_data.get_item_name(a.item.id).nocasecmp_to(
 		b_data.get_item_name(b.item.id)))
 func sort_by_src(a: NetworkHint, b: NetworkHint) -> int:
 	return (Archipelago.conn.get_player_name(a.item.src_player_id).nocasecmp_to(
 		Archipelago.conn.get_player_name(b.item.src_player_id)))
 func sort_by_loc(a: NetworkHint, b: NetworkHint) -> int:
-	var a_data := Archipelago.conn.get_gamedata_for_player(a.item.src_player_id)
-	var b_data := Archipelago.conn.get_gamedata_for_player(b.item.src_player_id)
+	var a_data: DataCache = Archipelago.conn.get_gamedata_for_player(a.item.src_player_id)
+	var b_data: DataCache = Archipelago.conn.get_gamedata_for_player(b.item.src_player_id)
 	return (a_data.get_loc_name(a.item.loc_id).nocasecmp_to(
 		b_data.get_loc_name(b.item.loc_id)))
 func sort_by_status(a: NetworkHint, b: NetworkHint) -> int:

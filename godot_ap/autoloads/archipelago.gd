@@ -230,7 +230,7 @@ func _poll():
 				ap_disconnect()
 				return
 			WebSocketPeer.STATE_CLOSED: # Start a new connection
-				var err := _socket.connect_to_url(get_url())
+				var err: Error = _socket.connect_to_url(get_url())
 				if err:
 					AP.log("Connection to '%s' failed! Retrying (%d)" % [get_url(),_connect_attempts])
 					_wss = not _wss
@@ -503,7 +503,7 @@ func _receive_item(index: int, item: NetworkItem) -> bool:
 	assert(item.dest_player_id == conn.player_id)
 	if conn.received_index(index):
 		return false # Already recieved, skip
-	var data := conn.get_gamedata_for_player(conn.player_id)
+	var data: DataCache = conn.get_gamedata_for_player(conn.player_id)
 	var msg := ""
 	if item.loc_id < 0:
 		if output_console and _printout_recieved_items:
@@ -526,7 +526,7 @@ func _receive_item(index: int, item: NetworkItem) -> bool:
 		msg = "You found your %s at %s!" % [data.get_item_name(item.id),data.get_loc_name(item.loc_id)]
 		_remove_loc(item.loc_id)
 	else:
-		var src_data := conn.get_gamedata_for_player(item.src_player_id)
+		var src_data: DataCache = conn.get_gamedata_for_player(item.src_player_id)
 		if output_console and _printout_recieved_items:
 			conn.get_player(item.src_player_id).output(output_console)
 			output_console.add_text(" sent ")
@@ -749,7 +749,7 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 		.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, msg: String):
 			if not _ensure_connected(mgr.console): return
 			var filt := msg.substr(11)
-			var data := conn.get_gamedata_for_player()
+			var data: DataCache = conn.get_gamedata_for_player()
 
 			var columns := BaseConsole.PagedColumnsPart.new()
 			var title := "LOCATIONS"
@@ -794,7 +794,7 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 		.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, msg: String):
 			if not _ensure_connected(mgr.console): return
 			var filt := msg.substr(7)
-			var data := conn.get_gamedata_for_player()
+			var data: DataCache = conn.get_gamedata_for_player()
 
 			var columns := BaseConsole.PagedColumnsPart.new()
 			var title := "ITEMS"
