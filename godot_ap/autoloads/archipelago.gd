@@ -751,7 +751,7 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 			var filt := msg.substr(11)
 			var data := conn.get_gamedata_for_player()
 
-			var columns := BaseConsole.ColumnsPart.new()
+			var columns := BaseConsole.PagedColumnsPart.new()
 			var title := "LOCATIONS"
 			if filt: title += " (%s)" % filt
 			var folder: BaseConsole.FoldablePart = mgr.console.add_foldable("[ %s ]" % title, msg, mgr.console.COLOR_UI_MSG)
@@ -796,7 +796,7 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 			var filt := msg.substr(7)
 			var data := conn.get_gamedata_for_player()
 
-			var columns := BaseConsole.ColumnsPart.new()
+			var columns := BaseConsole.PagedColumnsPart.new()
 			var title := "ITEMS"
 			if filt: title += " (%s)" % filt
 			var folder: BaseConsole.FoldablePart = mgr.console.add_foldable("[ %s ]" % title, msg, mgr.console.COLOR_UI_MSG)

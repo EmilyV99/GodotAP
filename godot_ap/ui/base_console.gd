@@ -260,8 +260,10 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 			_font_flags.italic = italic
 			return _font_flags
 
+	func get_text() -> String:
+		return text
 	func _to_string() -> String:
-		return "TextPart<'%s' '%s' %s>" % [text, tooltip, color]
+		return "TextPart<'%s' '%s' %s>" % [get_text(), tooltip, color]
 
 	func _hitbox_string(c: BaseConsole, subtext: String, data: ConsoleDrawData):
 		var str_sz = c.get_string_size(subtext, _font_flags)
@@ -345,27 +347,28 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 		var old_hitbox := get_hitbox()
 		clear_hitboxes()
 		var space_only := true
+		var txt := get_text()
 		while true:
-			if text_pos >= text.length():
+			if text_pos >= txt.length():
 				break
-			if text[text_pos] == "\n":
+			if txt[text_pos] == "\n":
 				data.newline(c)
-				while text_pos < text.length() and not text[text_pos].lstrip("\n"):
+				while text_pos < txt.length() and not txt[text_pos].lstrip("\n"):
 					text_pos += 1
 				continue
-			trim_pos = text.find("\n", text_pos)
-			if trim_pos < 0: trim_pos = text.length()
-			var subtext := text.substr(text_pos,trim_pos-text_pos)
+			trim_pos = txt.find("\n", text_pos)
+			if trim_pos < 0: trim_pos = txt.length()
+			var subtext := txt.substr(text_pos,trim_pos-text_pos)
 			var str_sz := c.get_string_size(subtext, _font_flags)
 			while data.x < data.r and data.x + str_sz.x >= data.r and trim_pos > text_pos:
-				if text[trim_pos-1].lstrip(" \t"):
-					while trim_pos > text_pos and text[trim_pos-1].lstrip(" \t"): # Trim non-WS
+				if txt[trim_pos-1].lstrip(" \t"):
+					while trim_pos > text_pos and txt[trim_pos-1].lstrip(" \t"): # Trim non-WS
 						trim_pos -= 1
 						if not space_only: break # Allow breaking mid-word
 				else:
-					while trim_pos > text_pos and not text[trim_pos-1].lstrip(" \t"): # Trim WS
+					while trim_pos > text_pos and not txt[trim_pos-1].lstrip(" \t"): # Trim WS
 						trim_pos -= 1
-				subtext = text.substr(text_pos,trim_pos-text_pos)
+				subtext = txt.substr(text_pos,trim_pos-text_pos)
 				str_sz = c.get_string_size(subtext, _font_flags)
 			if trim_pos <= text_pos: # No space at all, window is too thin
 				if Util.approx_eq(data.x, data.l):
@@ -376,7 +379,7 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 				data.x = data.r # Force next line
 			if data.x >= data.r: # no space! next line!
 				data.newline(c)
-				while text_pos < text.length() and not text[text_pos].lstrip("\n"):
+				while text_pos < txt.length() and not txt[text_pos].lstrip("\n"):
 					text_pos += 1
 				continue
 			# The string WILL be drawn if this line is reached
@@ -390,7 +393,7 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 				data.show_x(data.x + str_sz.x)
 				data.show_y(data.y + str_sz.y + c.get_font_ascent(_font_flags))
 				data.x += str_sz.x
-			elif trim_pos < text.length():
+			elif trim_pos < txt.length():
 				# Trimmed whitespace, need to force the line down though
 				data.x = data.r
 			text_pos = trim_pos
@@ -406,7 +409,7 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 		part.color = col
 		return part
 	func copy_to(other: TextPart) -> void:
-		other.text = text
+		other.text = get_text()
 		other.tooltip = tooltip
 		other.color = color
 		other.hitboxes = hitboxes
@@ -441,6 +444,20 @@ class TextPart extends ConsolePart: ## A part that displays text, with opt color
 			if not left.is_empty():
 				ret.append(dupe_settings(left))
 		return ret
+class TextProcPart extends TextPart: ## A part that displays text that varies
+	var text_proc: Callable
+	func get_text() -> String:
+		return text_proc.call() if text_proc else super()
+
+	func _to_string() -> String:
+		return "TextProcPart<'%s' '%s' %s>" % [text_proc, tooltip, color]
+
+	static func make_proc(proc: Callable, ttip := "", col := Color.TRANSPARENT) -> TextProcPart:
+		var part := TextProcPart.new()
+		part.text_proc = proc
+		part.tooltip = ttip
+		part.color = col
+		return part
 
 class CenterTextPart extends TextPart:
 	func _hitbox_string(c: BaseConsole, subtext: String, data: ConsoleDrawData):
@@ -641,14 +658,20 @@ class FoldablePart extends ContainerPart:
 		ret.fold_changed.connect(c.queue_locked_redraw)
 		return ret
 class ColumnsPart extends ContainerPart:
+	func _on_add() -> void:
+		pass
+
 	## Adds a part to a specified column index
 	## Columns will be auto-spaced by their used witdth
 	func add(col: int, part: ConsolePart) -> ConsolePart:
 		while parts.size() <= col:
 			_add(ContainerPart.new())
-		return parts[col]._add(part)
+		var ret: ConsolePart = parts[col]._add(part)
+		_on_add()
+		return ret
 	func add_nil(col: int) -> void:
 		add(col, null)
+		_on_add()
 	func draw(c: BaseConsole, data: ConsoleDrawData) -> void:
 		if dont_draw():
 			super(c, data)
@@ -716,6 +739,172 @@ class ColumnsPart extends ContainerPart:
 		data.l = dl
 		data.y = by
 		data.newline(c)
+
+class PagedColumnsPart extends ColumnsPart:
+	var frozen_rows: int = 1 :
+		set(val):
+			frozen_rows = val
+			_on_add()
+	var content_rows: int = 20 :
+		set(val):
+			content_rows = val
+			_on_add()
+	var current_page: int = 0
+	var num_pages: int = 1
+
+	var prev_part: TextProcPart
+	var next_part: TextProcPart
+
+	func _prev_text() -> String:
+		return "🞁 Prev (Page %d/%d) 🞁" % [current_page, num_pages]
+	func _next_text() -> String:
+		return "🞃 Next (Page %d/%d) 🞃" % [current_page+2, num_pages]
+
+	func _on_add() -> void:
+		var num_rows: int = 0
+		for col: ContainerPart in parts:
+			num_rows = maxi(num_rows, col.parts.size())
+		num_rows -= frozen_rows
+		num_pages = maxi(0, ceili(num_rows as float / content_rows))
+
+	func showing_row(row: int) -> bool:
+		if row < 0: return false
+		if row < frozen_rows: return true
+		row -= frozen_rows
+		if row < current_page * content_rows:
+			return false # before start
+		return row < (current_page+1) * content_rows
+
+	func swap_page(by: int) -> void:
+		current_page = clampi(current_page + by, 0, num_pages-1)
+	func page_click(_evt: InputEventMouseButton, by: int) -> bool:
+		swap_page(by)
+		return true
+
+	func get_hitboxes() -> Array[Rect2]:
+		var ret: Array[Rect2] = super()
+		if prev_part:
+			ret.append_array(prev_part.get_hitboxes())
+		if next_part:
+			ret.append_array(next_part.get_hitboxes())
+		return ret
+	func try_click(evt: InputEventMouseButton, pos: Vector2) -> bool:
+		if super(evt, pos):
+			return true
+		if next_part and next_part.try_click(evt, pos):
+			return true
+		if prev_part and prev_part.try_click(evt, pos):
+			return true
+		return false
+
+	func _calc_and_draw(c: BaseConsole, data: ConsoleDrawData, do_draw: bool) -> void:
+		if not prev_part:
+			assert(not next_part)
+			prev_part = TextProcPart.make_proc(_prev_text, "", c.COLOR_UI_MSG)
+			next_part = TextProcPart.make_proc(_next_text, "", c.COLOR_UI_MSG)
+			var on_page_click: Callable = func(evt: InputEventMouseButton, change_by: int):
+				if not evt.pressed:
+					swap_page(change_by)
+					c.queue_redraw()
+				return true
+			prev_part.on_click = on_page_click.bind(-1)
+			next_part.on_click = on_page_click.bind(1)
+
+		# Ensure we're at line start
+		data.ensure_line(c)
+		# Cache data vals
+		var dl := data.l
+		var dy := data.y
+		# Draw
+		var by := data.y
+		var old_max_x := data.max_shown_x
+		var xs: Array = [data.x]
+		var ys: Array = [dy]
+		var heights: Array = []
+
+		var start_page_ind: int = frozen_rows + (current_page * content_rows)
+		var end_page_ind: int = start_page_ind + content_rows
+
+		for q in parts.size():
+			var data_copy := data.duplicate()
+			data_copy.max_shown_x = 0.0
+			data_copy.l = xs.back()
+			data_copy.x = data_copy.l
+			for ind in parts[q].parts.size():
+				var p = parts[q].parts[ind]
+				if not p: continue
+				data_copy.y = dy
+				p.calc_hitboxes(c, data_copy)
+				data_copy.ensure_line(c)
+			if q == 0:
+				data_copy.y = dy
+				prev_part.calc_hitboxes(c, data_copy)
+				data_copy.ensure_line(c)
+				data_copy.y = dy
+				next_part.calc_hitboxes(c, data_copy)
+				data_copy.ensure_line(c)
+			if data_copy.max_shown_x > xs.back():
+				xs.append(data_copy.max_shown_x)
+			else: xs.append(xs.back())
+			for ind in parts[q].parts.size():
+				var p = parts[q].parts[ind]
+				if not p: continue
+				if ind >= frozen_rows and ind < start_page_ind:
+					continue
+				if ind >= end_page_ind:
+					break
+				var h = p.get_hitbox().size.y
+				while heights.size() <= ind: heights.append(0.0)
+				heights[ind] = max(heights[ind], h)
+
+		var prev_y: int = ys.back()
+		if current_page > 0:
+			ys[0] += prev_part.get_hitbox().size.y
+		for h in heights:
+			ys.append(ys.back() + h)
+		var next_y: int = ys.back()
+
+		for q in parts.size():
+			data.max_shown_x = 0.0
+			for ind in parts[q].parts.size():
+				var p = parts[q].parts[ind]
+				if not p: continue
+				if q == 0 and ind == 0 and current_page > 0:
+					data.x = xs[q]
+					data.y = prev_y
+					if do_draw:
+						prev_part.draw(c,data)
+					else:
+						prev_part.calc_hitboxes(c,data)
+				if ind >= frozen_rows and ind < start_page_ind:
+					continue
+				if ind >= end_page_ind:
+					if q == 0 and current_page < num_pages - 1:
+						data.x = xs[q]
+						data.y = next_y
+						if do_draw:
+							next_part.draw(c,data)
+						else:
+							next_part.calc_hitboxes(c,data)
+					break
+				data.x = xs[q]
+				data.y = ys[ind]
+				if do_draw:
+					p.draw(c,data)
+				else:
+					p.calc_hitboxes(c,data)
+			data.ensure_line(c)
+			# Increment position
+			data.l = data.max_shown_x + 4 # add spacing
+			data.x = data.l
+			if data.y > by:
+				by = data.y
+		data.max_shown_x = max(data.max_shown_x, old_max_x)
+		# Revert boundaries, and linebreak from by
+		data.l = dl
+		data.y = by
+		data.newline(c)
+
 class ArrangedColumnsPart extends ContainerPart:
 	var widths: Array[int] = []
 
