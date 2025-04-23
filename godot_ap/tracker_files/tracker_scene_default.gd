@@ -80,8 +80,8 @@ class LocationPart extends BaseConsole.ArrangedColumnsPart: ## A part representi
 		if parent.cols_by_name.has(COL_HINT_STAT):
 			add(NetworkHint.make_hint_status(c, loc.hint_status).centered(), parent.cols_by_name[COL_HINT_STAT].col_width)
 		if trackerpack and parent.cols_by_name.has(COL_LOC_STAT):
-			var stat: String = TrackerManager.get_location(loc.id).get_status()
-			var stats: Array = TrackerManager.statuses.filter(func(s): return s.text == stat)
+			var stat: String = Archipelago.tracker_manager.get_location(loc.id).get_status()
+			var stats: Array = Archipelago.tracker_manager.statuses.filter(func(s): return s.text == stat)
 			if stats:
 				add(stats[0].make_c_text(c), parent.cols_by_name[COL_LOC_STAT].col_width)
 
@@ -138,7 +138,7 @@ func sort_click(event: InputEventMouseButton, column_name: String) -> bool:
 					vbox.add_child(hbox)
 			COL_LOC_STAT:
 				var arr: Array = []
-				arr.append_array(Util.reversed(TrackerManager.statuses))
+				arr.append_array(Util.reversed(Archipelago.tracker_manager.statuses))
 				for s in arr:
 					var hbox := GUI.make_cbox_row(s.text,
 						status_filters.get(s.text, true),
@@ -168,7 +168,7 @@ func refresh_tracker(fresh_connection: bool = false) -> void:
 				var font := console.get_font()
 				var sz := font.get_string_size(statname)
 				cols_in_order[1].col_width = max(cols_in_order[1].col_width, sz.x)
-			for stat in TrackerManager.statuses:
+			for stat in Archipelago.tracker_manager.statuses:
 				var font := console.get_font()
 				var sz := font.get_string_size(stat.text)
 				cols_in_order[2].col_width = max(cols_in_order[2].col_width, sz.x)
@@ -197,9 +197,9 @@ func refresh_tracker(fresh_connection: bool = false) -> void:
 		loc_container = console.add(BaseConsole.ContainerPart.new())
 		Archipelago.conn.set_hint_notify(func(_hints): queue_refresh())
 
-		await TrackerManager.on_tracker_load()
+		await Archipelago.tracker_manager.on_tracker_load()
 		for locid in Archipelago.location_list():
-			var new_part := LocationPart.new(TrackerManager.get_location(locid), trackerpack, self)
+			var new_part := LocationPart.new(Archipelago.tracker_manager.get_location(locid), trackerpack, self)
 			loc_container._add(new_part)
 		await get_tree().process_frame
 		console.scroll_by_abs(-console.scroll)

@@ -52,7 +52,7 @@ class MapPin extends Control:
 			if stat.text in statuses:
 				c_status = stat.text
 				break
-		var cname = TrackerManager.get_status(c_status).map_colorname
+		var cname = Archipelago.tracker_manager.get_status(c_status).map_colorname
 		if c_status == "Reachable":
 			if statuses.keys().filter(func(s): return s != "Reachable" and s != "Found").size() > 0:
 				cname = parent.some_reachable_color
@@ -80,7 +80,7 @@ class MapPin extends Control:
 		var columns := BaseConsole.ColumnsPart.new()
 		columns.add(1, console.make_spacing(Vector2(4,0)))
 		for loc in locs:
-			var stat := TrackerManager.get_status(loc.get_status())
+			var stat: LocationStatus = Archipelago.tracker_manager.get_status(loc.get_status())
 			if Archipelago.config.hide_finished_map_squares and stat.text == "Found":
 				continue
 			columns.add(0, console.make_text(loc.get_loc_name() + ": ",
@@ -128,8 +128,8 @@ func refresh_tracker(fresh_connection: bool = false) -> void:
 			pins.clear()
 
 		var spot_dict := {}
-		await TrackerManager.on_tracker_load()
-		for loc in TrackerManager.locations.values():
+		await Archipelago.tracker_manager.on_tracker_load()
+		for loc in Archipelago.tracker_manager.locations.values():
 			var track_loc: TrackerLocation = loc.loaded_tracker_loc
 			if not track_loc: continue
 			for spot in track_loc.map_spots:

@@ -1,5 +1,4 @@
-extends Node
-# Autoload 'TrackerManager'
+class_name TrackerManager extends Node
 
 signal tracking_reloaded
 

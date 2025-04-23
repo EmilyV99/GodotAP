@@ -47,7 +47,7 @@ func refresh_tracker(fresh_connection: bool = false) -> void:
 		_base_image = trackerpack.load_image(image_path)
 		image = Util.modulate(_base_image, AP.color_from_name(modulate_colorname))
 		gray_image = Util.grayscale(image)
-	await TrackerManager.on_tracker_load()
+	await Archipelago.tracker_manager.on_tracker_load()
 
 	var v = valnode.calculate()
 	var maxval = maxnode.calculate()

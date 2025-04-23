@@ -21,9 +21,9 @@ class MapSpot:
 
 func get_loc() -> APLocation:
 	if identifier is int:
-		return TrackerManager.get_location(identifier)
+		return Archipelago.tracker_manager.get_location(identifier)
 	elif identifier is String:
-		return TrackerManager.get_loc_by_name(identifier)
+		return Archipelago.tracker_manager.get_loc_by_name(identifier)
 	return APLocation.nil()
 
 func _iter_statuses(only_relevant := true) -> Array[LocationStatus]:

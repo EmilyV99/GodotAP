@@ -6,7 +6,7 @@ func _init(rule_name: String) -> void:
 	name = rule_name
 
 func can_access() -> Variant:
-	var rule := TrackerManager.get_named_rule(name)
+	var rule: TrackerLogicNode = Archipelago.tracker_manager.get_named_rule(name)
 	if not rule: return null
 	return rule.can_access()
 
@@ -26,7 +26,7 @@ static func from_dict(vals: Dictionary) -> TrackerLogicNode:
 	return TrackerLogicNamedRule.new(vals.get("name", ""))
 
 func get_repr(indent := 0) -> String:
-	var rule := TrackerManager.get_named_rule(name)
+	var rule: TrackerLogicNode = Archipelago.tracker_manager.get_named_rule(name)
 	if not rule:
 		return "\t".repeat(indent) + "ERROR"
 	if rule is TrackerLogicNamedRule:
@@ -40,7 +40,7 @@ func get_repr(indent := 0) -> String:
 
 func _get_joint_repr(dict, indent := 0):
 	var repeated = name in dict.keys()
-	var rule := TrackerManager.get_named_rule(name)
+	var rule: TrackerLogicNode = Archipelago.tracker_manager.get_named_rule(name)
 	if rule and not repeated: dict[name] = rule
 	var names: Array[String] = []
 	names.assign(dict.keys())

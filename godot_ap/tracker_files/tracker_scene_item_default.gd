@@ -311,7 +311,7 @@ func refresh_tracker(fresh_connection: bool = false) -> void:
 		console.add(header)
 		headings[sort_cols[0].index].text += (" ↑" if sort_cols[0].sort_ascending else " ↓")
 		itm_container = console.add(BaseConsole.ContainerPart.new())
-		await TrackerManager.on_tracker_load()
+		await Archipelago.tracker_manager.on_tracker_load()
 		_construct_values()
 		await get_tree().process_frame
 		console.scroll_by_abs(-console.scroll)

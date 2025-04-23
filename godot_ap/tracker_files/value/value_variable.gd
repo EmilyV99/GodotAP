@@ -6,7 +6,7 @@ func _init(varname: String):
 	name = varname
 
 func calculate() -> Variant:
-	return TrackerManager.get_variable(name)
+	return Archipelago.tracker_manager.get_variable(name)
 
 func _to_dict() -> Dictionary:
 	return {

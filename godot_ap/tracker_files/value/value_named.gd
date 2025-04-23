@@ -6,7 +6,7 @@ func _init(rule_name: String) -> void:
 	name = rule_name
 
 func calculate() -> Variant:
-	var val := TrackerManager.get_named_value(name)
+	var val: TrackerValueNode = Archipelago.tracker_manager.get_named_value(name)
 	if not val: return null
 	return val.calculate()
 

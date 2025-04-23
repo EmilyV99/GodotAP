@@ -438,13 +438,13 @@ func instantiate() -> TrackerScene_Root:
 		scene.labeltext = description_bar
 	if not description_ttip.is_empty():
 		scene.labelttip = description_ttip
-	TrackerManager.variables.clear()
+	Archipelago.tracker_manager.variables.clear()
 	for key in starting_variables:
-		TrackerManager.variables[key] = starting_variables[key].calculate()
-	TrackerManager.load_tracker_locations(locations)
-	TrackerManager.load_named_rules(named_rules)
-	TrackerManager.load_named_values(named_values)
-	TrackerManager.load_statuses(statuses)
+		Archipelago.tracker_manager.variables[key] = starting_variables[key].calculate()
+	Archipelago.tracker_manager.load_tracker_locations(locations)
+	Archipelago.tracker_manager.load_named_rules(named_rules)
+	Archipelago.tracker_manager.load_named_values(named_values)
+	Archipelago.tracker_manager.load_statuses(statuses)
 
 	if gui_layout.is_empty():
 		gui_layout = TrackerPack_Data.DEFAULT_GUI.duplicate(true)
@@ -527,19 +527,19 @@ func _load_file(json: Dictionary) -> Error:
 				"+":
 					_item_register.connect(func(name):
 						if name == iname:
-							TrackerManager.variables[varname] += op.get("value", 0))
+							Archipelago.tracker_manager.variables[varname] += op.get("value", 0))
 				"-":
 					_item_register.connect(func(name):
 						if name == iname:
-							TrackerManager.variables[varname] -= op.get("value", 0))
+							Archipelago.tracker_manager.variables[varname] -= op.get("value", 0))
 				"*":
 					_item_register.connect(func(name):
 						if name == iname:
-							TrackerManager.variables[varname] *= op.get("value", 1))
+							Archipelago.tracker_manager.variables[varname] *= op.get("value", 1))
 				"/":
 					_item_register.connect(func(name):
 						if name == iname:
-							TrackerManager.variables[varname] /= op.get("value", 1))
+							Archipelago.tracker_manager.variables[varname] /= op.get("value", 1))
 
 	return ret
 

@@ -1,13 +1,18 @@
-extends Node
+class_name APSaveManager extends Node
 
-var open_save: SaveFile = SaveFile.new()
+@export var SAVE_HEADER: String = "GodotAP_Save_File"
+var open_save: SaveFile
 var open_save_ind := -1
 
+func make_save_file() -> SaveFile: ## Override to return a subclass of SaveFile
+	return SaveFile.new()
+
 func _init() -> void:
+	open_save = make_save_file()
 	DirAccess.make_dir_recursive_absolute("user://saves/")
 
 func _ready() -> void:
-	if OS.is_debug_build():
+	if OS.is_debug_build(): # Debug commands for forcibly saving/loading via console
 		Archipelago.cmd_manager.register_command(ConsoleCommand.new("/save").debug()
 			.add_help("[num]", "Saves the save file, optionally to a different-numbered slot. num >= 0.")
 			.set_call(func(mgr: CommandManager, cmd: ConsoleCommand, msg: String):
@@ -48,7 +53,7 @@ func save() -> void:
 func read_save(ind: int) -> bool:
 	if ind < 0: return false
 	var file: FileAccess = FileAccess.open("user://saves/%d.dat" % ind, FileAccess.READ)
-	if not file:
+	if not file or file.get_pascal_string() != SAVE_HEADER:
 		var f2 = FileAccess.open("user://saves/%d.dat" % ind, FileAccess.WRITE)
 		if not f2: return false
 		f2.close()
@@ -65,6 +70,7 @@ func read_save(ind: int) -> bool:
 func write_save(ind: int) -> bool:
 	if ind < 0: return false
 	var file: FileAccess = FileAccess.open("user://saves/%d.dat" % ind, FileAccess.WRITE)
+	file.store_pascal_string(SAVE_HEADER)
 	open_save.write(file)
 	file.close()
 	return true

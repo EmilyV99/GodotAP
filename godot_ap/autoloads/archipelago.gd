@@ -96,7 +96,9 @@ var aplock: APLock = null
 
 var _socket: WebSocketPeer
 
-var config : APConfigManager
+var config : APConfigManager ## Will be defaulted if not provided in 'godot_ap/autoloads/archipelago.tscn'
+var save_manager : APSaveManager ## Can be 'null' if not provided in 'godot_ap/autoloads/archipelago.tscn'
+var tracker_manager: TrackerManager = TrackerManager.new()
 
 #region CONNECTION
 var conn: ConnectionInfo ## The active Archipelago connection
@@ -769,12 +771,12 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 			for q in ids.size(): _index_dict[ids[q]] = q
 			var _status_getter = func(lid: int) -> String:
 				if conn.slot_locations.get(lid): return "Found"
-				var status_name = TrackerManager.get_location(lid).get_status("Not Found")
+				var status_name = Archipelago.tracker_manager.get_location(lid).get_status("Not Found")
 				return status_name
 			ids.sort_custom(func(a,b):
 				var astat: String = _status_getter.call(a)
 				var bstat: String = _status_getter.call(b)
-				var v = TrackerManager.sort_by_location_status(astat, bstat)
+				var v = Archipelago.tracker_manager.sort_by_location_status(astat, bstat)
 				if v:
 					return v > 0
 				return _index_dict[b] > _index_dict[a])
@@ -782,7 +784,7 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 			for lid in ids:
 				var loc_name = data.get_loc_name(lid)
 				if not filt or (filt.to_lower() in loc_name.to_lower()):
-					var loc_status = TrackerManager.get_status(_status_getter.call(lid))
+					var loc_status = Archipelago.tracker_manager.get_status(_status_getter.call(lid))
 					if not loc_status: loc_status = LocationStatus.new("Not Found","","red")
 
 					columns.add(0, mgr.console.make_text(loc_name, "Location %d" % lid, rich_colors[loc_status.colorname]))
@@ -893,7 +895,7 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 						var locs: Array[APLocation] = []
 
 						locs.assign(conn.slot_locations.keys() \
-							.map(func(locid: int): return TrackerManager.get_location(locid)) \
+							.map(func(locid: int): return Archipelago.tracker_manager.get_location(locid)) \
 							.filter(func(v: APLocation): return v.loaded_tracker_loc != null and \
 								(filt.is_empty() or v.name.to_lower().contains(filt))))
 						locs.sort_custom(func(a: APLocation, b: APLocation): return a.name.naturalnocasecmp_to(b.name) < 0)
@@ -904,7 +906,7 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 							for loc in locs:
 								var tloc: TrackerLocation = loc.loaded_tracker_loc
 								var status_name := tloc.get_status()
-								var status_obj := TrackerManager.get_status(status_name)
+								var status_obj: LocationStatus = Archipelago.tracker_manager.get_status(status_name)
 								var folder: BaseConsole.FoldablePart = outer_folder.add(
 									mgr.console.make_foldable("%s (%s)" % [loc.name, status_name], "", rich_colors[status_obj.colorname]))
 								for stat in tloc._iter_statuses():
@@ -917,7 +919,7 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 									cont.textpart_replace("false", "false", true, "", rich_colors["red"])
 							mgr.console.add_header_spacing()
 					"refresh":
-						TrackerManager.load_tracker_packs()
+						Archipelago.tracker_manager.load_tracker_packs()
 					"vars":
 						if not _ensure_connected(mgr.console): return
 						mgr.console.add_header_spacing()
@@ -926,14 +928,14 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 						outer_folder.add(mgr.console.make_header_spacing())
 						outer_folder.add(mgr.console.make_indent(20))
 						var needs_spacing := false
-						var named_rules = TrackerManager.named_rules.keys()
+						var named_rules = Archipelago.tracker_manager.named_rules.keys()
 						if not named_rules.is_empty():
 							if needs_spacing:
 								outer_folder.add(mgr.console.make_header_spacing())
 							else: needs_spacing = true
 							var rules_folder := outer_folder.add(mgr.console.make_foldable("[ NAMED RULES ]", "", mgr.console.COLOR_UI_MSG))
 							for rulename in named_rules:
-								var rule = TrackerManager.get_named_rule(rulename)
+								var rule = Archipelago.tracker_manager.get_named_rule(rulename)
 								var b = rule.can_access()
 								var c = "white"
 								if b != null:
@@ -944,14 +946,14 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 									rule.get_repr(0), 25, mgr.console.COLOR_UI_MSG))
 								cont.textpart_replace("true", "true", true, "", rich_colors["green"])
 								cont.textpart_replace("false", "false", true, "", rich_colors["red"])
-						var named_vals = TrackerManager.named_values.keys()
+						var named_vals = Archipelago.tracker_manager.named_values.keys()
 						if not named_vals.is_empty():
 							if needs_spacing:
 								outer_folder.add(mgr.console.make_header_spacing())
 							else: needs_spacing = true
 							var vals_folder := outer_folder.add(mgr.console.make_foldable("[ NAMED VALUES ]", "", mgr.console.COLOR_UI_MSG))
 							for valname in named_vals:
-								var val_node := TrackerManager.get_named_value(valname)
+								var val_node: TrackerValueNode = Archipelago.tracker_manager.get_named_value(valname)
 								var value = val_node.calculate()
 								var inner_folder: BaseConsole.FoldablePart = vals_folder.add(
 									mgr.console.make_foldable("%s = %s" % [valname,value], "", mgr.console.COLOR_UI_MSG))
@@ -959,7 +961,7 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 								var cont: BaseConsole.ContainerPart = inner_folder.add(mgr.console.make_indented_block(val_str, 25))
 								cont.textpart_replace("true", "true", true, "", rich_colors["green"])
 								cont.textpart_replace("false", "false", true, "", rich_colors["red"])
-						var vars = TrackerManager.variables.keys()
+						var vars = Archipelago.tracker_manager.variables.keys()
 						if not vars.is_empty():
 							if needs_spacing:
 								outer_folder.add(mgr.console.make_header_spacing())
@@ -967,7 +969,7 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 							var vars_folder := outer_folder.add(mgr.console.make_foldable("[ VARIABLES ]", "", mgr.console.COLOR_UI_MSG))
 							for varname in vars:
 								vars_folder.add(mgr.console.make_text(varname+": ", "", mgr.console.COLOR_UI_MSG))
-								var val = TrackerManager.get_variable(varname)
+								var val = Archipelago.tracker_manager.get_variable(varname)
 								vars_folder.add(mgr.console.make_text(str(val), "", AP.color_from_name("green")))
 								vars_folder.add(mgr.console.make_header_spacing(0))
 						outer_folder.add(mgr.console.make_indent(-20))
@@ -1085,10 +1087,12 @@ func _ready():
 	for node in get_children():
 		if node is APConfigManager:
 			config = node
-			break
+		elif node is APSaveManager:
+			save_manager = node
 	if not config:
 		config = APConfigManager.new()
 		add_child(config)
+	# 'save_manager' can be null
 enum ItemClassification {
 	FILLER = 0b000,
 	PROG = 0b001,
