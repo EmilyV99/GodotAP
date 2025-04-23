@@ -11,8 +11,11 @@ var info_part: BaseConsole.TextPart = null
 func refr_tags():
 	tracker_button.set_pressed_no_signal(TrackerManager.tracking)
 	init_tracker()
-		
+
 func _ready():
+	if not Archipelago.AP_ALLOW_TRACKERPACKS:
+		queue_free()
+		return
 	info_part = info_console.add_c_text("")
 	Archipelago.on_tag_change.connect(refr_tags)
 	TrackerManager.tracking_reloaded.connect(refr_tags)
@@ -33,7 +36,7 @@ func init_tracker():
 		await get_tree().process_frame
 		tracker = null
 	TrackerManager.clear_tracker()
-	
+
 	if not TrackerManager.tracking:
 		info_part.text = "Tracking Disabled"
 		info_part.tooltip = ""
