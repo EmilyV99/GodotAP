@@ -1,12 +1,13 @@
 class_name NetworkHint
 
 enum Status {
-	FOUND = 0,
-	UNSPECIFIED = 1,
+	UNSPECIFIED = 0,
 	NON_PRIORITY = 10,
 	AVOID = 20,
 	PRIORITY = 30,
-	NOT_FOUND = 2, # Deprecated by new hint status code https://github.com/ArchipelagoMW/Archipelago/pull/3506, still supported for now
+
+	FOUND = -2, # Special case, not actually a status value but used for the same GUI column
+	NOT_FOUND = -1, # Compat, can probaly remove soon
 }
 
 static var status_names: Dictionary[Status, String] = {
