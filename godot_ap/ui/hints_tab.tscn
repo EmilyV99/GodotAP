@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3 uid="uid://dhya6ucgf72i8"]
+
+[ext_resource type="Script" uid="uid://bow4x4xntl26h" path="res://godot_ap/ui/hints_tab.gd" id="1_bwydx"]
+[ext_resource type="PackedScene" uid="uid://c51q4vrwhlcl7" path="res://godot_ap/ui/console_container.tscn" id="2_iqo4x"]
+
+[node name="Hints" type="MarginContainer"]
+visible = false
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
+script = ExtResource("1_bwydx")
+metadata/_tab_index = 1
+
+[node name="Console" parent="." instance=ExtResource("2_iqo4x")]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TypingBar" parent="Console" index="1"]
+visible = false
+
+[editable path="Console"]

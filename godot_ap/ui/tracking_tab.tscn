@@ -1,0 +1,59 @@
+[gd_scene load_steps=7 format=3 uid="uid://c1duqcw3ilaf3"]
+
+[ext_resource type="Script" uid="uid://dmuwjh1jlhnmd" path="res://godot_ap/ui/tracker_tab.gd" id="1_oibrk"]
+[ext_resource type="Texture2D" uid="uid://dvhxfj3wda717" path="res://godot_ap/ui/refresh.png" id="2_llhda"]
+[ext_resource type="Texture2D" uid="uid://bd4dd3r6vt17p" path="res://godot_ap/ui/refresh_pressed.png" id="3_tcu2u"]
+[ext_resource type="Texture2D" uid="uid://cjc7g6m7tklr1" path="res://godot_ap/ui/refresh_hov.png" id="4_4g4fk"]
+[ext_resource type="PackedScene" uid="uid://bwamxuo3s7c8n" path="res://godot_ap/ui/plain_console.tscn" id="5_hc70o"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ov043"]
+
+[node name="Tracking" type="MarginContainer"]
+visible = false
+script = ExtResource("1_oibrk")
+metadata/_tab_index = 2
+
+[node name="Column" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Margins" type="MarginContainer" parent="Column"]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 8
+
+[node name="Row" type="HBoxContainer" parent="Column/Margins"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Column/Margins/Row"]
+layout_mode = 2
+size_flags_horizontal = 0
+text = "Enable Tracking:"
+
+[node name="TrackingButton" type="CheckButton" parent="Column/Margins/Row"]
+layout_mode = 2
+size_flags_horizontal = 0
+mouse_default_cursor_shape = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_ov043")
+
+[node name="Reload" type="TextureButton" parent="Column/Margins/Row"]
+layout_mode = 2
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("2_llhda")
+texture_pressed = ExtResource("3_tcu2u")
+texture_hover = ExtResource("4_4g4fk")
+stretch_mode = 5
+
+[node name="InfoLabel" parent="Column/Margins/Row" instance=ExtResource("5_hc70o")]
+custom_minimum_size = Vector2(0, 0)
+layout_mode = 2
+focus_next = NodePath("")
+focus_previous = NodePath("")
+focus_mode = 0
+theme_type_variation = &"InfoLabel"
+font_color = Color(0, 0, 0, 0)
+
+[connection signal="sort_children" from="Column/Margins/Row" to="Column/Margins/Row/InfoLabel" method="queue_redraw"]

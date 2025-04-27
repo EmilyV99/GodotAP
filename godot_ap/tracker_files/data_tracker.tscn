@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://bog8y27sjyy1r"]
 
 [ext_resource type="Script" uid="uid://c71ngf2fwv2id" path="res://godot_ap/tracker_files/tracker_scene_default.gd" id="1_l7kyx"]
-[ext_resource type="PackedScene" uid="uid://c51q4vrwhlcl7" path="res://godot_ap/ui/console_tab.tscn" id="2_jjm2p"]
+[ext_resource type="PackedScene" uid="uid://c51q4vrwhlcl7" path="res://godot_ap/ui/console_container.tscn" id="2_jjm2p"]
 
 [node name="Control" type="VBoxContainer"]
 anchors_preset = 15
