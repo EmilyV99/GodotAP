@@ -93,8 +93,8 @@ func get_font_ascent(flags: FontFlags = null) -> float:
 	return get_font(flags).get_ascent(font_size)
 func get_string_size(text: String, flags: FontFlags = null) -> Vector2:
 	return get_font(flags).get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
-func _get_supported_opentype_variants(font: FontVariation) -> Array:
-	var arr = font.get_supported_variation_list().keys()
+func _get_supported_opentype_variants(fnt: FontVariation) -> Array:
+	var arr = fnt.get_supported_variation_list().keys()
 	var ts = TextServerManager.get_primary_interface()
 	for i in range(arr.size()):
 		arr[i] = ts.tag_to_name(arr[i])
