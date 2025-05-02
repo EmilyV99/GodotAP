@@ -1,8 +1,7 @@
-[gd_scene load_steps=9 format=3 uid="uid://bx4d5pih77vp4"]
+[gd_scene load_steps=8 format=3 uid="uid://bx4d5pih77vp4"]
 
 [ext_resource type="PackedScene" uid="uid://c51q4vrwhlcl7" path="res://godot_ap/ui/console_container.tscn" id="1_karta"]
 [ext_resource type="Script" uid="uid://cs0261v4jx4b" path="res://godot_ap/ui/slider_box.gd" id="2_t718y"]
-[ext_resource type="SystemFont" uid="uid://73rjoc23d4ub" path="res://godot_ap/ui/console_font.tres" id="3_iispj"]
 [ext_resource type="Script" uid="uid://cyc8jkqjagswj" path="res://godot_ap/ui/connect_box.gd" id="4_rlrcu"]
 [ext_resource type="Script" uid="uid://cety6nqnci3n6" path="res://godot_ap/ui/updown_lineedit.gd" id="5_dfvvx"]
 
@@ -11,7 +10,6 @@
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_1cnti"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_8fs71"]
-font = ExtResource("3_iispj")
 font_size = 20
 font_color = Color(1, 0.443684, 0.375096, 1)
 outline_size = 6
@@ -58,7 +56,6 @@ theme_override_constants/margin_bottom = 0
 layout_mode = 2
 size_flags_vertical = 0
 mouse_filter = 1
-theme_override_fonts/font = ExtResource("3_iispj")
 theme_override_font_sizes/font_size = 40
 text = "🞀"
 
@@ -94,7 +91,6 @@ focus_neighbor_top = NodePath("../Pwd_Box")
 focus_neighbor_bottom = NodePath("../Port_Box")
 focus_next = NodePath("../Port_Box")
 focus_previous = NodePath("../Pwd_Box")
-theme_override_fonts/font = ExtResource("3_iispj")
 theme_override_font_sizes/font_size = 20
 script = ExtResource("5_dfvvx")
 
@@ -110,7 +106,6 @@ focus_neighbor_top = NodePath("../IP_Box")
 focus_neighbor_bottom = NodePath("../Slot_Box")
 focus_next = NodePath("../Slot_Box")
 focus_previous = NodePath("../IP_Box")
-theme_override_fonts/font = ExtResource("3_iispj")
 theme_override_font_sizes/font_size = 20
 script = ExtResource("5_dfvvx")
 
@@ -126,7 +121,6 @@ focus_neighbor_top = NodePath("../Port_Box")
 focus_neighbor_bottom = NodePath("../Pwd_Box")
 focus_next = NodePath("../Pwd_Box")
 focus_previous = NodePath("../Port_Box")
-theme_override_fonts/font = ExtResource("3_iispj")
 theme_override_font_sizes/font_size = 20
 script = ExtResource("5_dfvvx")
 
@@ -150,7 +144,6 @@ focus_neighbor_top = NodePath("../Slot_Box")
 focus_neighbor_bottom = NodePath("../IP_Box")
 focus_next = NodePath("../IP_Box")
 focus_previous = NodePath("../Slot_Box")
-theme_override_fonts/font = ExtResource("3_iispj")
 theme_override_font_sizes/font_size = 20
 script = ExtResource("5_dfvvx")
 

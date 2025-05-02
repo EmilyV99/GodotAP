@@ -1,4 +1,6 @@
-[gd_resource type="SystemFont" format=3 uid="uid://dgq72ioiluq5i"]
+[gd_resource type="FontVariation" load_steps=2 format=3 uid="uid://bsf22ltaya6h0"]
+
+[ext_resource type="FontFile" uid="uid://dbixaqt6tnh4p" path="res://godot_ap/ui/themes/NotoSans-VariableFont_wdth,wght.ttf" id="1_gawu5"]
 
 [resource]
-font_names = PackedStringArray("Arial", "Sans-Serif")
+base_font = ExtResource("1_gawu5")

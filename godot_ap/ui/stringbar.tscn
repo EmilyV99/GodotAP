@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://cm123kfw5gslb"]
 
 [ext_resource type="Script" uid="uid://ducbdpm1vq87" path="res://godot_ap/ui/autofill_bar.gd" id="1_fwo2d"]
-[ext_resource type="SystemFont" uid="uid://73rjoc23d4ub" path="res://godot_ap/ui/console_font.tres" id="2_xunq5"]
+[ext_resource type="FontVariation" uid="uid://emo3rlwg7g61" path="res://godot_ap/ui/console_font.tres" id="2_wpxyq"]
 
 [node name="StringBar" type="Control"]
 layout_mode = 3
@@ -14,4 +14,4 @@ offset_bottom = -282.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_fwo2d")
-font = ExtResource("2_xunq5")
+font = ExtResource("2_wpxyq")
