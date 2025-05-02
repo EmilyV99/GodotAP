@@ -1,7 +1,8 @@
 @tool class_name ConsoleContainer extends VBoxContainer
 
-@onready var console_cont = $Cont
-@onready var console: BaseConsole = $Cont/ConsoleMargin/Row/Console
+@export_group("Nodes")
+@export var console_cont: Container
+@export var console: BaseConsole
 var typing_bar: TypingBar = null
 
 func _ready():

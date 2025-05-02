@@ -1,5 +1,6 @@
 class_name HintsTab extends MarginContainer
 
+@export_range(0.0, 20.0, 0.5, "or_greater") var hint_vertical_separation: float = 15.0
 @onready var hint_console: BaseConsole = $Console.console
 
 var hint_container: BaseConsole.ContainerPart
@@ -210,10 +211,13 @@ func refresh_hints():
 
 	hint_container.clear()
 	old_status_system = true
+	var spacing := Vector2(0, hint_vertical_separation)
 	for hint in _stored_hints:
 		if hint.status != NetworkHint.Status.NOT_FOUND and hint.status != NetworkHint.Status.FOUND:
 			old_status_system = false
 		if filter_allow(hint):
+			if not hint_container.is_empty():
+				hint_container._add(hint_console.make_spacing(spacing))
 			hint_container._add(hint_console.make_hint(hint))
 	hint_console.is_max_scroll = false # Prevent auto-scrolling
 	hint_console.queue_redraw()

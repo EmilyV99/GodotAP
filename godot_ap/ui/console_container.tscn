@@ -6,10 +6,12 @@
 [ext_resource type="FontVariation" uid="uid://emo3rlwg7g61" path="res://godot_ap/ui/console_font.tres" id="3_xv68c"]
 [ext_resource type="PackedScene" uid="uid://cm123kfw5gslb" path="res://godot_ap/ui/stringbar.tscn" id="5_rm2bb"]
 
-[node name="Console" type="VBoxContainer"]
+[node name="Console" type="VBoxContainer" node_paths=PackedStringArray("console_cont", "console")]
 offset_right = 46.0
 offset_bottom = 20.0
 script = ExtResource("1_yktyr")
+console_cont = NodePath("Cont")
+console = NodePath("Cont/ConsoleMargin/Row/Console")
 
 [node name="Cont" type="MarginContainer" parent="."]
 layout_mode = 2
@@ -44,14 +46,13 @@ focus_neighbor_left = NodePath(".")
 focus_neighbor_top = NodePath(".")
 focus_neighbor_right = NodePath(".")
 focus_neighbor_bottom = NodePath(".")
-scroll_bar = NodePath("../ScrollBar")
 
 [node name="ScrollBar" type="VScrollBar" parent="Cont/ConsoleMargin/Row"]
 layout_mode = 2
 size_flags_horizontal = 8
 
 [node name="TypingBar" type="ColorRect" parent="."]
-custom_minimum_size = Vector2(0, 33)
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 focus_neighbor_left = NodePath(".")
 focus_neighbor_top = NodePath(".")
@@ -68,6 +69,6 @@ color_dis_bg = Color(0.304462, 0.304462, 0.304462, 1)
 [node name="StringBar" parent="TypingBar" instance=ExtResource("5_rm2bb")]
 layout_mode = 1
 offset_left = -219.5
-offset_top = 99.0
+offset_top = 106.0
 offset_right = -219.5
 offset_bottom = 66.0

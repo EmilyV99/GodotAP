@@ -12,9 +12,11 @@ theme_override_constants/margin_bottom = 0
 script = ExtResource("1_bwydx")
 metadata/_tab_index = 1
 
-[node name="Console" parent="." instance=ExtResource("2_iqo4x")]
+[node name="Console" parent="." node_paths=PackedStringArray("console_cont", "console") instance=ExtResource("2_iqo4x")]
 layout_mode = 2
 size_flags_vertical = 3
+console_cont = NodePath("Cont")
+console = NodePath("Cont/ConsoleMargin/Row/Console")
 
 [node name="TypingBar" parent="Console" index="1"]
 visible = false
