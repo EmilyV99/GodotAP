@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://bwamxuo3s7c8n"]
 
 [ext_resource type="Script" uid="uid://bt05nk6su6m5r" path="res://godot_ap/ui/base_console.gd" id="1_3bobc"]
-[ext_resource type="SystemFont" uid="uid://73rjoc23d4ub" path="res://godot_ap/ui/console_font.tres" id="2_w3f10"]
+[ext_resource type="FontVariation" uid="uid://emo3rlwg7g61" path="res://godot_ap/ui/console_font.tres" id="2_bc317"]
 
 [node name="Console" type="Control"]
 custom_minimum_size = Vector2(150, 150)
@@ -13,7 +13,7 @@ focus_previous = NodePath("../../../../TypingBar")
 focus_mode = 2
 mouse_filter = 1
 script = ExtResource("1_3bobc")
-font = ExtResource("2_w3f10")
+font = ExtResource("2_bc317")
 font_color = Color(1, 1, 1, 1)
 
 [node name="TooltipBG" type="Panel" parent="."]

@@ -391,7 +391,7 @@ func _instantiate_gui_element(elem: Dictionary) -> Node:
 			lbl.size_flags_vertical = TrackerPack_Base.get_size_flag(elem.get("valign", "SHRINK_CENTER"))
 			lbl.size_flags_stretch_ratio = elem.get("stretch_ratio", 1.0)
 			lbl.texture_filter = TrackerPack_Base.get_draw_filter(elem.get("draw_filter", "INHERIT"))
-			var font: SystemFont = load("res://godot_ap/ui/console_font.tres")
+			var font: FontVariation = load("res://godot_ap/ui/console_font.tres")
 			ls.font = font
 			ls.font_size = elem["size"]
 			ls.font_color = AP.color_from_name(elem.get("color", "white"), Color.WHITE)

@@ -1,4 +1,6 @@
-[gd_resource type="SystemFont" format=3 uid="uid://73rjoc23d4ub"]
+[gd_resource type="FontVariation" load_steps=2 format=3 uid="uid://emo3rlwg7g61"]
+
+[ext_resource type="FontFile" uid="uid://ct6uyop8kfed4" path="res://godot_ap/ui/NotoSansMono-VariableFont_wdth,wght.ttf" id="1_tap4s"]
 
 [resource]
-font_names = PackedStringArray("Constantia", "Serif")
+base_font = ExtResource("1_tap4s")

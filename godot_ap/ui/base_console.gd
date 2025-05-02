@@ -8,7 +8,7 @@ class FontFlags:
 	var bold := false
 	var italic := false
 
-@export var font: SystemFont :
+@export var font: FontVariation :
 	set(val):
 		font = val
 		font_bold = null
@@ -37,24 +37,40 @@ class FontFlags:
 		scroll_bar.scrolling.connect(update_scroll)
 		scroll_bar.value_changed.connect(_update_scroll2)
 
-var font_bold: SystemFont :
+var font_bold: FontVariation :
 	get:
 		if font_bold: return font_bold
 		font_bold = font.duplicate()
-		font_bold.font_weight *= 2
+		if "weight" in _get_supported_opentype_variants(font_bold):
+			var ts = TextServerManager.get_primary_interface()
+			var _dict = font_bold.variation_opentype
+			_dict[ts.name_to_tag("weight")] = 700
+			font_bold.variation_opentype = _dict
+		else:
+			font_bold.variation_embolden = 0.7
 		return font_bold
-var font_italic: SystemFont :
+var font_italic: FontVariation :
 	get:
 		if font_italic: return font_italic
 		font_italic = font.duplicate()
-		font_italic.font_italic = true
+		#TODO: add handling of italic opentype variant
+		var slant = 0.3
+		font_italic.variation_transform = Transform2D(Vector2(1.0, slant), Vector2(0.0, 1.0), Vector2(0.0, 0.0))
 		return font_italic
-var font_bold_italic: SystemFont :
+var font_bold_italic: FontVariation :
 	get:
 		if font_bold_italic: return font_bold_italic
 		font_bold_italic = font.duplicate()
-		font_bold_italic.font_italic = true
-		font_bold_italic.font_weight *= 2
+		#TODO: add handling of italic opentype variant
+		var slant = 0.3
+		font_bold_italic.variation_transform = Transform2D(Vector2(1.0, slant), Vector2(0.0, 1.0), Vector2(0.0, 0.0))
+		if "weight" in _get_supported_opentype_variants(font_bold_italic):
+			var ts = TextServerManager.get_primary_interface()
+			var _dict = font_bold.variation_opentype
+			_dict[ts.name_to_tag("weight")] = 700
+			font_bold_italic.variation_opentype = _dict
+		else:
+			font_bold_italic.variation_embolden = 0.7
 		return font_bold_italic
 
 func get_font(flags: FontFlags = null) -> Font:
@@ -77,6 +93,12 @@ func get_font_ascent(flags: FontFlags = null) -> float:
 	return get_font(flags).get_ascent(font_size)
 func get_string_size(text: String, flags: FontFlags = null) -> Vector2:
 	return get_font(flags).get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
+func _get_supported_opentype_variants(font: FontVariation) -> Array:
+	var arr = font.get_supported_variation_list().keys()
+	var ts = TextServerManager.get_primary_interface()
+	for i in range(arr.size()):
+		arr[i] = ts.tag_to_name(arr[i])
+	return arr
 
 @onready var tooltip_bg: Panel = $TooltipBG
 @onready var tooltip_label: Label = $TooltipBG/Tooltip

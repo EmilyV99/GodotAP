@@ -34,7 +34,7 @@ import/blender/enabled=false
 [gui]
 
 theme/custom="res://godot_ap/ui/themes/dark_theme.tres"
-theme/custom_font="res://godot_ap/ui/themes/basic_font.tres"
+theme/custom_font="uid://bsf22ltaya6h0"
 
 [rendering]
 
