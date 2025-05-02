@@ -5,12 +5,6 @@
 [ext_resource type="PackedScene" uid="uid://dp2yir3r1061y" path="res://godot_ap/ui/settings_tab.tscn" id="3_4k5ff"]
 
 [node name="ConsoleContainer" instance=ExtResource("1_i5jgm")]
-custom_minimum_size = Vector2(1920, 1001)
-offset_right = 1920.0
-offset_bottom = 1001.0
-
-[node name="Tabs" parent="." index="0"]
-custom_minimum_size = Vector2(1920, 1001)
 
 [node name="Tracking" parent="Tabs" index="3" instance=ExtResource("2_kwywh")]
 layout_mode = 2

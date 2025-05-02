@@ -27,6 +27,8 @@ clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+focus_next = NodePath("Row/Console")
+focus_previous = NodePath("Row/Console")
 focus_mode = 1
 theme_override_constants/margin_left = 8
 theme_override_constants/margin_top = 8
@@ -38,13 +40,18 @@ layout_mode = 2
 
 [node name="Console" parent="Cont/ConsoleMargin/Row" instance=ExtResource("2_yktyr")]
 layout_mode = 2
+focus_neighbor_left = NodePath(".")
+focus_neighbor_top = NodePath(".")
+focus_neighbor_right = NodePath(".")
+focus_neighbor_bottom = NodePath(".")
+scroll_bar = NodePath("../ScrollBar")
 
 [node name="ScrollBar" type="VScrollBar" parent="Cont/ConsoleMargin/Row"]
 layout_mode = 2
 size_flags_horizontal = 8
 
 [node name="TypingBar" type="ColorRect" parent="."]
-custom_minimum_size = Vector2(0, 40)
+custom_minimum_size = Vector2(0, 33)
 layout_mode = 2
 focus_neighbor_left = NodePath(".")
 focus_neighbor_top = NodePath(".")
@@ -60,7 +67,7 @@ color_dis_bg = Color(0.304462, 0.304462, 0.304462, 1)
 
 [node name="StringBar" parent="TypingBar" instance=ExtResource("5_rm2bb")]
 layout_mode = 1
-offset_left = -242.5
-offset_top = 126.0
-offset_right = -288.5
-offset_bottom = 86.0
+offset_left = -219.5
+offset_top = 99.0
+offset_right = -219.5
+offset_bottom = 66.0
