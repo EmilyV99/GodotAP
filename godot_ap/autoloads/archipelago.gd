@@ -1083,7 +1083,8 @@ func _init():
 	_poll.call_deferred()
 func _ready():
 	if AP_AUTO_OPEN_CONSOLE:
-		open_console.call_deferred()
+		# Delayed to prevent some warnings
+		get_tree().create_timer(2.0).timeout.connect(open_console)
 	create_socket()
 	for node in get_children():
 		if node is APConfigManager:
