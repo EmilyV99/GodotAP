@@ -3,7 +3,7 @@ class_name SliderBox extends MarginContainer
 @export var total_slide_dur: float = 0.5
 @onready var row: HBoxContainer = $Row
 @onready var handle: Control = $Row/Handle
-@onready var handle_label: Label = $Row/Handle/Margin/Label
+@onready var handle_label: CustomLabel = $Row/Handle/Margin/CustomLabel
 @onready var box: Control = $Row/Box
 @onready var connect_btn: Button = $Row/Box/Margins/VBox/ButtonRow/ConnectBtn
 @onready var disconnect_btn: Button = $Row/Box/Margins/VBox/ButtonRow/DisconnectBtn
