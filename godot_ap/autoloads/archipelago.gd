@@ -166,6 +166,8 @@ func ap_connect(room_ip: String, room_port: String, slot_name: String, room_pwd 
 
 ## Disconnect from Archipelago
 func ap_disconnect() -> void:
+	if _connecting_part:
+		_connecting_part = null
 	if status == APStatus.DISCONNECTED or status == APStatus.DISCONNECTING:
 		return
 	status = APStatus.DISCONNECTING
@@ -274,8 +276,6 @@ func _poll() -> void:
 				WebSocketPeer.STATE_CLOSING:
 					pass
 			continue
-		if _connecting_part:
-			_connecting_part = null
 		_socket.poll()
 		match _socket.get_ready_state():
 			WebSocketPeer.STATE_CLOSED: # Exited; handle reconnection, or concluding intentional disconnection
@@ -353,7 +353,7 @@ func _handle_command(json: Dictionary) -> void:
 					_connecting_part.text = "Connection Mismatch! Wrong slot for this save!"
 					for s in lock_err:
 						_connecting_part.tooltip += "\n%s" % s
-						_connecting_part = null
+					_connecting_part = null
 					ap_disconnect()
 					return
 
