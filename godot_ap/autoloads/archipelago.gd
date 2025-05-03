@@ -223,64 +223,66 @@ static func dblog(s: Variant) -> void:
 	AP.log(s)
 #endregion
 
-func _poll():
-	if status == APStatus.DISCONNECTED:
-		return
-	if status == APStatus.SOCKET_CONNECTING:
-		match _socket.get_ready_state():
-			WebSocketPeer.STATE_OPEN: # Already connected, disconnect that connection
-				ap_disconnect()
-				return
-			WebSocketPeer.STATE_CLOSED: # Start a new connection
-				var err: Error = _socket.connect_to_url(get_url())
-				if err:
-					AP.log("Connection to '%s' failed! Retrying (%d)" % [get_url(),_connect_attempts])
-					_wss = not _wss
-					if _wss: _connect_attempts += 1
-				elif output_console and not _connecting_part:
-					_connecting_part = output_console.add_line("Connecting...","%s:%s %s" % [creds.ip,creds.port,creds.slot],output_console.COLOR_UI_MSG)
-			WebSocketPeer.STATE_CONNECTING: # Continue trying to make new connection
-				_socket.poll()
-				var state := _socket.get_ready_state()
-				if state == WebSocketPeer.STATE_OPEN:
-					AP.log("Connected to '%s'!" % get_url())
-					status = APStatus.CONNECTING
-				elif state != WebSocketPeer.STATE_CONNECTING:
-					if _connect_attempts >= 50:
-						_socket.close()
-						status = APStatus.DISCONNECTING
-						AP.log("Connection to '%s' failed too much! Giving up!" % get_url())
-						if output_console and _connecting_part:
-							_connecting_part.text = "Connection Failed!"
-							_connecting_part.tooltip += "\nFailed connecting too many times. Check your connection details, or '/reconnect' to try again."
-							_connecting_part = null
-					else:
+func _poll() -> void:
+	while true:
+		await get_tree().process_frame
+		if status == APStatus.DISCONNECTED:
+			continue
+		if status == APStatus.SOCKET_CONNECTING:
+			match _socket.get_ready_state():
+				WebSocketPeer.STATE_OPEN: # Already connected, disconnect that connection
+					ap_disconnect()
+					pass
+				WebSocketPeer.STATE_CLOSED: # Start a new connection
+					var err: Error = _socket.connect_to_url(get_url())
+					if err:
 						AP.log("Connection to '%s' failed! Retrying (%d)" % [get_url(),_connect_attempts])
 						_wss = not _wss
 						if _wss: _connect_attempts += 1
-			WebSocketPeer.STATE_CLOSING:
-				return
-		return
-	if _connecting_part:
-		_connecting_part = null
-	_socket.poll()
-	match _socket.get_ready_state():
-		WebSocketPeer.STATE_CLOSED: # Exited; handle reconnection, or concluding intentional disconnection
-			hang_clock.stop()
-			if status == APStatus.DISCONNECTING:
-				status = APStatus.DISCONNECTED
-				disconnected.emit()
-			else:
-				AP.log("Accidental disconnection; reconnecting!")
-				ap_reconnect()
-		WebSocketPeer.STATE_OPEN: # Running; handle communication
-			while _socket.get_available_packet_count():
-				var packet: PackedByteArray = _socket.get_packet()
-				var json = JSON.parse_string(packet.get_string_from_utf8())
-				if not json is Array:
-					json = [json]
-				for dict in json:
-					_handle_command(dict)
+					elif output_console and not _connecting_part:
+						_connecting_part = output_console.add_line("Connecting...","%s:%s %s" % [creds.ip,creds.port,creds.slot],output_console.COLOR_UI_MSG)
+				WebSocketPeer.STATE_CONNECTING: # Continue trying to make new connection
+					_socket.poll()
+					var state := _socket.get_ready_state()
+					if state == WebSocketPeer.STATE_OPEN:
+						AP.log("Connected to '%s'!" % get_url())
+						status = APStatus.CONNECTING
+					elif state != WebSocketPeer.STATE_CONNECTING:
+						if _connect_attempts >= 50:
+							_socket.close()
+							status = APStatus.DISCONNECTING
+							AP.log("Connection to '%s' failed too much! Giving up!" % get_url())
+							if output_console and _connecting_part:
+								_connecting_part.text = "Connection Failed!"
+								_connecting_part.tooltip += "\nFailed connecting too many times. Check your connection details, or '/reconnect' to try again."
+								_connecting_part = null
+						else:
+							AP.log("Connection to '%s' failed! Retrying (%d)" % [get_url(),_connect_attempts])
+							_wss = not _wss
+							if _wss: _connect_attempts += 1
+				WebSocketPeer.STATE_CLOSING:
+					pass
+			continue
+		if _connecting_part:
+			_connecting_part = null
+		_socket.poll()
+		match _socket.get_ready_state():
+			WebSocketPeer.STATE_CLOSED: # Exited; handle reconnection, or concluding intentional disconnection
+				hang_clock.stop()
+				if status == APStatus.DISCONNECTING:
+					status = APStatus.DISCONNECTED
+					disconnected.emit()
+				else:
+					AP.log("Accidental disconnection; reconnecting!")
+					ap_reconnect()
+			WebSocketPeer.STATE_OPEN: # Running; handle communication
+				while _socket.get_available_packet_count():
+					var packet: PackedByteArray = _socket.get_packet()
+					var json = JSON.parse_string(packet.get_string_from_utf8())
+					if not json is Array:
+						json = [json]
+					for dict in json:
+						_handle_command(dict)
 
 var _printout_recieved_items: bool = false
 ## Sends a command of the specified name, with the given dictionary as the command arguments, to the Archipelago server
@@ -599,8 +601,6 @@ func location_list() -> Array[int]:
 	arr.assign(conn.slot_locations.keys())
 	return arr
 #endregion LOCATIONS
-func _process(_delta):
-	_poll()
 
 ## Try to reconnect to the current connection details, BUT if it detects errors in the details,
 ## it will instead prompt the user to enter the details.
@@ -1080,6 +1080,7 @@ func _autofill_track(msg: String) -> Array[String]:
 func _init():
 	init_command_manager(true)
 	_update_tags()
+	_poll.call_deferred()
 func _ready():
 	if AP_AUTO_OPEN_CONSOLE:
 		open_console.call_deferred()

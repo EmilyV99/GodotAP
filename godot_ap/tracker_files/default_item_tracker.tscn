@@ -12,11 +12,9 @@ grow_vertical = 2
 size_flags_vertical = 3
 script = ExtResource("1_xwb80")
 
-[node name="Console" parent="." node_paths=PackedStringArray("console_cont", "console") instance=ExtResource("2_gvlkx")]
+[node name="Console" parent="." instance=ExtResource("2_gvlkx")]
 layout_mode = 2
 size_flags_vertical = 3
-console_cont = NodePath("Cont")
-console = NodePath("Cont/ConsoleMargin/Row/Console")
 
 [node name="TypingBar" parent="Console" index="1"]
 visible = false
