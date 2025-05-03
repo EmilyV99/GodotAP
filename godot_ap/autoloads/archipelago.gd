@@ -40,6 +40,9 @@ signal all_datapacks_loaded ## Signals when all required datapacks have finished
 signal remove_location(loc_id: int)
 signal on_tag_change
 signal on_attach_console
+
+# Debug purposes
+signal _logged_message(msg: String)
 #endregion
 
 
@@ -208,11 +211,19 @@ static func close_logger() -> void:
 		logging_file.close()
 		logging_file = null
 ## Logs a message to the GodotAP log
-static func log(s: Variant) -> void:
+func _log(s: String) -> void:
 	if logging_file:
-		logging_file.store_line(str(s))
+		logging_file.store_line(s)
 		if OS.is_debug_build(): logging_file.flush()
-	print("[AP] %s" % str(s))
+	var msg: String = "[AP] %s" % s
+	print(msg)
+	_logged_message.emit(msg)
+static func log(s: Variant) -> void:
+	if Archipelago:
+		Archipelago._log(str(s))
+	else:
+		print("[AP!] %s" % s)
+
 ## Logs a message to the GodotAP log, but only if AP_LOG_COMMUNICATION is true
 func comm_log(pref: String, s: Variant) -> void:
 	if not AP_LOG_COMMUNICATION: return
