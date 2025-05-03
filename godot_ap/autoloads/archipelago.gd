@@ -236,16 +236,17 @@ static func dblog(s: Variant) -> void:
 	AP.log(s)
 #endregion
 
+var _socket_state: WebSocketPeer.State = WebSocketPeer.STATE_CLOSED
 func _poll() -> void:
 	while true:
 		await get_tree().process_frame
 		if status == APStatus.DISCONNECTED:
 			continue
 		if status == APStatus.SOCKET_CONNECTING:
-			match _socket.get_ready_state():
+			match _socket_state:
 				WebSocketPeer.STATE_OPEN: # Already connected, disconnect that connection
 					ap_disconnect()
-					pass
+					_socket_state = _socket.get_ready_state()
 				WebSocketPeer.STATE_CLOSED: # Start a new connection
 					var err: Error = _socket.connect_to_url(get_url())
 					if err:
@@ -254,13 +255,14 @@ func _poll() -> void:
 						if _wss: _connect_attempts += 1
 					elif output_console and not _connecting_part:
 						_connecting_part = output_console.add_line("Connecting...","%s:%s %s" % [creds.ip,creds.port,creds.slot],output_console.COLOR_UI_MSG)
+					_socket_state = _socket.get_ready_state()
 				WebSocketPeer.STATE_CONNECTING: # Continue trying to make new connection
 					_socket.poll()
-					var state := _socket.get_ready_state()
-					if state == WebSocketPeer.STATE_OPEN:
+					_socket_state = _socket.get_ready_state()
+					if _socket_state == WebSocketPeer.STATE_OPEN:
 						AP.log("Connected to '%s'!" % get_url())
 						status = APStatus.CONNECTING
-					elif state != WebSocketPeer.STATE_CONNECTING:
+					elif _socket_state != WebSocketPeer.STATE_CONNECTING:
 						if _connect_attempts >= 50:
 							_socket.close()
 							status = APStatus.DISCONNECTING
@@ -274,10 +276,12 @@ func _poll() -> void:
 							_wss = not _wss
 							if _wss: _connect_attempts += 1
 				WebSocketPeer.STATE_CLOSING:
-					pass
+					_socket.poll()
+					_socket_state = _socket.get_ready_state()
 			continue
 		_socket.poll()
-		match _socket.get_ready_state():
+		_socket_state = _socket.get_ready_state()
+		match _socket_state:
 			WebSocketPeer.STATE_CLOSED: # Exited; handle reconnection, or concluding intentional disconnection
 				hang_clock.stop()
 				if status == APStatus.DISCONNECTING:
