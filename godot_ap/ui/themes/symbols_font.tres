@@ -1,0 +1,9 @@
+[gd_resource type="FontVariation" load_steps=4 format=3 uid="uid://by743jyixqnxb"]
+
+[ext_resource type="FontFile" uid="uid://7itoghsrgvom" path="res://godot_ap/ui/themes/NotoSansSymbols-VariableFont_wght.ttf" id="1_3c6pc"]
+[ext_resource type="FontFile" uid="uid://b7tr0eceg78dk" path="res://godot_ap/ui/themes/NotoSansSymbols2-Regular.ttf" id="2_uivbg"]
+[ext_resource type="FontFile" uid="uid://cqtcjq721rgfh" path="res://godot_ap/ui/themes/NotoEmoji-VariableFont_wght.ttf" id="3_uivbg"]
+
+[resource]
+fallbacks = Array[Font]([ExtResource("2_uivbg"), ExtResource("3_uivbg")])
+base_font = ExtResource("1_3c6pc")

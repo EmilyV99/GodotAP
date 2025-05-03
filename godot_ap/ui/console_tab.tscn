@@ -1,8 +1,10 @@
-[gd_scene load_steps=8 format=3 uid="uid://bx4d5pih77vp4"]
+[gd_scene load_steps=10 format=3 uid="uid://bx4d5pih77vp4"]
 
 [ext_resource type="PackedScene" uid="uid://c51q4vrwhlcl7" path="res://godot_ap/ui/console_container.tscn" id="1_karta"]
 [ext_resource type="Script" uid="uid://cs0261v4jx4b" path="res://godot_ap/ui/slider_box.gd" id="2_t718y"]
+[ext_resource type="Script" uid="uid://do8ua21ppl1de" path="res://godot_ap/ui/custom_containers/custom_label.gd" id="3_karta"]
 [ext_resource type="Script" uid="uid://cyc8jkqjagswj" path="res://godot_ap/ui/connect_box.gd" id="4_rlrcu"]
+[ext_resource type="FontVariation" uid="uid://by743jyixqnxb" path="res://godot_ap/ui/themes/symbols_font.tres" id="4_t718y"]
 [ext_resource type="Script" uid="uid://cety6nqnci3n6" path="res://godot_ap/ui/updown_lineedit.gd" id="5_dfvvx"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ksdsn"]
@@ -52,12 +54,16 @@ theme_override_constants/margin_top = 0
 theme_override_constants/margin_right = 2
 theme_override_constants/margin_bottom = 0
 
-[node name="Label" type="Label" parent="ConnectBox/Row/Handle/Margin"]
+[node name="CustomLabel" type="Panel" parent="ConnectBox/Row/Handle/Margin"]
+custom_minimum_size = Vector2(24, 54)
 layout_mode = 2
-size_flags_vertical = 0
 mouse_filter = 1
-theme_override_font_sizes/font_size = 40
+script = ExtResource("3_karta")
 text = "🞀"
+font = ExtResource("4_t718y")
+font_size = 40
+pos = Vector2(0, 40)
+metadata/_custom_type_script = "uid://do8ua21ppl1de"
 
 [node name="Box" type="PanelContainer" parent="ConnectBox/Row"]
 clip_contents = true
