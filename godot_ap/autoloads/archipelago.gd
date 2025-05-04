@@ -35,6 +35,9 @@ class_name AP extends Node
 @export var READABLE_DATAPACK_FILES := true
 ## Which fields should be saved from received DataPacks.
 @export var datapack_cached_fields: Array[String] = ["item_name_to_id","location_name_to_id","checksum"]
+@export_group("Misc")
+## Size, in MB, of the websocket inbound buffer. Raising may help if large datapackages are causing disconnections.
+@export_range(5, 500, 1, "or_greater", "hide_slider") var websocket_inbuffer_mb: int = 50
 @export_group("")
 
 @onready var hang_clock: Timer = $HangTimer
@@ -213,7 +216,7 @@ func force_disconnect() -> void:
 func create_socket() -> void:
 	const BYTE_PER_MB := 1000000
 	_socket = WebSocketPeer.new()
-	_socket.inbound_buffer_size = 5*BYTE_PER_MB
+	_socket.inbound_buffer_size = websocket_inbuffer_mb*BYTE_PER_MB
 #endregion CONNECTION
 
 #region LOGGING TO FILE
