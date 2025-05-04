@@ -344,7 +344,9 @@ func _handle_command(json: Dictionary) -> void:
 			args["tags"] = AP_GAME_TAGS
 			args["items_handling"] = AP_ITEM_HANDLING
 			roominfo.emit(conn, json)
-			all_datapacks_loaded.connect(send_command.bind("Connect",args), CONNECT_ONE_SHOT)
+			SignalChooser.new().register_multiple(
+				[all_datapacks_loaded, disconnected],
+				[send_command.bind("Connect",args), Util.nil])
 			_send_datapack_request()
 		"ConnectionRefused":
 			var err_str := str(json["errors"])

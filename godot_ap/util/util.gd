@@ -212,3 +212,6 @@ static func get_32_or(file: FileAccess, default: int) -> int:
 	if not file or file.eof_reached(): return default
 	if file.get_position() >= file.get_length(): return default
 	return file.get_32()
+
+static func nil() -> void:
+	pass
