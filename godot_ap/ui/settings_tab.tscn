@@ -6,16 +6,12 @@
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_oksvb"]
 
-[node name="Settings" type="MarginContainer" node_paths=PackedStringArray("tracker_tab", "track_verbose", "track_hide_completed_map")]
-visible = false
+[node name="Settings" type="MarginContainer"]
 theme_override_constants/margin_left = 0
 theme_override_constants/margin_top = 0
 theme_override_constants/margin_right = 0
 theme_override_constants/margin_bottom = 0
 script = ExtResource("1_vvcbk")
-tracker_tab = NodePath("Margin/Tabs/TrackerPack")
-track_verbose = NodePath("Margin/Tabs/TrackerPack/Row/Col1/TrackVerbose")
-track_hide_completed_map = NodePath("Margin/Tabs/TrackerPack/Row/Col1/TrackHideFinishedMap")
 metadata/_tab_index = 3
 
 [node name="Margin" type="MarginContainer" parent="."]
@@ -62,26 +58,3 @@ text = "Light Mode"
 script = ExtResource("3_aogvt")
 target_theme_path = "res://godot_ap/ui/themes/light_theme.tres"
 metadata/_custom_type_script = "uid://cttniyxj6oq7h"
-
-[node name="TrackerPack" type="MarginContainer" parent="Margin/Tabs"]
-visible = false
-layout_mode = 2
-theme_override_constants/margin_left = 6
-theme_override_constants/margin_top = 6
-theme_override_constants/margin_right = 6
-theme_override_constants/margin_bottom = 6
-metadata/_tab_index = 1
-
-[node name="Row" type="HBoxContainer" parent="Margin/Tabs/TrackerPack"]
-layout_mode = 2
-
-[node name="Col1" type="VBoxContainer" parent="Margin/Tabs/TrackerPack/Row"]
-layout_mode = 2
-
-[node name="TrackVerbose" type="CheckBox" parent="Margin/Tabs/TrackerPack/Row/Col1"]
-layout_mode = 2
-text = "Verbose TrackerPack Output"
-
-[node name="TrackHideFinishedMap" type="CheckBox" parent="Margin/Tabs/TrackerPack/Row/Col1"]
-layout_mode = 2
-text = "Hide Completed Map Locations"

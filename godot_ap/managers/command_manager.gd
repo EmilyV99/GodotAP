@@ -54,7 +54,7 @@ func call_cmd(msg: String) -> void:
 	var cmd := get_command(msg.split(" ", true, 1)[0])
 	if cmd and cmd.call_proc:
 		if cmd.is_disabled():
-			console.add_line("Command '%s' is disabled!" % cmd.text, "", console.COLOR_UI_MSG)
+			console.add(BaseConsole.make_text("Command '%s' is disabled!" % cmd.text, "", AP.ComplexColor.as_special(AP.SpecialColor.UI_MESSAGE)))
 		else:
 			cmd.call_proc.call(self, cmd, msg)
 	else:
@@ -82,9 +82,10 @@ func setup_basic_commands() -> void:
 		.add_help("", "Displays all currently available commands")
 		.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, _msg: String):
 			mgr.console.add_header_spacing()
-			var folder: BaseConsole.FoldablePart = mgr.console.add_foldable("[ COMMAND HELP ]",
+			var folder := BaseConsole.make_foldable("[ COMMAND HELP ]",
 				"Commands shown may vary based on various conditions, such as if you are" +
-				" connected to an Archipelago server or not.", mgr.console.COLOR_UI_MSG)
+				" connected to an Archipelago server or not.", AP.ComplexColor.as_special(AP.SpecialColor.UI_MESSAGE))
+			mgr.console.add(folder)
 			folder.add(mgr.console.make_header_spacing())
 			for cmd in mgr.get_commands().filter(func(cmd):
 				return not (cmd.is_disabled() or cmd.is_debug())):
@@ -105,7 +106,7 @@ func setup_debug_commands() -> void:
 		.add_help("", "Displays this message")
 		.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, _msg: String):
 			mgr.console.add_header_spacing()
-			mgr.console.add_line("Debug Help:", "", mgr.console.COLOR_UI_MSG)
+			mgr.console.add(BaseConsole.make_text("Debug Help:", "", AP.ComplexColor.as_special(AP.SpecialColor.UI_MESSAGE)))
 			for cmd in mgr.get_commands().filter(func(cmd):
 				return not cmd.is_disabled() and cmd.is_debug()):
 				cmd.output_helptext(mgr.console)
@@ -115,7 +116,7 @@ func setup_debug_commands() -> void:
 			debug_hidden = not debug_hidden
 			mgr.console.add_header_spacing()
 			if debug_hidden:
-				mgr.console.add_line("Debug mode disabled","",mgr.console.COLOR_UI_MSG)
+				mgr.console.add(BaseConsole.make_text("Debug mode disabled","",AP.ComplexColor.as_special(AP.SpecialColor.UI_MESSAGE)))
 			else:
-				mgr.console.add_line("Debug mode enabled. Use '/db_help' for debug commands.","",mgr.console.COLOR_UI_MSG)
+				mgr.console.add(BaseConsole.make_text("Debug mode enabled. Use '/db_help' for debug commands.","",AP.ComplexColor.as_special(AP.SpecialColor.UI_MESSAGE)))
 			mgr.console.add_header_spacing()))

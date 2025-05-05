@@ -1,10 +1,10 @@
 class_name HintsTab extends MarginContainer
 
-@export_range(0.0, 20.0, 0.5, "or_greater") var hint_vertical_separation: float = 15.0
+@export_range(0.0, 20.0, 0.5, "or_greater") var hint_vertical_separation: int = 15
 @onready var hint_console: BaseConsole = $Console.console
 
-var hint_container: BaseConsole.ContainerPart
-var headings: Array[BaseConsole.TextPart]
+var hint_container: Container
+var headings: Array[ConsoleLabel]
 
 var sort_ascending: Array[bool] = [true,true,true,true,false]
 var sort_cols: Array[int] = [4,0,2,1,3]
@@ -62,9 +62,8 @@ func _status_filter(s: NetworkHint.Status) -> bool:
 		NetworkHint.Status.NOT_FOUND: return old_status_system
 		_: return not old_status_system
 
-func sort_click(event: InputEventMouseButton, index: int) -> bool:
-	if not event.pressed: return false
-	if event.button_index == MOUSE_BUTTON_LEFT:
+func sort_click(mouse_button: MouseButton, index: int) -> bool:
+	if mouse_button == MOUSE_BUTTON_LEFT:
 		if sort_cols[0] == index:
 			sort_ascending[index] = not sort_ascending[index]
 			headings[index].text = headings[index].text.rstrip("↓↑") + ("↑" if sort_ascending[index] else "↓")
@@ -76,8 +75,8 @@ func sort_click(event: InputEventMouseButton, index: int) -> bool:
 			headings[index].text += (" ↑" if sort_ascending[index] else " ↓")
 		queue_refresh()
 		return true
-	elif event.button_index == MOUSE_BUTTON_RIGHT:
-		var vbox := headings[index].pop_dropdown(hint_console)
+	elif mouse_button == MOUSE_BUTTON_RIGHT:
+		var vbox := hint_console.pop_dropdown(headings[index])
 		# Create action buttons
 		var btnrow := HBoxContainer.new()
 		var btn_checkall := Button.new()
@@ -178,17 +177,18 @@ func _ready():
 	Archipelago.connected.connect(func(conn: ConnectionInfo, _j: Dictionary):
 		conn.set_hint_notify(self.load_hints))
 	Archipelago.disconnected.connect(reset_hints_to_empty)
-	var header := BaseConsole.ArrangedColumnsPart.new()
-	headings.append(header.add(hint_console.make_c_text("Receiving Player"), 500))
-	headings.append(header.add(hint_console.make_c_text("Item"), 500))
-	headings.append(header.add(hint_console.make_c_text("Finding Player"), 500))
-	headings.append(header.add(hint_console.make_c_text("Location"), 500))
-	headings.append(header.add(hint_console.make_c_text("Status ↓"), 500))
+	headings.append(BaseConsole.make_c_text("Receiving Player"))
+	headings.append(BaseConsole.make_c_text("Item"))
+	headings.append(BaseConsole.make_c_text("Finding Player"))
+	headings.append(BaseConsole.make_c_text("Location"))
+	headings.append(BaseConsole.make_c_text("Status ↓"))
 	for q in headings.size():
-		headings[q].on_click = func(evt): return sort_click(evt,q)
-	hint_console.add(header)
-	hint_container = hint_console.add(BaseConsole.ContainerPart.new())
-
+		headings[q].clicked.connect(sort_click.bind(q))
+	hint_container = GridContainer.new()
+	hint_container.columns = 5
+	for heading in headings:
+		hint_container.add_child(heading)
+	hint_console.add(hint_container)
 
 var _queued_refresh_hints := false
 func _process(_delta):
@@ -209,16 +209,42 @@ func refresh_hints():
 		_sort_index_data[_stored_hints[q]] = q
 	_stored_hints.sort_custom(do_sort)
 
-	hint_container.clear()
+	for child in hint_container.get_children():
+		if child not in headings:
+			child.queue_free()
 	old_status_system = true
-	var spacing := Vector2(0, hint_vertical_separation)
+	hint_container.add_theme_constant_override("v_separation", hint_vertical_separation)
+
 	for hint in _stored_hints:
 		if hint.status != NetworkHint.Status.NOT_FOUND and hint.status != NetworkHint.Status.FOUND:
 			old_status_system = false
 		if filter_allow(hint):
-			if not hint_container.is_empty():
-				hint_container._add(hint_console.make_spacing(spacing))
-			hint_container._add(hint_console.make_hint(hint))
+			var data: DataCache = Archipelago.conn.get_gamedata_for_player(hint.item.src_player_id)
+
+			var dest := BaseConsole.make_player(hint.item.dest_player_id).centered()
+			var itm := hint.item.output().centered()
+			var src := BaseConsole.make_player(hint.item.src_player_id).centered()
+			var loc := BaseConsole.make_location(hint.item.loc_id, data).centered()
+			var status := hint.make_status().centered()
+			if hint.item.dest_player_id == Archipelago.conn.player_id:
+				if hint.status not in [NetworkHint.Status.FOUND,NetworkHint.Status.NOT_FOUND]:
+					status.clicked.connect(func(_btn):
+						var vbox := hint_console.pop_dropdown(status)
+						vbox.add_theme_constant_override("separation", 0)
+						for s in [NetworkHint.Status.AVOID,NetworkHint.Status.NON_PRIORITY,NetworkHint.Status.PRIORITY]:
+							var btn := Button.new()
+							btn.text = NetworkHint.status_names[s]
+							btn.set_anchors_preset(Control.PRESET_HCENTER_WIDE)
+							btn.pressed.connect(func():
+								Archipelago.conn.update_hint(hint.item.loc_id, hint.item.src_player_id, s)
+								vbox.get_window().close_requested.emit())
+							vbox.add_child(btn)
+						)
+			hint_container.add_child(dest)
+			hint_container.add_child(itm)
+			hint_container.add_child(src)
+			hint_container.add_child(loc)
+			hint_container.add_child(status)
 	hint_console.is_max_scroll = false # Prevent auto-scrolling
 	hint_console.queue_redraw()
 

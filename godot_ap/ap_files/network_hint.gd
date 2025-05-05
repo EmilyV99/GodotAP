@@ -18,13 +18,13 @@ static var status_names: Dictionary[Status, String] = {
 	Status.PRIORITY: "Priority",
 	Status.NOT_FOUND: "Not Found",
 }
-static var status_colors: Dictionary[Status, String] = {
-	Status.FOUND: "green",
-	Status.UNSPECIFIED: "white",
-	Status.NON_PRIORITY: "slateblue",
-	Status.AVOID: "salmon",
-	Status.PRIORITY: "plum",
-	Status.NOT_FOUND: "red",
+static var status_colors: Dictionary[Status, AP.RichColor] = {
+	Status.FOUND: AP.RichColor.GREEN,
+	Status.UNSPECIFIED: AP.RichColor.NIL,
+	Status.NON_PRIORITY: AP.RichColor.SLATEBLUE,
+	Status.AVOID: AP.RichColor.SALMON,
+	Status.PRIORITY: AP.RichColor.PLUM,
+	Status.NOT_FOUND: AP.RichColor.RED,
 }
 
 var item: NetworkItem
@@ -46,17 +46,17 @@ static func from(json: Dictionary) -> NetworkHint:
 func is_local() -> bool:
 	return item.is_local()
 
-func make_status(c: BaseConsole) -> BaseConsole.TextPart:
-	return NetworkHint.make_hint_status(c, status)
+func make_status() -> ConsoleLabel:
+	return NetworkHint.make_hint_status(status)
 
-static func make_hint_status(c: BaseConsole, targ_status: Status) -> BaseConsole.TextPart:
+static func make_hint_status(targ_status: Status) -> ConsoleLabel:
 	var txt = NetworkHint.status_names.get(targ_status, "Unknown")
-	var colname = NetworkHint.status_colors.get(targ_status, "red")
-	return c.make_text(txt, "", AP.color_from_name(colname))
+	var color: AP.RichColor = NetworkHint.status_colors.get(targ_status, AP.RichColor.RED)
+	return BaseConsole.make_text(txt, "", AP.ComplexColor.as_rich(color))
 
-static func update_hint_status(targ_status: Status, part: BaseConsole.TextPart):
+static func update_hint_status(targ_status: Status, part: ConsoleLabel):
 	part.text = NetworkHint.status_names.get(targ_status, "Unknown")
-	part.color = NetworkHint.status_colors.get(targ_status, "red")
+	part.rich_color = NetworkHint.status_colors.get(targ_status, AP.RichColor.RED)
 
 func as_plain_string() -> String:
 	return "%s %s '%s' (%s) for %s at '%s'" % [

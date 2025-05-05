@@ -53,7 +53,7 @@ func _ready() -> void:
 	for w in right_bar_ws:
 		if w > right_bar_w:
 			right_bar_w = w
-	console_margin.add_theme_constant_override("margin_right", 8+ceili(right_bar_w))
+	console_margin.add_theme_constant_override("margin_right", 8+ceili(right_bar_w / 2))
 
 func close() -> void:
 	get_window().close_requested.emit()

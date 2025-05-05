@@ -1,27 +1,31 @@
-[gd_scene load_steps=4 format=3 uid="uid://c51q4vrwhlcl7"]
+[gd_scene load_steps=5 format=3 uid="uid://c51q4vrwhlcl7"]
 
 [ext_resource type="Script" uid="uid://b84vkudajol4o" path="res://godot_ap/ui/console_container.gd" id="1_yktyr"]
-[ext_resource type="PackedScene" uid="uid://bwamxuo3s7c8n" path="res://godot_ap/ui/plain_console.tscn" id="2_yktyr"]
+[ext_resource type="Script" uid="uid://h7ul4qybx5qd" path="res://godot_ap/ui/theme_color_rect.gd" id="2_xv68c"]
+[ext_resource type="PackedScene" uid="uid://bwamxuo3s7c8n" path="res://godot_ap/ui/console/plain_console.tscn" id="2_yktyr"]
 [ext_resource type="PackedScene" uid="uid://hifmj2cuuh1b" path="res://godot_ap/ui/typing_bar.tscn" id="3_e1fkb"]
 
-[node name="Console" type="VBoxContainer" node_paths=PackedStringArray("console_cont", "console")]
+[node name="Console" type="VBoxContainer" node_paths=PackedStringArray("console_cont", "console", "typing_bar")]
 offset_right = 46.0
 offset_bottom = 20.0
 theme_override_constants/separation = 0
 script = ExtResource("1_yktyr")
 console_cont = NodePath("Cont")
 console = NodePath("Cont/ConsoleMargin/Row/Console")
+typing_bar = NodePath("TypingBar")
 
 [node name="Cont" type="MarginContainer" parent="."]
 layout_mode = 2
+size_flags_vertical = 3
 theme_override_constants/margin_left = 0
 theme_override_constants/margin_top = 0
 theme_override_constants/margin_right = 0
 theme_override_constants/margin_bottom = 0
 
-[node name="BG" type="ColorRect" parent="Cont"]
+[node name="BG" type="Control" parent="Cont"]
 layout_mode = 2
-color = Color(0, 0, 0, 1)
+theme_type_variation = &"Console_BG"
+script = ExtResource("2_xv68c")
 
 [node name="ConsoleMargin" type="MarginContainer" parent="Cont"]
 clip_contents = true
@@ -45,10 +49,6 @@ focus_neighbor_left = NodePath(".")
 focus_neighbor_top = NodePath(".")
 focus_neighbor_right = NodePath(".")
 focus_neighbor_bottom = NodePath(".")
-
-[node name="ScrollBar" type="VScrollBar" parent="Cont/ConsoleMargin/Row"]
-layout_mode = 2
-size_flags_horizontal = 8
 
 [node name="TypingBar" parent="." instance=ExtResource("3_e1fkb")]
 layout_mode = 2

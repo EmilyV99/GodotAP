@@ -59,30 +59,31 @@ func output_helptext(console: BaseConsole, target = null) -> void:
 		texts.append(ht)
 	if not target:
 		for ht in texts:
-			console.add_line("%s %s" % [text,ht.args], "", console.COLOR_UI_MSG)
-			console.add_indent(HELPTEXT_INDENT)
-			console.add_line(ht.text, "", console.COLOR_UI_MSG)
-			console.add_indent(-HELPTEXT_INDENT)
-	elif target is BaseConsole.ArrangedColumnsPart or target is BaseConsole.ColumnsPart:
-		assert(false)
-	elif target is BaseConsole.FoldablePart:
+			console.add(BaseConsole.make_text("%s %s" % [text,ht.args], "", AP.ComplexColor.as_special(AP.SpecialColor.UI_MESSAGE)))
+			var indent := BaseConsole.make_indent(HELPTEXT_INDENT)
+			console.add(indent)
+			indent.add_child(BaseConsole.make_text(ht.text, "", AP.ComplexColor.as_special(AP.SpecialColor.UI_MESSAGE)))
+	elif target is ConsoleFoldableContainer:
 		for ht in texts:
-			target.add(console.make_text("%s %s" % [text,ht.args], "", console.COLOR_UI_MSG))
+			target.add(BaseConsole.make_text("%s %s" % [text,ht.args], "", AP.ComplexColor.as_special(AP.SpecialColor.UI_MESSAGE)))
 			target.add(console.make_header_spacing(0))
-			target.add(console.make_indent(HELPTEXT_INDENT))
-			target.add(console.make_text(ht.text, "", console.COLOR_UI_MSG))
-			target.add(console.make_header_spacing(0))
-			target.add(console.make_indent(-HELPTEXT_INDENT))
-	elif target is BaseConsole.ContainerPart:
+			var indent := BaseConsole.make_indent(HELPTEXT_INDENT)
+			target.add(indent)
+			var vbox := VBoxContainer.new()
+			indent.add_child(vbox)
+			vbox.add_child(BaseConsole.make_text(ht.text, "", AP.ComplexColor.as_special(AP.SpecialColor.UI_MESSAGE)))
+			vbox.add_child(console.make_header_spacing(0))
+
+	elif target is Container:
 		for ht in texts:
-			target._add(console.make_text("%s %s" % [text,ht.args], "", console.COLOR_UI_MSG))
-			target._add(console.make_header_spacing(0))
-			target._add(console.make_indent(HELPTEXT_INDENT))
-			target._add(console.make_text(ht.text, "", console.COLOR_UI_MSG))
-			target._add(console.make_header_spacing(0))
-			target._add(console.make_indent(-HELPTEXT_INDENT))
+			target.add_child(BaseConsole.make_text("%s %s" % [text,ht.args], "", AP.ComplexColor.as_special(AP.SpecialColor.UI_MESSAGE)))
+			target.add_child(console.make_header_spacing(0))
+			target.add_child(BaseConsole.make_indent(HELPTEXT_INDENT))
+			target.add_child(BaseConsole.make_text(ht.text, "", AP.ComplexColor.as_special(AP.SpecialColor.UI_MESSAGE)))
+			target.add_child(console.make_header_spacing(0))
+			target.add_child(BaseConsole.make_indent(-HELPTEXT_INDENT))
 func output_usage(console: BaseConsole) -> void:
-	console.add_text("Usage:\n%s" % get_helptext(), "", console.COLOR_UI_MSG)
+	console.add(BaseConsole.make_text("Usage:\n%s" % get_helptext(), "", AP.ComplexColor.as_special(AP.SpecialColor.UI_MESSAGE)))
 
 func is_disabled() -> bool:
 	for proc in disabled_procs:

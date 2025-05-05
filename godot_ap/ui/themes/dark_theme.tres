@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=39 format=3 uid="uid://cxykl3ktlymdu"]
+[gd_resource type="Theme" load_steps=40 format=3 uid="uid://cxykl3ktlymdu"]
 
 [ext_resource type="Texture2D" uid="uid://lx3r4ysmhst6" path="res://godot_ap/ui/themes/graphics/cbox_check.png" id="3_dpqyv"]
 [ext_resource type="Texture2D" uid="uid://cjukwyh6fgvv4" path="res://godot_ap/ui/themes/graphics/cbox_check_dis.png" id="4_fy47w"]
@@ -171,6 +171,13 @@ content_margin_top = 4.0
 content_margin_right = 6.0
 content_margin_bottom = 4.0
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0flio"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0, 0, 0, 1)
+
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_0flio"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_43qp1"]
@@ -295,6 +302,8 @@ Console_AutofillBar/colors/font_color = Color(1, 1, 1, 1)
 Console_AutofillBar/colors/sel_color = Color(0.439216, 0.501961, 0.564706, 1)
 Console_AutofillBar/font_sizes/font_size = 20
 Console_AutofillBar/fonts/font = ExtResource("9_0flio")
+Console_BG/base_type = &"PanelContainer"
+Console_BG/styles/panel = SubResource("StyleBoxFlat_0flio")
 Console_Bar/base_type = &"LineEdit"
 Console_Bar/colors/font_color = Color(1, 1, 1, 1)
 Console_Bar/font_sizes/font_size = 20
@@ -306,6 +315,25 @@ Console_Bar_Back/colors/font_color = Color(0.662745, 0.662745, 0.662745, 0.50196
 Console_Bar_Back/colors/font_uneditable_color = Color(0, 0, 0, 0)
 Console_Bar_Front/base_type = &"Console_Bar"
 Console_Bar_Front/styles/normal = SubResource("StyleBoxEmpty_fm8qu")
+Console_Label/base_type = &"Label"
+Console_Label/colors/font_color = Color(1, 1, 1, 1)
+Console_Label/colors/rich_black = Color(0, 0, 0, 1)
+Console_Label/colors/rich_blue = Color(0.392157, 0.584314, 0.929412, 1)
+Console_Label/colors/rich_cyan = Color(0, 0.933333, 0.933333, 1)
+Console_Label/colors/rich_gold = Color(1, 0.843, 0, 1)
+Console_Label/colors/rich_green = Color(0, 1, 0.498039, 1)
+Console_Label/colors/rich_magenta = Color(0.933333, 0, 0.933333, 1)
+Console_Label/colors/rich_orange = Color(1, 0.466667, 0, 1)
+Console_Label/colors/rich_plum = Color(0.686275, 0.6, 0.937255, 1)
+Console_Label/colors/rich_red = Color(0.933333, 0, 0, 1)
+Console_Label/colors/rich_salmon = Color(0.980392, 0.501961, 0.447059, 1)
+Console_Label/colors/rich_slateblue = Color(0.427451, 0.545098, 0.909804, 1)
+Console_Label/colors/rich_white = Color(1, 1, 1, 1)
+Console_Label/colors/rich_yellow = Color(0.980392, 0.980392, 0.823529, 1)
+Console_Label/font_sizes/font_size = 20
+Console_Label/fonts/font = ExtResource("9_0flio")
+Console_VBox/base_type = &"VBoxContainer"
+Console_VBox/constants/separation = 0
 ErrLabel/base_type = &"Label"
 ErrLabel/colors/font_color = Color(0.803922, 0.360784, 0.360784, 1)
 InfoLabel/base_type = &"Label"
