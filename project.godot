@@ -26,6 +26,8 @@ Archipelago="*res://godot_ap/autoloads/archipelago.tscn"
 
 window/size/extend_to_title=true
 window/subwindows/embed_subwindows=false
+window/stretch/mode="canvas_items"
+window/stretch/aspect="ignore"
 
 [filesystem]
 

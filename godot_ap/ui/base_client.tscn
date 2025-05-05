@@ -5,15 +5,17 @@
 [ext_resource type="PackedScene" uid="uid://dhya6ucgf72i8" path="res://godot_ap/ui/hints_tab.tscn" id="7_sh7qn"]
 
 [node name="WindowContainer" type="PanelContainer"]
-custom_minimum_size = Vector2(1366, 705)
-offset_right = 1366.0
-offset_bottom = 705.0
+custom_minimum_size = Vector2(1152, 648)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 script = ExtResource("1_gj1xe")
 
 [node name="Tabs" type="TabContainer" parent="."]
-custom_minimum_size = Vector2(1366, 705)
 layout_mode = 2
 current_tab = 0
 tab_focus_mode = 0

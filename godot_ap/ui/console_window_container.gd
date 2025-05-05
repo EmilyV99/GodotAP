@@ -37,9 +37,7 @@ func refresh_hidden() -> void:
 func _ready() -> void:
 	refresh_hidden()
 	typing_bar.grab_focus()
-	get_window().size_changed.connect(update_cont_size)
 	get_window().gui_embed_subwindows = true
-	update_cont_size()
 
 	if Engine.is_editor_hint(): return
 
@@ -56,15 +54,6 @@ func _ready() -> void:
 		if w > right_bar_w:
 			right_bar_w = w
 	console_margin.add_theme_constant_override("margin_right", 8+ceili(right_bar_w))
-
-func update_cont_size() -> void:
-	position = Vector2.ZERO
-	var win := get_window()
-	if win:
-		custom_minimum_size = win.size
-		tabs.custom_minimum_size = win.size
-	reset_size()
-	queue_sort()
 
 func close() -> void:
 	get_window().close_requested.emit()
