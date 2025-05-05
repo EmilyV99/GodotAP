@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=95 format=3 uid="uid://wduxpxflengc"]
+[gd_resource type="Theme" load_steps=99 format=3 uid="uid://wduxpxflengc"]
 
 [ext_resource type="Texture2D" uid="uid://lx3r4ysmhst6" path="res://godot_ap/ui/themes/graphics/cbox_check.png" id="3_rwjul"]
 [ext_resource type="Texture2D" uid="uid://cjukwyh6fgvv4" path="res://godot_ap/ui/themes/graphics/cbox_check_dis.png" id="4_xhpdk"]
@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://7wv3n2652kwn" path="res://godot_ap/ui/themes/graphics/radio_check_dis.png" id="6_fudjp"]
 [ext_resource type="Texture2D" uid="uid://c2p38ss6caiy" path="res://godot_ap/ui/themes/graphics/radio_uncheck.png" id="7_dqbbc"]
 [ext_resource type="Texture2D" uid="uid://xy8oso1rxld7" path="res://godot_ap/ui/themes/graphics/radio_uncheck_dis.png" id="8_byere"]
+[ext_resource type="FontVariation" uid="uid://emo3rlwg7g61" path="res://godot_ap/ui/console_font.tres" id="9_0flio"]
 [ext_resource type="Texture2D" uid="uid://b1jakuiicisq8" path="res://godot_ap/ui/themes/graphics/cbox_uncheck.png" id="9_uukxq"]
 [ext_resource type="Texture2D" uid="uid://dbfqqrnahvgnr" path="res://godot_ap/ui/themes/graphics/cbox_uncheck_dis.png" id="10_plmgx"]
 [ext_resource type="Texture2D" uid="uid://cp4hog7geu8w7" path="res://godot_ap/ui/themes/graphics/down_selector.png" id="10_wtxwt"]
@@ -199,6 +200,21 @@ corner_radius_bottom_right = 2
 corner_radius_bottom_left = 2
 corner_detail = 2
 anti_aliasing = false
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_0flio"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_43qp1"]
+content_margin_left = 8.0
+content_margin_top = 2.0
+content_margin_right = 8.0
+content_margin_bottom = 2.0
+bg_color = Color(0.917647, 0.917647, 0.917647, 1)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_fm8qu"]
+content_margin_left = 8.0
+content_margin_top = 2.0
+content_margin_right = 8.0
+content_margin_bottom = 2.0
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_wwh7o"]
 content_margin_left = 4.0
@@ -937,6 +953,23 @@ ColorPickerButton/styles/hover = SubResource("StyleBoxFlat_uyew4")
 ColorPickerButton/styles/normal = SubResource("StyleBoxFlat_fcrex")
 ColorPickerButton/styles/pressed = SubResource("StyleBoxFlat_mwoai")
 ColorPresetButton/styles/preset_fg = SubResource("StyleBoxFlat_18aod")
+Console_AutofillBar/base_type = &"Control"
+Console_AutofillBar/colors/bg_color = Color(0.917647, 0.917647, 0.917647, 1)
+Console_AutofillBar/colors/font_color = Color(0, 0, 0, 1)
+Console_AutofillBar/colors/sel_color = Color(0.294118, 0.505882, 0.784314, 1)
+Console_AutofillBar/font_sizes/font_size = 20
+Console_AutofillBar/fonts/font = ExtResource("9_0flio")
+Console_Bar/base_type = &"LineEdit"
+Console_Bar/colors/font_color = Color(0, 0, 0, 1)
+Console_Bar/font_sizes/font_size = 20
+Console_Bar/styles/focus = SubResource("StyleBoxEmpty_0flio")
+Console_Bar/styles/normal = SubResource("StyleBoxFlat_43qp1")
+Console_Bar_Back/base_type = &"Console_Bar"
+Console_Bar_Back/colors/caret_color = Color(0, 0, 0, 0)
+Console_Bar_Back/colors/font_color = Color(0.417257, 0.417257, 0.417257, 0.501961)
+Console_Bar_Back/colors/font_uneditable_color = Color(0, 0, 0, 0)
+Console_Bar_Front/base_type = &"Console_Bar"
+Console_Bar_Front/styles/normal = SubResource("StyleBoxEmpty_fm8qu")
 ErrLabel/base_type = &"Label"
 ErrLabel/colors/font_color = Color(0.623361, 0, 0, 1)
 FileDialog/colors/file_disabled_color = Color(1, 1, 1, 0.25)

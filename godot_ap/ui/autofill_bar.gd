@@ -1,10 +1,5 @@
 @tool class_name StringBar extends Control
 
-@export var bg_color: Color = Color(.2,.2,.2)
-@export var sel_color: Color = Color.SLATE_GRAY
-@export var font: Font
-@export var font_size: int = 20
-
 signal clicked(index: int)
 
 const HMARGIN = 6
@@ -25,21 +20,23 @@ func get_strings() -> Array[String]:
 	return strings
 
 func _draw():
+	var font := get_font()
+	var font_size := get_font_size()
 	var by := position.y+size.y
 	var fh := font.get_height(font_size)
 	var lh := fh + 2*(VMARGIN+VPADDING)
 	var sz = Vector2(size.x,strings.size() * lh)
 	position.y = by-sz.y
 	var y = sz.y-(VMARGIN+VPADDING)-fh
-	draw_rect(Rect2(Vector2.ZERO,size), bg_color)
+	draw_rect(Rect2(Vector2.ZERO,size), get_bg_color())
 	_hitboxes.clear()
 	for q in strings.size():
 		_hitboxes.append(Rect2(HMARGIN,VMARGIN+(lh*(strings.size()-q-1)),sz.x-2*HMARGIN,lh-2*VPADDING))
 	for q in strings.size():
 		var s = strings[q]
 		if q == hov_ind:
-			draw_rect(Rect2(HMARGIN,y-VPADDING,sz.x-(2*HMARGIN), lh-(2*VMARGIN)), sel_color)
-		draw_string(font, Vector2(HMARGIN+HPADDING, y+font.get_ascent(font_size)), s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
+			draw_rect(Rect2(HMARGIN,y-VPADDING,sz.x-(2*HMARGIN), lh-(2*VMARGIN)), get_sel_color())
+		draw_string(font, Vector2(HMARGIN+HPADDING, y+font.get_ascent(font_size)), s, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, get_font_color())
 		y -= lh
 	set_deferred("size",sz)
 
@@ -69,3 +66,14 @@ func _notification(what):
 		NOTIFICATION_MOUSE_EXIT:
 			_has_mouse = false
 			hov_ind = -1
+
+func get_bg_color() -> Color:
+	return get_theme_color(&"bg_color")
+func get_sel_color() -> Color:
+	return get_theme_color(&"sel_color")
+func get_font_color() -> Color:
+	return get_theme_color(&"font_color")
+func get_font() -> Font:
+	return get_theme_font(&"font")
+func get_font_size() -> int:
+	return get_theme_font_size(&"font_size")
