@@ -3,8 +3,6 @@
 @export_group("Nodes")
 @export var scroll_cont: ScrollContainer
 @export var parts_cont: VBoxContainer
-@export var tooltip_bg: Panel
-@export var tooltip_label: Label
 @export_group("")
 @export var spacing: int :
 	set(val):
@@ -160,12 +158,6 @@ func _ready():
 
 func _get_mouse_pos() -> Vector2:
 	return get_viewport().get_mouse_position() - global_position + Util.MOUSE_OFFSET
-
-func _clear_tooltip() -> void:
-	if tooltip_bg:
-		tooltip_bg.visible = false
-	if tooltip_label:
-		tooltip_label.text = ""
 
 func scroll_bottom() -> void:
 	scroll_cont.scroll_vertical = 9999999

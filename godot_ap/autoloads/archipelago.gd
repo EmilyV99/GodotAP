@@ -829,10 +829,10 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 			folder.add(grid)
 			folder.fold(false)
 
-			var h1 = BaseConsole.make_text("Location Name:")
+			var h1 := BaseConsole.make_text("Location Name:")
 			grid.add_child(h1)
 			if filt:
-				h1.tooltip = "Filter: " + filt
+				h1.tooltip_text = "Filter: " + filt
 			grid.add_child(BaseConsole.make_text("Status:"))
 
 			var ids: Array = data.location_name_to_id.values()

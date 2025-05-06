@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bt05nk6su6m5r" path="res://godot_ap/ui/console/base_console.gd" id="1_ee8mw"]
 
-[node name="Console" type="Control" node_paths=PackedStringArray("scroll_cont", "parts_cont", "tooltip_bg", "tooltip_label")]
+[node name="Console" type="Control" node_paths=PackedStringArray("scroll_cont", "parts_cont")]
 custom_minimum_size = Vector2(150, 150)
 layout_mode = 3
 anchors_preset = 0
@@ -14,8 +14,6 @@ mouse_filter = 1
 script = ExtResource("1_ee8mw")
 scroll_cont = NodePath("PanelContainer/ScrollContainer")
 parts_cont = NodePath("PanelContainer/ScrollContainer/PartsContainer")
-tooltip_bg = NodePath("TooltipBG")
-tooltip_label = NodePath("TooltipBG/Tooltip")
 spacing = 4
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
@@ -35,19 +33,3 @@ vertical_scroll_mode = 4
 [node name="PartsContainer" type="VBoxContainer" parent="PanelContainer/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-
-[node name="TooltipBG" type="Panel" parent="."]
-visible = false
-z_index = 1000
-layout_mode = 2
-offset_right = 40.0
-offset_bottom = 40.0
-mouse_filter = 2
-theme_type_variation = &"TooltipPanel"
-
-[node name="Tooltip" type="Label" parent="TooltipBG"]
-layout_mode = 2
-offset_top = 8.0
-offset_right = 40.0
-offset_bottom = 31.0
-autowrap_mode = 2
