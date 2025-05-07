@@ -601,11 +601,11 @@ func _receive_item(index: int, item: NetworkItem) -> bool:
 		if output_console and _printout_recieved_items:
 			var flowbox := ConsoleHFlow.new()
 			flowbox.add_text_split(conn.get_player().output())
-			flowbox.add_text_split(ConsoleLabel.make(" got "))
+			flowbox.add_text_split(BaseConsole.make_text(" got "))
 			flowbox.add_text_split(item.output())
-			flowbox.add_text_split(ConsoleLabel.make(" ("))
+			flowbox.add_text_split(BaseConsole.make_text(" ("))
 			flowbox.add_text_split(BaseConsole.make_location(item.loc_id, data))
-			flowbox.add_text_split(ConsoleLabel.make(")"))
+			flowbox.add_text_split(BaseConsole.make_text(")"))
 			output_console.add(flowbox)
 		msg = "You found your %s at %s!" % [data.get_item_name(item.id),data.get_loc_name(item.loc_id)]
 		_remove_loc(item.loc_id)
@@ -613,11 +613,11 @@ func _receive_item(index: int, item: NetworkItem) -> bool:
 		if output_console and _printout_recieved_items:
 			var flowbox := ConsoleHFlow.new()
 			flowbox.add_text_split(conn.get_player().output())
-			flowbox.add_text_split(ConsoleLabel.make(" found their "))
+			flowbox.add_text_split(BaseConsole.make_text(" found their "))
 			flowbox.add_text_split(item.output())
-			flowbox.add_text_split(ConsoleLabel.make(" ("))
+			flowbox.add_text_split(BaseConsole.make_text(" ("))
 			flowbox.add_text_split(BaseConsole.make_location(item.loc_id, data))
-			flowbox.add_text_split(ConsoleLabel.make(")"))
+			flowbox.add_text_split(BaseConsole.make_text(")"))
 			output_console.add(flowbox)
 		msg = "You found your %s at %s!" % [data.get_item_name(item.id),data.get_loc_name(item.loc_id)]
 		_remove_loc(item.loc_id)
@@ -626,13 +626,13 @@ func _receive_item(index: int, item: NetworkItem) -> bool:
 		if output_console and _printout_recieved_items:
 			var flowbox := ConsoleHFlow.new()
 			flowbox.add_text_split(conn.get_player(item.src_player_id).output())
-			flowbox.add_text_split(ConsoleLabel.make(" sent "))
+			flowbox.add_text_split(BaseConsole.make_text(" sent "))
 			flowbox.add_text_split(item.output())
-			flowbox.add_text_split(ConsoleLabel.make(" to "))
+			flowbox.add_text_split(BaseConsole.make_text(" to "))
 			flowbox.add_text_split(conn.get_player().output())
-			flowbox.add_text_split(ConsoleLabel.make(" ("))
+			flowbox.add_text_split(BaseConsole.make_text(" ("))
 			flowbox.add_text_split(BaseConsole.make_location(item.loc_id, src_data))
-			flowbox.add_text_split(ConsoleLabel.make(")"))
+			flowbox.add_text_split(BaseConsole.make_text(")"))
 			output_console.add(flowbox)
 
 		msg = "%s found your %s at their %s!" % [conn.get_player_name(item.src_player_id), data.get_item_name(item.id), src_data.get_loc_name(item.loc_id)]

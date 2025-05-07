@@ -14,6 +14,43 @@
 			return spacing
 		return parts_cont.get_theme_constant(&"separation")
 
+class FontStorage:
+	func _init(_base_font: Font):
+		populate(_base_font)
+
+	func populate(_base_font: Font):
+		base_font = _base_font
+		bold_font = Util.font_mod(_get_font_for_mod(), true, false)
+		italic_font = Util.font_mod(_get_font_for_mod(), false, true)
+		bold_italic_font = Util.font_mod(_get_font_for_mod(), true, true)
+
+	func get_font(bold: bool, italic: bool) -> Font:
+		if not italic:
+			if not bold:
+				return base_font
+			else:
+				return bold_font
+		else:
+			if not bold:
+				return italic_font
+			else:
+				return bold_italic_font
+
+	func _get_font_for_mod():
+		var _font: Font
+		if base_font is FontVariation or base_font is SystemFont:
+			_font = base_font.duplicate()
+		else:
+			_font = base_font
+		return _font
+
+	var base_font: Font
+	var bold_font: Font
+	var italic_font: Font
+	var bold_italic_font: Font
+
+static var console_label_fonts: FontStorage
+
 func pop_dropdown(target: Control) -> VBoxContainer:
 	var parent_window := get_window()
 	var window := Window.new()
@@ -63,7 +100,7 @@ func add(part: Control) -> Control:
 	return part
 
 static func make_text(text: String, ttip := "", col := AP.ComplexColor.NIL) -> ConsoleLabel:
-	return ConsoleLabel.make_col(text, col, ttip)
+	return ConsoleLabel.make_col(console_label_fonts, text, col, ttip)
 
 static func make_c_text(text: String, ttip := "", col := AP.ComplexColor.NIL) -> ConsoleLabel:
 	var part := make_text(text, ttip, col)
@@ -78,11 +115,10 @@ static func make_spacing(space: Vector2) -> Control:
 func get_line_height() -> float:
 	var font_size: int = get_theme_font_size(&"font_size", "ConsoleLabel")
 	var fonts: Array[Font]
-	var base_font := get_theme_font(&"font", "ConsoleLabel")
-	fonts.append(base_font)
-	fonts.append(Util.font_mod(base_font.duplicate(), true, false))
-	fonts.append(Util.font_mod(base_font.duplicate(), false, true))
-	fonts.append(Util.font_mod(base_font.duplicate(), true, true))
+	fonts.append(console_label_fonts.base_font)
+	fonts.append(console_label_fonts.bold_font)
+	fonts.append(console_label_fonts.italic_font)
+	fonts.append(console_label_fonts.bold_italic_font)
 	var h := 0.0
 	for f in fonts:
 		h = maxf(h,f.get_height(font_size))
@@ -141,7 +177,7 @@ static func make_player(id: int) -> ConsoleLabel:
 	return make_text(player.name, ttip, AP.ComplexColor.as_special(AP.SpecialColor.PLAYER))
 
 static func make_foldable(text: String, ttip := "", color := AP.ComplexColor.NIL) -> ConsoleFoldableContainer:
-	return ConsoleFoldableContainer.make(text, ttip, color)
+	return ConsoleFoldableContainer.make(console_label_fonts, text, ttip, color)
 
 var is_max_scroll := false
 
@@ -155,6 +191,13 @@ func _ready():
 		v.bold = true
 		v.italic = true
 		return
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_THEME_CHANGED:
+		if not console_label_fonts:
+			console_label_fonts = FontStorage.new(get_theme_font(&"font", "ConsoleLabel"))
+		else:
+			console_label_fonts.populate(get_theme_font(&"font", "ConsoleLabel"))
 
 func _get_mouse_pos() -> Vector2:
 	return get_viewport().get_mouse_position() - global_position + Util.MOUSE_OFFSET
