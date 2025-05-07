@@ -218,17 +218,27 @@ static func nil() -> void:
 
 # Font stuff
 static func font_mod(font: Font, bold: bool, italic: bool) -> Font:
-	if bold:
-		if "weight" in _get_supported_opentype_variants(font):
-			var ts = TextServerManager.get_primary_interface()
-			var _dict = font.variation_opentype
-			_dict[ts.name_to_tag("weight")] = 700
-			font.variation_opentype = _dict
-		else:
-			font.variation_embolden = 0.7
-	if italic: #TODO: add handling of italic opentype variant
-		var slant = 0.3
-		font.variation_transform = Transform2D(Vector2(1.0, slant), Vector2(0.0, 1.0), Vector2(0.0, 0.0))
+	if font is FontFile:
+		var _font = FontVariation.new()
+		_font.base_font = font
+		font = _font
+	if font is FontVariation:
+		if bold:
+			if "weight" in _get_supported_opentype_variants(font):
+				var ts = TextServerManager.get_primary_interface()
+				var _dict = font.variation_opentype
+				_dict[ts.name_to_tag("weight")] = 700
+				font.variation_opentype = _dict
+			else:
+				font.variation_embolden = 0.7
+		if italic: #TODO: add handling of italic opentype variant
+			var slant = 0.3
+			font.variation_transform = Transform2D(Vector2(1.0, slant), Vector2(0.0, 1.0), Vector2(0.0, 0.0))
+	elif font is SystemFont:
+		if bold:
+			font.font_weight = 700
+		if italic:
+			font.font_italic = true
 	return font
 static func _get_supported_opentype_variants(fnt: FontVariation) -> Array:
 	var arr = fnt.get_supported_variation_list().keys()
