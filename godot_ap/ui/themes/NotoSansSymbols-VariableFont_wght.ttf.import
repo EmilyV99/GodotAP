@@ -31,5 +31,5 @@ Compress=null
 compress=true
 preload=[]
 language_support={}
-script_support=null
+script_support={}
 opentype_features={}

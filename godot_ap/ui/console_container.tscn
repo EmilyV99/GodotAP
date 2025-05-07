@@ -10,9 +10,9 @@ offset_bottom = 20.0
 theme_override_constants/separation = 0
 script = ExtResource("1_yktyr")
 console_cont = NodePath("Cont")
-console = NodePath("Cont/ConsoleMargin/ConsoleBG/Row/Console")
+console = NodePath("Cont/ConsoleBG/ConsoleMargin/Row/Console")
 typing_bar = NodePath("TypingBar")
-margin = NodePath("Cont/ConsoleMargin")
+margin = NodePath("Cont/ConsoleBG/ConsoleMargin")
 
 [node name="Cont" type="MarginContainer" parent="."]
 layout_mode = 2
@@ -22,21 +22,21 @@ theme_override_constants/margin_top = 0
 theme_override_constants/margin_right = 0
 theme_override_constants/margin_bottom = 0
 
-[node name="ConsoleMargin" type="MarginContainer" parent="Cont"]
+[node name="ConsoleBG" type="PanelContainer" parent="Cont"]
+layout_mode = 2
+theme_type_variation = &"Console_BG"
+
+[node name="ConsoleMargin" type="MarginContainer" parent="Cont/ConsoleBG"]
 layout_mode = 2
 theme_override_constants/margin_left = 0
 theme_override_constants/margin_top = 0
 theme_override_constants/margin_right = 0
 theme_override_constants/margin_bottom = 0
 
-[node name="ConsoleBG" type="PanelContainer" parent="Cont/ConsoleMargin"]
-layout_mode = 2
-theme_type_variation = &"Console_BG"
-
-[node name="Row" type="HBoxContainer" parent="Cont/ConsoleMargin/ConsoleBG"]
+[node name="Row" type="HBoxContainer" parent="Cont/ConsoleBG/ConsoleMargin"]
 layout_mode = 2
 
-[node name="Console" parent="Cont/ConsoleMargin/ConsoleBG/Row" instance=ExtResource("2_yktyr")]
+[node name="Console" parent="Cont/ConsoleBG/ConsoleMargin/Row" instance=ExtResource("2_yktyr")]
 layout_mode = 2
 focus_neighbor_left = NodePath(".")
 focus_neighbor_top = NodePath(".")
