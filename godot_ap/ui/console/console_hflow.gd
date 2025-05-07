@@ -23,8 +23,7 @@ func add_text_split(main_label: ConsoleLabel) -> void:
 		var d := main_label.make_dupe()
 		d.text = word
 		labels.append(d)
-		var spacing := Control.new()
-		spacing.custom_minimum_size.x = hspace
+		var spacing := Spacing.new(self, hspace)
 		labels.append(spacing)
 	if labels.is_empty(): return
 	labels.pop_back()
