@@ -1,0 +1,39 @@
+[gd_scene load_steps=3 format=3 uid="uid://hifmj2cuuh1b"]
+
+[ext_resource type="Script" uid="uid://b3a0pgbdh0yqj" path="res://godot_ap/ui/typing_bar.gd" id="1_10hap"]
+[ext_resource type="PackedScene" uid="uid://cm123kfw5gslb" path="res://godot_ap/ui/stringbar.tscn" id="3_24fl5"]
+
+[node name="TypingBar" type="LineEdit" node_paths=PackedStringArray("autofill_rect", "autofill_edit")]
+custom_minimum_size = Vector2(0, 47)
+focus_neighbor_left = NodePath(".")
+focus_neighbor_top = NodePath(".")
+focus_neighbor_right = NodePath(".")
+focus_neighbor_bottom = NodePath(".")
+focus_next = NodePath(".")
+focus_previous = NodePath(".")
+theme_type_variation = &"Console_Bar_Front"
+script = ExtResource("1_10hap")
+autofill_rect = NodePath("StringBar")
+autofill_edit = NodePath("AutofillText")
+
+[node name="AutofillText" type="LineEdit" parent="."]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+mouse_filter = 2
+theme_type_variation = &"Console_Bar_Back"
+
+[node name="StringBar" parent="." instance=ExtResource("3_24fl5")]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+offset_left = 30.0
+offset_top = -47.0
+offset_right = -30.0
+offset_bottom = -47.0
+grow_vertical = 0

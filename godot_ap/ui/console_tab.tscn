@@ -31,7 +31,6 @@ metadata/_tab_index = 0
 
 [node name="Console" parent="." instance=ExtResource("1_karta")]
 layout_mode = 2
-theme_override_constants/separation = 0
 
 [node name="ConnectBox" type="MarginContainer" parent="."]
 clip_contents = true

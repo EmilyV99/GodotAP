@@ -38,5 +38,5 @@ func get_name() -> String:
 	return Archipelago.conn.get_gamedata_for_player(dest_player_id).get_item_name(id)
 func _to_string():
 	return "ITEM(%d at %d,player %d->%d,flags %d)" % [id,loc_id,src_player_id,dest_player_id,flags]
-func output(console: BaseConsole, add := true) -> BaseConsole.TextPart:
-	return Archipelago.out_item(console, id, flags, Archipelago.conn.get_gamedata_for_player(dest_player_id), add)
+func output() -> ConsoleLabel:
+	return BaseConsole.make_item(id, flags, Archipelago.conn.get_gamedata_for_player(dest_player_id))

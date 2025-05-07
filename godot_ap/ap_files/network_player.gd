@@ -28,5 +28,5 @@ static func from(json: Dictionary) -> NetworkPlayer:
 
 func _to_string():
 	return "PLAYER(%s[%s],team %d,slot %d)" % [name,alias,team,slot]
-func output(console: BaseConsole, add := true) -> BaseConsole.TextPart:
-	return Archipelago.out_player(console, slot, add)
+func output() -> ConsoleLabel:
+	return BaseConsole.make_player(slot)

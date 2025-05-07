@@ -3,8 +3,8 @@
 @onready var tabs: TabContainer = $Tabs
 @onready var console_tab: Control = $Tabs/Console
 @onready var hints_tab: Control = $Tabs/Hints
-@onready var console_margin: MarginContainer = $Tabs/Console/Console/Cont/ConsoleMargin
 @onready var console_container: ConsoleContainer = $Tabs/Console/Console
+@onready var console_margin: MarginContainer = console_container.margin
 @onready var console: BaseConsole = console_container.console
 @onready var typing_bar: TypingBar = console_container.typing_bar
 
@@ -53,7 +53,7 @@ func _ready() -> void:
 	for w in right_bar_ws:
 		if w > right_bar_w:
 			right_bar_w = w
-	console_margin.add_theme_constant_override("margin_right", 8+ceili(right_bar_w))
+	console_margin.add_theme_constant_override("margin_right", 8+ceili(right_bar_w / 2))
 
 func close() -> void:
 	get_window().close_requested.emit()

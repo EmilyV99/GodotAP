@@ -24,10 +24,13 @@ Archipelago="*res://godot_ap/autoloads/archipelago.tscn"
 
 [display]
 
+window/size/viewport_width=750
+window/size/viewport_height=400
 window/size/extend_to_title=true
+window/size/window_width_override=1152
+window/size/window_height_override=648
 window/subwindows/embed_subwindows=false
-window/stretch/mode="canvas_items"
-window/stretch/aspect="ignore"
+window/stretch/aspect="expand"
 
 [filesystem]
 
@@ -35,6 +38,7 @@ import/blender/enabled=false
 
 [gui]
 
+timers/tooltip_delay_sec=0.2
 theme/custom="res://godot_ap/ui/themes/dark_theme.tres"
 theme/custom_font="uid://bsf22ltaya6h0"
 

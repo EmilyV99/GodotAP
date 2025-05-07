@@ -1,74 +1,51 @@
-[gd_scene load_steps=6 format=3 uid="uid://c51q4vrwhlcl7"]
+[gd_scene load_steps=4 format=3 uid="uid://c51q4vrwhlcl7"]
 
 [ext_resource type="Script" uid="uid://b84vkudajol4o" path="res://godot_ap/ui/console_container.gd" id="1_yktyr"]
-[ext_resource type="PackedScene" uid="uid://bwamxuo3s7c8n" path="res://godot_ap/ui/plain_console.tscn" id="2_yktyr"]
-[ext_resource type="Script" uid="uid://b3a0pgbdh0yqj" path="res://godot_ap/ui/typing_bar.gd" id="3_s5o28"]
-[ext_resource type="FontVariation" uid="uid://emo3rlwg7g61" path="res://godot_ap/ui/console_font.tres" id="3_xv68c"]
-[ext_resource type="PackedScene" uid="uid://cm123kfw5gslb" path="res://godot_ap/ui/stringbar.tscn" id="5_rm2bb"]
+[ext_resource type="PackedScene" uid="uid://bwamxuo3s7c8n" path="res://godot_ap/ui/console/plain_console.tscn" id="2_yktyr"]
+[ext_resource type="PackedScene" uid="uid://hifmj2cuuh1b" path="res://godot_ap/ui/typing_bar.tscn" id="3_e1fkb"]
 
-[node name="Console" type="VBoxContainer" node_paths=PackedStringArray("console_cont", "console")]
+[node name="Console" type="VBoxContainer" node_paths=PackedStringArray("console_cont", "console", "typing_bar", "margin")]
 offset_right = 46.0
 offset_bottom = 20.0
+theme_override_constants/separation = 0
 script = ExtResource("1_yktyr")
 console_cont = NodePath("Cont")
-console = NodePath("Cont/ConsoleMargin/Row/Console")
+console = NodePath("Cont/ConsoleMargin/ConsoleBG/Row/Console")
+typing_bar = NodePath("TypingBar")
+margin = NodePath("Cont/ConsoleMargin")
 
 [node name="Cont" type="MarginContainer" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
+
+[node name="ConsoleMargin" type="MarginContainer" parent="Cont"]
 layout_mode = 2
 theme_override_constants/margin_left = 0
 theme_override_constants/margin_top = 0
 theme_override_constants/margin_right = 0
 theme_override_constants/margin_bottom = 0
 
-[node name="BG" type="ColorRect" parent="Cont"]
+[node name="ConsoleBG" type="PanelContainer" parent="Cont/ConsoleMargin"]
 layout_mode = 2
-color = Color(0, 0, 0, 1)
+theme_type_variation = &"Console_BG"
 
-[node name="ConsoleMargin" type="MarginContainer" parent="Cont"]
-clip_contents = true
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-focus_next = NodePath("Row/Console")
-focus_previous = NodePath("Row/Console")
-focus_mode = 1
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 8
-theme_override_constants/margin_bottom = 8
-
-[node name="Row" type="HBoxContainer" parent="Cont/ConsoleMargin"]
+[node name="Row" type="HBoxContainer" parent="Cont/ConsoleMargin/ConsoleBG"]
 layout_mode = 2
 
-[node name="Console" parent="Cont/ConsoleMargin/Row" instance=ExtResource("2_yktyr")]
+[node name="Console" parent="Cont/ConsoleMargin/ConsoleBG/Row" instance=ExtResource("2_yktyr")]
 layout_mode = 2
 focus_neighbor_left = NodePath(".")
 focus_neighbor_top = NodePath(".")
 focus_neighbor_right = NodePath(".")
 focus_neighbor_bottom = NodePath(".")
+focus_next = NodePath("../../../../../TypingBar")
+focus_previous = NodePath("../../../../../TypingBar")
 
-[node name="ScrollBar" type="VScrollBar" parent="Cont/ConsoleMargin/Row"]
+[node name="TypingBar" parent="." instance=ExtResource("3_e1fkb")]
 layout_mode = 2
-size_flags_horizontal = 8
-
-[node name="TypingBar" type="ColorRect" parent="."]
-custom_minimum_size = Vector2(0, 40)
-layout_mode = 2
-focus_neighbor_left = NodePath(".")
-focus_neighbor_top = NodePath(".")
-focus_neighbor_right = NodePath(".")
-focus_neighbor_bottom = NodePath(".")
-focus_next = NodePath(".")
-focus_previous = NodePath(".")
-focus_mode = 2
-color = Color(0.145266, 0.145266, 0.145266, 1)
-script = ExtResource("3_s5o28")
-font = ExtResource("3_xv68c")
-color_dis_bg = Color(0.304462, 0.304462, 0.304462, 1)
-
-[node name="StringBar" parent="TypingBar" instance=ExtResource("5_rm2bb")]
-layout_mode = 1
-offset_left = -219.5
-offset_top = 106.0
-offset_right = -219.5
-offset_bottom = 66.0
+keep_editing_on_text_submit = true
+caret_blink = true

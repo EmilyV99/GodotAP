@@ -17,8 +17,6 @@ class_name AP extends Node
 @export var AP_HIDE_NONLOCAL_ITEMSENDS := true
 ## Automatically opens a default AP text console.
 @export var AP_AUTO_OPEN_CONSOLE := false
-## Allow loading custom tracker packs.
-@export var AP_ALLOW_TRACKERPACKS := true
 @export_subgroup("UI")
 ## Automatically open the Connection box when the console opens
 @export var AP_CONSOLE_CONNECTION_OPEN := false
@@ -65,36 +63,91 @@ signal _logged_message(msg: String)
 
 
 #region COLORS
-const COLORNAME_PLAYER: StringName = "magenta"
-const COLORNAME_ITEM_PROG: StringName = "plum"
-const COLORNAME_ITEM: StringName = "cyan"
-const COLORNAME_ITEM_USEFUL: StringName = "slateblue"
-const COLORNAME_ITEM_TRAP: StringName = "salmon"
-const COLORNAME_LOCATION: StringName = "green"
-
-static func color_from_name(colname: String, def := Color.TRANSPARENT) -> Color:
-	var c = rich_colors.get(colname)
-	return c if c else Color.from_string(colname, def)
-
-## The rich-text colors used for console output
-## Chosen to match Archipelago CommonClient
-static var rich_colors: Dictionary[String, Color] = {
-	"red": Color8(0xEE,0x00,0x00),
-	"green": Color8(0x00,0xFF,0x7F),
-	"yellow": Color8(0xFA,0xFA,0xD2),
-	"blue": Color8(0x64,0x95,0xED),
-	"magenta": Color8(0xEE,0x00,0xEE),
-	"cyan": Color8(0x00,0xEE,0xEE),
-	"white": Color.WHITE,
-	"black": Color.BLACK,
-	"slateblue": Color8(0x6D,0x8B,0xE8),
-	"plum": Color8(0xAF,0x99,0xEF),
-	"salmon": Color8(0xFA,0x80,0x72),
-	"orange": Color8(0xFF,0x77,0x00),
-	"gold": Color.GOLD,
+class ComplexColor:
+	var rich :
+		set(val):
+			if val is RichColor:
+				rich = val
+				special = null
+				plain = null
+			else: rich = null
+	var special :
+		set(val):
+			if val is SpecialColor:
+				rich = null
+				special = val
+				plain = null
+			else:
+				special = null
+	var plain :
+		set(val):
+			if val is String:
+				rich = null
+				special = null
+				plain = val
+			elif val is Color:
+				plain = str(val)
+			else: plain = null
+	static func as_rich(color: RichColor) -> ComplexColor:
+		var ret := ComplexColor.new()
+		ret.rich = color
+		return ret
+	static func as_special(color: SpecialColor) -> ComplexColor:
+		var ret := ComplexColor.new()
+		ret.special = color
+		return ret
+	static func as_plain(color: String) -> ComplexColor:
+		var ret := ComplexColor.new()
+		ret.plain = color
+		return ret
+	func calculate(node: Control) -> Color:
+		if rich: return AP.get_rich_color(node, rich)
+		if special: return AP.get_special_color(node, special)
+		return AP.color_from_name(node, plain)
+	static var NIL := as_rich(AP.RichColor.NIL)
+enum RichColor {
+	NIL, RED, GREEN, YELLOW, BLUE,
+	MAGENTA, CYAN, WHITE, BLACK, SLATEBLUE,
+	PLUM, SALMON, ORANGE, GOLD,
+}
+enum SpecialColor {
+	PLAYER, ITEM_PROG, ITEM, ITEM_USEFUL, ITEM_TRAP,
+	LOCATION, UI_MESSAGE, DEBUG
 }
 
+const _special_colors: Dictionary[SpecialColor, RichColor] = {
+	SpecialColor.PLAYER: RichColor.MAGENTA,
+	SpecialColor.ITEM_PROG: RichColor.PLUM,
+	SpecialColor.ITEM: RichColor.CYAN,
+	SpecialColor.ITEM_USEFUL: RichColor.SLATEBLUE,
+	SpecialColor.ITEM_TRAP: RichColor.SALMON,
+	SpecialColor.LOCATION: RichColor.GREEN,
+	SpecialColor.UI_MESSAGE: RichColor.GOLD,
+	SpecialColor.DEBUG: RichColor.MAGENTA,
+}
 
+static func is_rich_color_name(s: String) -> bool:
+	if s == "nil": return false
+	return RichColor.keys().map(func(c): return str(c).to_lower()).has(s)
+static func rich_color_from_name(s: String) -> RichColor:
+	var ind: int = RichColor.keys().map(func(c): return str(c).to_lower()).find(s)
+	if ind > -1: return RichColor.values()[ind]
+	return RichColor.NIL
+static func get_rich_color_name(node: Control, s: String, default := Color.WHITE) -> Color:
+	if node.has_theme_color("rich_%s" % s, "Console_Label"):
+		return node.get_theme_color("rich_%s" % s, "Console_Label")
+	return default
+static func get_rich_color(node: Control, c: RichColor, default := Color.WHITE) -> Color:
+	if c == RichColor.NIL:
+		return default
+	return get_rich_color_name(node, RichColor.find_key(c).to_lower(), default)
+static func get_special_color(node: Control, c: SpecialColor, default := Color.WHITE) -> Color:
+	return get_rich_color(node, _special_colors.get(c, RichColor.NIL), default)
+static func special_to_rich_color(c: SpecialColor, default := RichColor.NIL) -> RichColor:
+	return _special_colors.get(c, default)
+
+static func color_from_name(node: Control, colname: String, def := Color.TRANSPARENT) -> Color:
+	return get_rich_color_name(node, colname, Color.from_string(colname, def))
 #endregion COLORS
 
 enum ItemHandling {
@@ -119,7 +172,6 @@ var _socket: WebSocketPeer
 
 var config : APConfigManager ## Will be defaulted if not provided in 'godot_ap/autoloads/archipelago.tscn'
 var save_manager : APSaveManager ## Can be 'null' if not provided in 'godot_ap/autoloads/archipelago.tscn'
-var tracker_manager: TrackerManager = TrackerManager.new()
 
 #region CONNECTION
 var conn: ConnectionInfo ## The active Archipelago connection
@@ -153,7 +205,7 @@ func is_ap_connected() -> bool:
 func is_not_connected() -> bool:
 	return status != APStatus.PLAYING
 
-var _connecting_part: BaseConsole.TextPart
+var _connecting_part: Label
 
 var _connect_attempts := 1
 var _wss := true
@@ -194,7 +246,8 @@ func ap_disconnect() -> void:
 	hang_clock.start(hang_clock.wait_time)
 	AP.close_logger()
 	if output_console:
-		var part := output_console.add_line("Disconnecting...","%s:%s %s" % [creds.ip,creds.port,creds.slot],output_console.COLOR_UI_MSG)
+		var part := BaseConsole.make_text("Disconnecting...","%s:%s %s" % [creds.ip,creds.port,creds.slot], ComplexColor.as_special(SpecialColor.UI_MESSAGE))
+		output_console.add(part)
 		while status != APStatus.DISCONNECTED:
 			await status_updated
 		part.text = "Disconnected from AP."
@@ -272,7 +325,7 @@ func _poll() -> void:
 						_wss = not _wss
 						if _wss: _connect_attempts += 1
 					elif output_console and not _connecting_part:
-						_connecting_part = output_console.add_line("Connecting...","%s:%s %s" % [creds.ip,creds.port,creds.slot],output_console.COLOR_UI_MSG)
+						_connecting_part = output_console.add(BaseConsole.make_text("Connecting...","%s:%s %s" % [creds.ip,creds.port,creds.slot], ComplexColor.as_special(SpecialColor.UI_MESSAGE)))
 					_socket_state = _socket.get_ready_state()
 				WebSocketPeer.STATE_CONNECTING: # Continue trying to make new connection
 					_socket.poll()
@@ -287,7 +340,7 @@ func _poll() -> void:
 							AP.log("Connection to '%s' failed too much! Giving up!" % get_url())
 							if output_console and _connecting_part:
 								_connecting_part.text = "Connection Failed!"
-								_connecting_part.tooltip += "\nFailed connecting too many times. Check your connection details, or '/reconnect' to try again."
+								_connecting_part.tooltip_text += "\nFailed connecting too many times. Check your connection details, or '/reconnect' to try again."
 								_connecting_part = null
 						else:
 							AP.log("Connection to '%s' failed! Retrying (%d)" % [get_url(),_connect_attempts])
@@ -355,7 +408,7 @@ func _handle_command(json: Dictionary) -> void:
 			var err_str := str(json["errors"])
 			if output_console and _connecting_part:
 				_connecting_part.text = "Connection Refused!"
-				_connecting_part.tooltip += "\nERROR(S): "+err_str
+				_connecting_part.tooltip_text += "\nERROR(S): "+err_str
 				_connecting_part = null
 			AP.log("Connection errors: %s" % err_str)
 			connect_step.emit("ERR: %s" % err_str)
@@ -376,7 +429,7 @@ func _handle_command(json: Dictionary) -> void:
 				if lock_err:
 					_connecting_part.text = "Connection Mismatch! Wrong slot for this save!"
 					for s in lock_err:
-						_connecting_part.tooltip += "\n%s" % s
+						_connecting_part.tooltip_text += "\n%s" % s
 					_connecting_part = null
 					ap_disconnect()
 					return
@@ -546,35 +599,42 @@ func _receive_item(index: int, item: NetworkItem) -> bool:
 	var msg := ""
 	if item.loc_id < 0:
 		if output_console and _printout_recieved_items:
-			conn.get_player().output(output_console)
-			output_console.add_text(" got ")
-			item.output(output_console)
-			output_console.add_text(" (")
-			out_location(output_console, item.loc_id, data)
-			output_console.add_line(")")
+			var flowbox := ConsoleHFlow.new()
+			flowbox.add_text_split(conn.get_player().output())
+			flowbox.add_text_split(ConsoleLabel.make(" got "))
+			flowbox.add_text_split(item.output())
+			flowbox.add_text_split(ConsoleLabel.make(" ("))
+			flowbox.add_text_split(BaseConsole.make_location(item.loc_id, data))
+			flowbox.add_text_split(ConsoleLabel.make(")"))
+			output_console.add(flowbox)
 		msg = "You found your %s at %s!" % [data.get_item_name(item.id),data.get_loc_name(item.loc_id)]
 		_remove_loc(item.loc_id)
 	elif item.dest_player_id == item.src_player_id:
 		if output_console and _printout_recieved_items:
-			conn.get_player().output(output_console)
-			output_console.add_text(" found their ")
-			item.output(output_console)
-			output_console.add_text(" (")
-			out_location(output_console, item.loc_id, data)
-			output_console.add_line(")")
+			var flowbox := ConsoleHFlow.new()
+			flowbox.add_text_split(conn.get_player().output())
+			flowbox.add_text_split(ConsoleLabel.make(" found their "))
+			flowbox.add_text_split(item.output())
+			flowbox.add_text_split(ConsoleLabel.make(" ("))
+			flowbox.add_text_split(BaseConsole.make_location(item.loc_id, data))
+			flowbox.add_text_split(ConsoleLabel.make(")"))
+			output_console.add(flowbox)
 		msg = "You found your %s at %s!" % [data.get_item_name(item.id),data.get_loc_name(item.loc_id)]
 		_remove_loc(item.loc_id)
 	else:
 		var src_data: DataCache = conn.get_gamedata_for_player(item.src_player_id)
 		if output_console and _printout_recieved_items:
-			conn.get_player(item.src_player_id).output(output_console)
-			output_console.add_text(" sent ")
-			item.output(output_console)
-			output_console.add_text(" to ")
-			conn.get_player().output(output_console)
-			output_console.add_text(" (")
-			out_location(output_console, item.loc_id, src_data)
-			output_console.add_line(")")
+			var flowbox := ConsoleHFlow.new()
+			flowbox.add_text_split(conn.get_player(item.src_player_id).output())
+			flowbox.add_text_split(ConsoleLabel.make(" sent "))
+			flowbox.add_text_split(item.output())
+			flowbox.add_text_split(ConsoleLabel.make(" to "))
+			flowbox.add_text_split(conn.get_player().output())
+			flowbox.add_text_split(ConsoleLabel.make(" ("))
+			flowbox.add_text_split(BaseConsole.make_location(item.loc_id, src_data))
+			flowbox.add_text_split(ConsoleLabel.make(")"))
+			output_console.add(flowbox)
+
 		msg = "%s found your %s at their %s!" % [conn.get_player_name(item.src_player_id), data.get_item_name(item.id), src_data.get_loc_name(item.loc_id)]
 
 	conn.obtained_item.emit(item)
@@ -647,7 +707,7 @@ func ap_reconnect_to_save() -> void:
 				s += "Please reconnect to the room previously used by this save file!"
 			else:
 				s += "Connect to a room when ready."
-			output_console.add_line(s, "", output_console.COLOR_UI_MSG)
+			output_console.add(BaseConsole.make_text(s, "", ComplexColor.as_special(SpecialColor.UI_MESSAGE)))
 	else:
 		ap_reconnect()
 
@@ -660,31 +720,6 @@ func _notification(what):
 		AP.close_logger()
 
 #region CONSOLE
-
-## Prints an Item in richtext (to the console, if `add` is true) and returns the TextPart
-func out_item(console: BaseConsole, id: int, flags: int, data: DataCache, add := true) -> BaseConsole.TextPart:
-	if not console: return
-	var ttip = "Type: %s" % AP.get_item_classification(flags)
-	var colorname := AP.get_item_class_color(flags)
-	var ret := console.make_text(data.get_item_name(id), ttip, rich_colors[colorname])
-	if add: console.add(ret)
-	return ret
-## Prints a Player in richtext (to the console, if `add` is true) and returns the TextPart
-func out_player(console: BaseConsole, id: int, add := true) -> BaseConsole.TextPart:
-	if not console: return
-	var player := conn.get_player(id)
-	var ttip = "Game: %s" % conn.get_slot(id).game
-	if not player.alias.is_empty():
-		ttip += "\nName: %s" % player.name
-	var ret := console.make_text(conn.get_player_name(id), ttip, rich_colors[COLORNAME_PLAYER])
-	if add: console.add(ret)
-	return ret
-## Prints a Location in richtext (to the console, if `add` is true) and returns the TextPart
-func out_location(console: BaseConsole, id: int, data: DataCache, add := true) -> BaseConsole.TextPart:
-	var ttip = ""
-	var ret := console.make_text(data.get_loc_name(id), ttip, rich_colors[COLORNAME_LOCATION])
-	if add: console.add(ret)
-	return ret
 
 var output_console_container: ConsoleContainer = null
 var output_console: BaseConsole :
@@ -717,13 +752,8 @@ func load_console(console_scene: Node, as_child := true) -> bool:
 	console_scene.ready.connect(func():
 		output_console = output_console_container.console
 		output_console_container.typing_bar.send_text.connect(func(s: String):
-			var data = output_console._draw_data
-			var y = data.max_shown_y
 			cmd_manager.call_cmd(s)
-			output_console.is_max_scroll = false
-			await get_tree().process_frame # IDK why this is needed, but it works
-			output_console.scroll = y
-			output_console.is_max_scroll = false
+			output_console.scroll_bottom.call_deferred()
 			)
 		output_console.tree_exiting.connect(close_console)
 		output_console_container.typing_bar.cmd_manager = cmd_manager
@@ -748,7 +778,7 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 	cmd_manager.reset()
 	cmd_manager.register_default(func(mgr: CommandManager, msg: String):
 		if msg[0] == "/":
-			mgr.console.add_line("Unknown command '%s' - use '/help' to see commands" % msg.split(" ", true, 1)[0], "", mgr.console.COLOR_UI_MSG)
+			mgr.console.add(BaseConsole.make_text("Unknown command '%s' - use '/help' to see commands" % msg.split(" ", true, 1)[0], "", ComplexColor.as_special(SpecialColor.UI_MESSAGE)))
 		else:
 			if _ensure_connected(mgr.console):
 				send_command("Say", {"text":msg}))
@@ -788,42 +818,38 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 			var filt := msg.substr(11)
 			var data: DataCache = conn.get_gamedata_for_player()
 
-			var columns := BaseConsole.PagedColumnsPart.new()
+			var grid := GridContainer.new()
+			grid.columns = 2
+			grid.add_theme_constant_override(&"h_separation", 80)
+
 			var title := "LOCATIONS"
 			if filt: title += " (%s)" % filt
-			var folder: BaseConsole.FoldablePart = mgr.console.add_foldable("[ %s ]" % title, msg, mgr.console.COLOR_UI_MSG)
-			folder.add(columns)
+			var folder := BaseConsole.make_foldable("[ %s ]" % title, msg, ComplexColor.as_special(SpecialColor.UI_MESSAGE))
+			mgr.console.add(folder)
+			folder.add(grid)
 			folder.fold(false)
 
-			var h1 = columns.add(0, mgr.console.make_text("Location Name:"))
+			var h1 := BaseConsole.make_text("Location Name:")
+			grid.add_child(h1)
 			if filt:
-				h1.tooltip = "Filter: " + filt
-			columns.add(1, mgr.console.make_spacing(Vector2(80,0)))
-			columns.add(2, mgr.console.make_text("Status:"))
+				h1.tooltip_text = "Filter: " + filt
+			grid.add_child(BaseConsole.make_text("Status:"))
 
 			var ids: Array = data.location_name_to_id.values()
 			var _index_dict := {}
-			for q in ids.size(): _index_dict[ids[q]] = q
-			var _status_getter = func(lid: int) -> String:
-				if conn.slot_locations.get(lid): return "Found"
-				var status_name = Archipelago.tracker_manager.get_location(lid).get_status("Not Found")
-				return status_name
+			for q in ids.size():
+				_index_dict[ids[q]] = q
 			ids.sort_custom(func(a,b):
-				var astat: String = _status_getter.call(a)
-				var bstat: String = _status_getter.call(b)
-				var v = Archipelago.tracker_manager.sort_by_location_status(astat, bstat)
-				if v:
-					return v > 0
 				return _index_dict[b] > _index_dict[a])
 
 			for lid in ids:
 				var loc_name = data.get_loc_name(lid)
 				if not filt or (filt.to_lower() in loc_name.to_lower()):
-					var loc_status = Archipelago.tracker_manager.get_status(_status_getter.call(lid))
-					if not loc_status: loc_status = LocationStatus.new("Not Found","","red")
-
-					columns.add(0, mgr.console.make_text(loc_name, "Location %d" % lid, rich_colors[loc_status.colorname]))
-					columns.add(2, mgr.console.make_text(loc_status.text, loc_status.tooltip, rich_colors[loc_status.colorname]))
+					var loc_status := find_hint_status(lid, NetworkHint.Status.NOT_FOUND)
+					var color := ComplexColor.as_rich(NetworkHint.status_colors.get(loc_status, RichColor.RED))
+					var stat_name: String = NetworkHint.status_names.get(loc_status, "Not Found")
+					grid.add_child(BaseConsole.make_text(loc_name, "Location %d" % lid, color))
+					grid.add_child(BaseConsole.make_text(stat_name, "", color))
 			mgr.console.add_header_spacing()
 			))
 	cmd_manager.register_command(ConsoleCommand.new("/items")
@@ -833,18 +859,16 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 			var filt := msg.substr(7)
 			var data: DataCache = conn.get_gamedata_for_player()
 
-			var columns := BaseConsole.PagedColumnsPart.new()
+			var grid := GridContainer.new()
+			grid.columns = 2
+			grid.add_theme_constant_override(&"h_separation", 80)
+
 			var title := "ITEMS"
 			if filt: title += " (%s)" % filt
-			var folder: BaseConsole.FoldablePart = mgr.console.add_foldable("[ %s ]" % title, msg, mgr.console.COLOR_UI_MSG)
-			folder.add(columns)
+			var folder := BaseConsole.make_foldable("[ %s ]" % title, msg, ComplexColor.as_special(SpecialColor.UI_MESSAGE))
+			mgr.console.add(folder)
+			folder.add(grid)
 			folder.fold(false)
-
-			var h1 = columns.add(0, mgr.console.make_text("Item Name:"))
-			if filt:
-				h1.tooltip = "Filter: " + filt
-			columns.add(1, mgr.console.make_spacing(Vector2(80,0)))
-			columns.add(2, mgr.console.make_text("Num Collected:"))
 
 			var item_dict := {}
 			for item in conn.received_items:
@@ -866,28 +890,42 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 					return _index_dict[b] > _index_dict[a]
 				return false)
 
-			var num_counted := 0
+			var found_second_column := false
+			var found_any := false
 			for iid in ids:
 				var itm_name = data.get_item_name(iid)
 				if not filt or (filt.to_lower() in itm_name.to_lower()):
+					found_any = true
 					var flag_options = item_dict.get(iid)
 					if flag_options:
-						num_counted += 1
-						for flags in flag_options.keys():
-							var c1 = columns.add(0, out_item(mgr.console, iid, flags, data, false))
-							columns.add(2, mgr.console.make_text("x%d" % flag_options[flags], "", c1.color))
-					else:
-						columns.add(0, mgr.console.make_text(itm_name, "Item %d" % iid, rich_colors["white"]))
-						columns.add_nil(2)
-			if columns.parts[0].parts.size() == 1:
-				columns.parts = []
+						found_second_column = true
+						break
+			var filt_ttip := "Filter: " + filt
+			if found_any:
+				grid.columns = 2 if found_second_column else 1
+				var h1 := BaseConsole.make_text("Item Name:")
+				grid.add_child(h1)
 				if filt:
-					columns.add(0, mgr.console.make_text(
-						"No%s items found!" % (" matching" if filt else ""),
-						h1.tooltip, rich_colors["salmon"]))
-			elif not num_counted:
-				columns.parts.pop_back()
-				columns.parts.pop_back()
+					h1.tooltip_text = filt_ttip
+				if found_second_column:
+					grid.add_child(BaseConsole.make_text("Num Collected:"))
+				for iid in ids:
+					var itm_name = data.get_item_name(iid)
+					if not filt or (filt.to_lower() in itm_name.to_lower()):
+						var flag_options = item_dict.get(iid)
+						if flag_options:
+							for flags in flag_options.keys():
+								var c1 := BaseConsole.make_item(iid, flags, data)
+								grid.add_child(c1)
+								grid.add_child(BaseConsole.make_text("x%d" % flag_options[flags], "", ComplexColor.as_rich(c1.rich_color)))
+						else:
+							grid.add_child(BaseConsole.make_text(itm_name, "Item %d" % iid))
+							if found_second_column:
+								grid.add_child(Control.new())
+			elif filt:
+				grid.add_child(BaseConsole.make_text(
+					"No%s items found!" % (" matching" if filt else ""),
+					filt_ttip, ComplexColor.as_rich(AP.RichColor.SALMON)))
 			mgr.console.add_header_spacing()
 			))
 	if server_autofills: # Autofill for some AP commands
@@ -912,104 +950,6 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 			.add_disable(is_not_connected))
 		cmd_manager.register_command(ConsoleCommand.new("!players")
 			.add_disable(is_not_connected))
-	if AP_ALLOW_TRACKERPACKS:
-		cmd_manager.register_command(ConsoleCommand.new("/tracker")
-			.add_help_cond("vars", "Outputs trackerpack debug info", is_ap_connected)
-			.add_help_cond("locations [filter]", "Outputs trackerpack location debug info, optionally filtered", is_ap_connected)
-			.add_help("refresh", "Reloads tracker packs")
-			.set_autofill(_autofill_track)
-			.set_call(func(mgr: CommandManager, cmd: ConsoleCommand, msg: String):
-				var args = msg.split(" ", true, 2)
-				if args.size() < 2:
-					cmd.output_usage(mgr.console)
-					return
-				match args[1].to_lower():
-					"locations":
-						if not _ensure_connected(mgr.console): return
-						var filt: String = args[2].to_lower() if args.size() > 2 else ""
-						var locs: Array[APLocation] = []
-
-						locs.assign(conn.slot_locations.keys() \
-							.map(func(locid: int): return Archipelago.tracker_manager.get_location(locid)) \
-							.filter(func(v: APLocation): return v.loaded_tracker_loc != null and \
-								(filt.is_empty() or v.name.to_lower().contains(filt))))
-						locs.sort_custom(func(a: APLocation, b: APLocation): return a.name.naturalnocasecmp_to(b.name) < 0)
-						if not locs.is_empty():
-							mgr.console.add_header_spacing()
-							var outer_folder := mgr.console.add_foldable("[ TRACKER LOCATIONS ]", msg, mgr.console.COLOR_UI_MSG)
-							outer_folder.fold(false)
-							for loc in locs:
-								var tloc: TrackerLocation = loc.loaded_tracker_loc
-								var status_name := tloc.get_status()
-								var status_obj: LocationStatus = Archipelago.tracker_manager.get_status(status_name)
-								var folder: BaseConsole.FoldablePart = outer_folder.add(
-									mgr.console.make_foldable("%s (%s)" % [loc.name, status_name], "", rich_colors[status_obj.colorname]))
-								for stat in tloc._iter_statuses():
-									if stat.text == "Found": continue
-									folder.add(mgr.console.make_text("'%s':" % stat.text, stat.tooltip, rich_colors[stat.colorname]))
-									mgr.console.ensure_newline(folder.get_inner_parts())
-									var cont: BaseConsole.ContainerPart = folder.add(mgr.console.make_indented_block(
-										tloc.status_rules[stat.text].get_repr(1), 25, mgr.console.COLOR_UI_MSG))
-									cont.textpart_replace("true", "true", true, "", rich_colors["green"])
-									cont.textpart_replace("false", "false", true, "", rich_colors["red"])
-							mgr.console.add_header_spacing()
-					"refresh":
-						Archipelago.tracker_manager.load_tracker_packs()
-					"vars":
-						if not _ensure_connected(mgr.console): return
-						mgr.console.add_header_spacing()
-						var outer_folder := mgr.console.add_foldable("[ TRACKER INFO ]", msg, mgr.console.COLOR_UI_MSG)
-						outer_folder.fold(false)
-						outer_folder.add(mgr.console.make_header_spacing())
-						outer_folder.add(mgr.console.make_indent(20))
-						var needs_spacing := false
-						var named_rules = Archipelago.tracker_manager.named_rules.keys()
-						if not named_rules.is_empty():
-							if needs_spacing:
-								outer_folder.add(mgr.console.make_header_spacing())
-							else: needs_spacing = true
-							var rules_folder := outer_folder.add(mgr.console.make_foldable("[ NAMED RULES ]", "", mgr.console.COLOR_UI_MSG))
-							for rulename in named_rules:
-								var rule = Archipelago.tracker_manager.get_named_rule(rulename)
-								var b = rule.can_access()
-								var c = "white"
-								if b != null:
-									c = "green" if b else "red"
-								var inner_folder: BaseConsole.FoldablePart = rules_folder.add(
-									mgr.console.make_foldable(rulename, "", AP.color_from_name(c)))
-								var cont: BaseConsole.ContainerPart = inner_folder.add(mgr.console.make_indented_block(
-									rule.get_repr(0), 25, mgr.console.COLOR_UI_MSG))
-								cont.textpart_replace("true", "true", true, "", rich_colors["green"])
-								cont.textpart_replace("false", "false", true, "", rich_colors["red"])
-						var named_vals = Archipelago.tracker_manager.named_values.keys()
-						if not named_vals.is_empty():
-							if needs_spacing:
-								outer_folder.add(mgr.console.make_header_spacing())
-							else: needs_spacing = true
-							var vals_folder := outer_folder.add(mgr.console.make_foldable("[ NAMED VALUES ]", "", mgr.console.COLOR_UI_MSG))
-							for valname in named_vals:
-								var val_node: TrackerValueNode = Archipelago.tracker_manager.get_named_value(valname)
-								var value = val_node.calculate()
-								var inner_folder: BaseConsole.FoldablePart = vals_folder.add(
-									mgr.console.make_foldable("%s = %s" % [valname,value], "", mgr.console.COLOR_UI_MSG))
-								var val_str: String = "%s" % JSON.stringify(val_node._to_dict(), "\t", false)
-								var cont: BaseConsole.ContainerPart = inner_folder.add(mgr.console.make_indented_block(val_str, 25))
-								cont.textpart_replace("true", "true", true, "", rich_colors["green"])
-								cont.textpart_replace("false", "false", true, "", rich_colors["red"])
-						var vars = Archipelago.tracker_manager.variables.keys()
-						if not vars.is_empty():
-							if needs_spacing:
-								outer_folder.add(mgr.console.make_header_spacing())
-							else: needs_spacing = true
-							var vars_folder := outer_folder.add(mgr.console.make_foldable("[ VARIABLES ]", "", mgr.console.COLOR_UI_MSG))
-							for varname in vars:
-								vars_folder.add(mgr.console.make_text(varname+": ", "", mgr.console.COLOR_UI_MSG))
-								var val = Archipelago.tracker_manager.get_variable(varname)
-								vars_folder.add(mgr.console.make_text(str(val), "", AP.color_from_name("green")))
-								vars_folder.add(mgr.console.make_header_spacing(0))
-						outer_folder.add(mgr.console.make_indent(-20))
-						mgr.console.add_header_spacing()
-				))
 	cmd_manager.setup_basic_commands()
 	if OS.is_debug_build():
 		cmd_manager.register_command(ConsoleCommand.new("/send").debug()
@@ -1025,17 +965,17 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 						var loc_name := data.get_loc_name(loc)
 						if loc_name.strip_edges().to_lower() == command_args[1].strip_edges().to_lower():
 							if conn.slot_locations[loc]:
-								mgr.console.add_line("Location already sent!", "", mgr.console.COLOR_UI_MSG)
+								mgr.console.add(BaseConsole.make_text("Location already sent!", "", ComplexColor.as_special(SpecialColor.UI_MESSAGE)))
 							else:
-								mgr.console.add_line("Sending location '%s'!" % loc_name, "", mgr.console.COLOR_UI_MSG)
+								mgr.console.add(BaseConsole.make_text("Sending location '%s'!" % loc_name, "", ComplexColor.as_special(SpecialColor.UI_MESSAGE)))
 								collect_location(loc)
 							return
-					mgr.console.add_line("Location '%s' not found! Check spelling?" % command_args[1].strip_edges(), "", mgr.console.COLOR_UI_MSG)
+					mgr.console.add(BaseConsole.make_text("Location '%s' not found! Check spelling?" % command_args[1].strip_edges(), "", ComplexColor.as_special(SpecialColor.UI_MESSAGE)))
 				else: cmd.output_usage(mgr.console)))
 		cmd_manager.register_command(ConsoleCommand.new("/lock_info").debug()
 			.add_help("", "Prints the connection lock info")
 			.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, _msg: String):
-				mgr.console.add_line("%s" % (str(aplock) if aplock else "No Lock Active"), "", mgr.console.COLOR_UI_MSG)))
+				mgr.console.add(BaseConsole.make_text("%s" % (str(aplock) if aplock else "No Lock Active"), "", ComplexColor.as_special(SpecialColor.UI_MESSAGE)))))
 		cmd_manager.register_command(ConsoleCommand.new("/unlock_connection").debug()
 			.add_help("", "Unlocks the connection lock, so that any valid slot can be connected to (instead of only the slot previously connected to)")
 			.set_call(func(_mgr: CommandManager, _cmd: ConsoleCommand, _msg: String):
@@ -1080,17 +1020,18 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 						cmd.output_usage(mgr.console)
 						return
 				set_tag(tag, state)
-				mgr.console.add_line("Set tag '%s' to %s" % [args[1],state], "", mgr.console.COLOR_UI_MSG)))
+				mgr.console.add(BaseConsole.make_text("Set tag '%s' to %s" % [args[1],state], "", ComplexColor.as_special(SpecialColor.UI_MESSAGE)))))
 		cmd_manager.register_command(ConsoleCommand.new("/tags").debug()
 			.add_help("", "Prints out your connection tags")
 			.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, _msg: String):
-				mgr.console.add_line(str(AP_GAME_TAGS), "", mgr.console.COLOR_UI_MSG)))
+				mgr.console.add(BaseConsole.make_text(str(AP_GAME_TAGS), "", ComplexColor.as_special(SpecialColor.UI_MESSAGE)))))
 		cmd_manager.register_command(ConsoleCommand.new("/slot_data").debug()
 			.add_help("", "Prints slot_data")
 			.add_disable(is_not_connected)
 			.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, _msg: String):
-				var folder := mgr.console.add_foldable("[ SLOT_DATA ]", "/slot_data", mgr.console.COLOR_UI_MSG)
-				folder.add(mgr.console.make_indented_block(JSON.stringify(Archipelago.conn.slot_data, "\t"), 25))
+				var folder := BaseConsole.make_foldable("[ SLOT_DATA ]", "/slot_data", ComplexColor.as_special(SpecialColor.UI_MESSAGE))
+				mgr.console.add(folder)
+				folder.add(BaseConsole.make_indented_block(JSON.stringify(Archipelago.conn.slot_data, "\t"), 25))
 				folder.fold(false)
 				))
 		cmd_manager.setup_debug_commands()
@@ -1137,13 +1078,15 @@ enum ItemClassification {
 	TRAP = 0b100
 }
 
-static func get_item_class_color(flags: int) -> String:
-	var ret := COLORNAME_ITEM
+static func get_item_class_color(flags: int) -> RichColor:
+	var spec := SpecialColor.ITEM
 	if flags & ItemClassification.PROG:
-		ret = COLORNAME_ITEM_PROG
+		spec = SpecialColor.ITEM_PROG
 	elif flags & ItemClassification.TRAP:
-		ret = COLORNAME_ITEM_TRAP
-	return ret
+		spec = SpecialColor.ITEM_TRAP
+	elif flags & ItemClassification.USEFUL:
+		spec = SpecialColor.ITEM_USEFUL
+	return special_to_rich_color(spec)
 ## Returns the string name representing the combined item classifications flags
 static func get_item_classification(flags: int) -> String:
 	match flags:
@@ -1246,7 +1189,7 @@ func set_tags(tags: Array[String]) -> void:
 func _ensure_connected(console: BaseConsole) -> bool:
 	if status == APStatus.PLAYING:
 		return true
-	console.add_line("Not connected to Archipelago! Please connect first!", "", console.COLOR_UI_MSG)
+	console.add(BaseConsole.make_text("Not connected to Archipelago! Please connect first!", "", ComplexColor.as_special(SpecialColor.UI_MESSAGE)))
 	return false
 
 func set_deathlink(state: bool) -> void:
@@ -1264,3 +1207,12 @@ enum ClientStatus {
 }
 func set_client_status(stat: ClientStatus) -> void:
 	send_command("StatusUpdate", {"status": stat})
+
+func find_hint_status(loc_id: int, default := NetworkHint.Status.UNSPECIFIED) -> NetworkHint.Status:
+	if location_checked(loc_id):
+		return NetworkHint.Status.FOUND
+	for hint in conn.hints:
+		if hint.item.src_player_id == conn.player_id and \
+			hint.item.loc_id == loc_id:
+			return hint.status
+	return default

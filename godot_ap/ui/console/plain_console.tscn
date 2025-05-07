@@ -1,0 +1,35 @@
+[gd_scene load_steps=2 format=3 uid="uid://bwamxuo3s7c8n"]
+
+[ext_resource type="Script" uid="uid://bt05nk6su6m5r" path="res://godot_ap/ui/console/base_console.gd" id="1_ee8mw"]
+
+[node name="Console" type="Control" node_paths=PackedStringArray("scroll_cont", "parts_cont")]
+custom_minimum_size = Vector2(150, 150)
+layout_mode = 3
+anchors_preset = 0
+size_flags_horizontal = 3
+focus_next = NodePath("../../../../TypingBar")
+focus_previous = NodePath("../../../../TypingBar")
+focus_mode = 2
+mouse_filter = 1
+script = ExtResource("1_ee8mw")
+scroll_cont = NodePath("PanelContainer/ScrollContainer")
+parts_cont = NodePath("PanelContainer/ScrollContainer/PartsContainer")
+spacing = 4
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_type_variation = &"Console_BG"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="PanelContainer"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 4
+
+[node name="PartsContainer" type="VBoxContainer" parent="PanelContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
