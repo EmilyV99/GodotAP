@@ -21,7 +21,7 @@ func _init() -> void:
 	add_theme_constant_override(&"separation", 4)
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
-	label = ConsoleLabel.make("")
+	label = ConsoleLabel.make(null, "")
 	add_child(label)
 
 	body = VBoxContainer.new()
@@ -35,8 +35,8 @@ func add(node: Control) -> Control:
 	body.add_child(node)
 	return node
 
-static func make(text: String, ttip := "", color := AP.ComplexColor.NIL) -> ConsoleFoldableContainer:
+static func make(fonts: FontStorage, text: String, ttip := "", color := AP.ComplexColor.NIL) -> ConsoleFoldableContainer:
 	var ret := ConsoleFoldableContainer.new()
-	ret.label.set_content(text, ttip)
+	ret.label.set_content(fonts, text, ttip)
 	ret.label.set_color(color)
 	return ret
