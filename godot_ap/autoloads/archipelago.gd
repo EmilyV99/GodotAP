@@ -108,15 +108,16 @@ class ComplexColor:
 enum RichColor {
 	NIL, RED, GREEN, YELLOW, BLUE,
 	MAGENTA, CYAN, WHITE, BLACK, SLATEBLUE,
-	PLUM, SALMON, ORANGE, GOLD,
+	PLUM, SALMON, ORANGE, GOLD
 }
 enum SpecialColor {
-	PLAYER, ITEM_PROG, ITEM, ITEM_USEFUL, ITEM_TRAP,
+	ANY_PLAYER, OWN_PLAYER, ITEM_PROG, ITEM, ITEM_USEFUL, ITEM_TRAP,
 	LOCATION, UI_MESSAGE, DEBUG
 }
 
 const _special_colors: Dictionary[SpecialColor, RichColor] = {
-	SpecialColor.PLAYER: RichColor.MAGENTA,
+	SpecialColor.ANY_PLAYER: RichColor.YELLOW,
+	SpecialColor.OWN_PLAYER: RichColor.MAGENTA,
 	SpecialColor.ITEM_PROG: RichColor.PLUM,
 	SpecialColor.ITEM: RichColor.CYAN,
 	SpecialColor.ITEM_USEFUL: RichColor.SLATEBLUE,
