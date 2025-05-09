@@ -30,6 +30,7 @@ var wrapping: bool = true :
 		refresh()
 var rich_color := AP.RichColor.NIL : set = set_rich_color, get = get_rich_color
 var color_override := ""
+var fonts: FontStorage
 
 func get_rich_color() -> AP.RichColor:
 	return rich_color
@@ -72,35 +73,36 @@ func refresh() -> void:
 			minsz.y = _parent_global_rect.end.y - global_position.y
 	if not minsz.is_equal_approx(custom_minimum_size):
 		custom_minimum_size = minsz
-func set_content(new_text: String, new_ttip := "") -> void:
+func set_content(new_fonts: FontStorage, new_text: String, new_ttip := "") -> void:
+	fonts = new_fonts
 	text = new_text
 	tooltip_text = new_ttip
 
-static func make(txt: String, ttip := "") -> ConsoleLabel:
+static func make(_fonts: FontStorage, txt: String, ttip := "") -> ConsoleLabel:
 	var ret := _scene.instantiate()
-	ret.set_content(txt, ttip)
+	ret.set_content(_fonts, txt, ttip)
 	return ret
 
-static func make_rich(txt: String, col: AP.RichColor, ttip := "") -> ConsoleLabel:
-	var ret := make(txt, ttip)
+static func make_rich(_fonts: FontStorage, txt: String, col: AP.RichColor, ttip := "") -> ConsoleLabel:
+	var ret := make(_fonts, txt, ttip)
 	ret.rich_color = col
 	return ret
-static func make_special(txt: String, col: AP.SpecialColor, ttip := "") -> ConsoleLabel:
-	var ret := make(txt, ttip)
+static func make_special(_fonts: FontStorage, txt: String, col: AP.SpecialColor, ttip := "") -> ConsoleLabel:
+	var ret := make(_fonts, txt, ttip)
 	ret.rich_color = AP.special_to_rich_color(col, ret.rich_color)
 	return ret
-static func make_custom(txt: String, col, ttip := "") -> ConsoleLabel:
-	var ret := make(txt, ttip)
+static func make_custom(_fonts: FontStorage, txt: String, col, ttip := "") -> ConsoleLabel:
+	var ret := make(_fonts, txt, ttip)
 	ret.color_override = str(col)
 	return ret
-static func make_col(txt: String, col: AP.ComplexColor, ttip := "") -> ConsoleLabel:
+static func make_col(_fonts: FontStorage, txt: String, col: AP.ComplexColor, ttip := "") -> ConsoleLabel:
 	if col == null:
-		return make(txt, ttip)
+		return make(_fonts, txt, ttip)
 	if col.rich != null:
-		return make_rich(txt, col.rich, ttip)
+		return make_rich(_fonts, txt, col.rich, ttip)
 	if col.special != null:
-		return make_special(txt, col.special, ttip)
-	return make_custom(txt, col.plain, ttip)
+		return make_special(_fonts, txt, col.special, ttip)
+	return make_custom(_fonts, txt, col.plain, ttip)
 func set_color(col: AP.ComplexColor) -> void:
 	color_override = ""
 	if col.rich:
@@ -115,8 +117,8 @@ func _notification(what: int) -> void:
 	if what == NOTIFICATION_THEME_CHANGED and not __theme_changing:
 		__theme_changing = true
 		remove_theme_font_override("font")
-		if bold or italic:
-			add_theme_font_override("font", Util.font_mod(get_theme_font("font").duplicate(), bold, italic))
+		if fonts and (bold or italic):
+			add_theme_font_override("font", fonts.get_font(bold, italic))
 		refresh()
 		__theme_changing = false
 
