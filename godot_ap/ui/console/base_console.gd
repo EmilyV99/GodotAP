@@ -133,12 +133,17 @@ static func make_item(id: int, flags: int, data: DataCache) -> ConsoleLabel:
 	var color := AP.ComplexColor.as_rich(AP.get_item_class_color(flags))
 	return make_text(data.get_item_name(id), ttip, color)
 
-static func make_player(id: int) -> ConsoleLabel:
+static func make_player(id: int, own_id: int) -> ConsoleLabel:
 	var player: NetworkPlayer = Archipelago.conn.get_player(id)
 	var ttip = "Game: %s" % Archipelago.conn.get_slot(id).game
 	if not player.alias.is_empty():
 		ttip += "\nSlot: %s" % player.name
-	return make_text(player.name, ttip, AP.ComplexColor.as_special(AP.SpecialColor.PLAYER))
+	var color: AP.SpecialColor
+	if id == own_id:
+		color = AP.SpecialColor.OWN_PLAYER
+	else:
+		color = AP.SpecialColor.ANY_PLAYER
+	return make_text(player.name, ttip, AP.ComplexColor.as_special(color))
 
 static func make_foldable(text: String, ttip := "", color := AP.ComplexColor.NIL) -> ConsoleFoldableContainer:
 	return ConsoleFoldableContainer.make(text, ttip, color)
@@ -286,7 +291,7 @@ func printjson_out(elems: Array, flowbox: ConsoleHFlow) -> String:
 
 				part = make_text(txt, stat_name, AP.ComplexColor.as_rich(color))
 			"player_name":
-				part = make_text(txt, "Arbitrary Player Name", AP.ComplexColor.as_special(AP.SpecialColor.PLAYER))
+				part = make_text(txt, "Arbitrary Player Name", AP.ComplexColor.as_special(AP.SpecialColor.ANY_PLAYER))
 			"item_name":
 				part = make_text(txt, "Arbitrary Item Name", AP.ComplexColor.as_special(AP.SpecialColor.ITEM))
 			"location_name":
