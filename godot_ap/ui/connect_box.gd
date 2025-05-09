@@ -31,8 +31,10 @@ func kill_connection() -> void:
 	Archipelago.ap_disconnect()
 
 func _connect_signals() -> void:
-	Archipelago.connected.connect(_on_connect_success)
-	Archipelago.connectionrefused.connect(_on_connect_refused)
+	if not Archipelago.connected.is_connected(_on_connect_success):
+		Archipelago.connected.connect(_on_connect_success)
+	if not Archipelago.connectionrefused.is_connected(_on_connect_refused):
+		Archipelago.connectionrefused.connect(_on_connect_refused)
 func _disconnect_signals() -> void:
 	Archipelago.connected.disconnect(_on_connect_success)
 	Archipelago.connectionrefused.disconnect(_on_connect_refused)
