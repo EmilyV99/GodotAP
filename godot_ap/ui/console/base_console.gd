@@ -65,7 +65,7 @@ func add(part: Control) -> Control:
 	return part
 
 static func make_text(text: String, ttip := "", col := AP.ComplexColor.NIL) -> ConsoleLabel:
-	return ConsoleLabel.make_col(console_label_fonts, text, col, ttip)
+	return ConsoleLabel.make_col(text, col, ttip)
 
 static func make_c_text(text: String, ttip := "", col := AP.ComplexColor.NIL) -> ConsoleLabel:
 	var part := make_text(text, ttip, col)
@@ -142,7 +142,7 @@ static func make_player(id: int) -> ConsoleLabel:
 	return make_text(player.name, ttip, AP.ComplexColor.as_special(AP.SpecialColor.PLAYER))
 
 static func make_foldable(text: String, ttip := "", color := AP.ComplexColor.NIL) -> ConsoleFoldableContainer:
-	return ConsoleFoldableContainer.make(console_label_fonts, text, ttip, color)
+	return ConsoleFoldableContainer.make(text, ttip, color)
 
 var is_max_scroll := false
 
