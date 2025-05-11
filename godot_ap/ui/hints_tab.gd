@@ -221,9 +221,9 @@ func refresh_hints():
 		if filter_allow(hint):
 			var data: DataCache = Archipelago.conn.get_gamedata_for_player(hint.item.src_player_id)
 
-			var dest := BaseConsole.make_player(hint.item.dest_player_id, Archipelago.conn.player_id).centered()
+			var dest := BaseConsole.make_player(hint.item.dest_player_id).centered()
 			var itm := hint.item.output().centered()
-			var src := BaseConsole.make_player(hint.item.src_player_id, Archipelago.conn.player_id).centered()
+			var src := BaseConsole.make_player(hint.item.src_player_id).centered()
 			var loc := BaseConsole.make_location(hint.item.loc_id, data).centered()
 			var status := hint.make_status().centered()
 			if hint.item.dest_player_id == Archipelago.conn.player_id:

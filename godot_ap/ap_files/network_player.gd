@@ -29,4 +29,4 @@ static func from(json: Dictionary) -> NetworkPlayer:
 func _to_string():
 	return "PLAYER(%s[%s],team %d,slot %d)" % [name,alias,team,slot]
 func output() -> ConsoleLabel:
-	return BaseConsole.make_player(slot, Archipelago.conn.player_id)
+	return BaseConsole.make_player(slot)

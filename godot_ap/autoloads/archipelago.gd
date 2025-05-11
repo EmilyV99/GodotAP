@@ -18,12 +18,8 @@ class_name AP extends Node
 ## Automatically opens a default AP text console.
 @export var AP_AUTO_OPEN_CONSOLE := false
 ## Show items that are both progression and useful with their own color
-@export var AP_ENABLE_PROGUSEFUL := false:
-	set(val):
-		if val != AP_ENABLE_PROGUSEFUL:
-			AP_ENABLE_PROGUSEFUL = val
-			STATIC_AP_ENABLE_PROGUSEFUL = val
-static var STATIC_AP_ENABLE_PROGUSEFUL := false
+@export var AP_ENABLE_PROGUSEFUL := false
+
 @export_subgroup("UI")
 ## Automatically open the Connection box when the console opens
 @export var AP_CONSOLE_CONNECTION_OPEN := false
@@ -1090,7 +1086,7 @@ enum ItemClassification {
 static func get_item_class_color(flags: int) -> RichColor:
 	var spec := SpecialColor.ITEM
 	if flags & ItemClassification.PROG:
-		if STATIC_AP_ENABLE_PROGUSEFUL and (flags & ItemClassification.USEFUL):
+		if Archipelago.AP_ENABLE_PROGUSEFUL and (flags & ItemClassification.USEFUL):
 			spec = SpecialColor.ITEM_PROGUSEFUL
 		else:
 			spec = SpecialColor.ITEM_PROG
