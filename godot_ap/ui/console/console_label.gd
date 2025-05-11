@@ -115,8 +115,8 @@ func _notification(what: int) -> void:
 	if what == NOTIFICATION_THEME_CHANGED and not __theme_changing:
 		__theme_changing = true
 		remove_theme_font_override("font")
-		if bold or italic:
-			add_theme_font_override("font", Util.font_mod(get_theme_font("font").duplicate(), bold, italic))
+		if BaseConsole.console_label_fonts and (bold or italic):
+			add_theme_font_override("font", BaseConsole.console_label_fonts.get_font(bold, italic))
 		refresh()
 		__theme_changing = false
 
