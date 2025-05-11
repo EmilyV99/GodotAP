@@ -139,7 +139,9 @@ static func make_player(id: int) -> ConsoleLabel:
 	var ttip = "Game: %s" % Archipelago.conn.get_slot(id).game
 	if not player.alias.is_empty():
 		ttip += "\nSlot: %s" % player.name
-	return make_text(player.name, ttip, AP.ComplexColor.as_special(AP.SpecialColor.PLAYER))
+	var color := (AP.SpecialColor.OWN_PLAYER if id == Archipelago.conn.player_id else
+		AP.SpecialColor.ANY_PLAYER)
+	return make_text(player.name, ttip, AP.ComplexColor.as_special(color))
 
 static func make_foldable(text: String, ttip := "", color := AP.ComplexColor.NIL) -> ConsoleFoldableContainer:
 	return ConsoleFoldableContainer.make(text, ttip, color)
@@ -294,7 +296,7 @@ func printjson_out(elems: Array, flowbox: ConsoleHFlow) -> String:
 
 				part = make_text(txt, stat_name, AP.ComplexColor.as_rich(color))
 			"player_name":
-				part = make_text(txt, "Arbitrary Player Name", AP.ComplexColor.as_special(AP.SpecialColor.PLAYER))
+				part = make_text(txt, "Arbitrary Player Name", AP.ComplexColor.as_special(AP.SpecialColor.ANY_PLAYER))
 			"item_name":
 				part = make_text(txt, "Arbitrary Item Name", AP.ComplexColor.as_special(AP.SpecialColor.ITEM))
 			"location_name":

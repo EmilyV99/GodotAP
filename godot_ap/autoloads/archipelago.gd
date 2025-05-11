@@ -17,6 +17,9 @@ class_name AP extends Node
 @export var AP_HIDE_NONLOCAL_ITEMSENDS := true
 ## Automatically opens a default AP text console.
 @export var AP_AUTO_OPEN_CONSOLE := false
+## Show items that are both progression and useful with their own color
+@export var AP_ENABLE_PROGUSEFUL := false
+
 @export_subgroup("UI")
 ## Automatically open the Connection box when the console opens
 @export var AP_CONSOLE_CONNECTION_OPEN := false
@@ -111,16 +114,18 @@ enum RichColor {
 	PLUM, SALMON, ORANGE, GOLD,
 }
 enum SpecialColor {
-	PLAYER, ITEM_PROG, ITEM, ITEM_USEFUL, ITEM_TRAP,
-	LOCATION, UI_MESSAGE, DEBUG
+	ANY_PLAYER, OWN_PLAYER, ITEM_PROG, ITEM, ITEM_USEFUL, ITEM_TRAP, ITEM_PROGUSEFUL,
+	LOCATION, UI_MESSAGE, DEBUG,
 }
 
 const _special_colors: Dictionary[SpecialColor, RichColor] = {
-	SpecialColor.PLAYER: RichColor.MAGENTA,
+	SpecialColor.ANY_PLAYER: RichColor.YELLOW,
+	SpecialColor.OWN_PLAYER: RichColor.MAGENTA,
 	SpecialColor.ITEM_PROG: RichColor.PLUM,
 	SpecialColor.ITEM: RichColor.CYAN,
 	SpecialColor.ITEM_USEFUL: RichColor.SLATEBLUE,
 	SpecialColor.ITEM_TRAP: RichColor.SALMON,
+	SpecialColor.ITEM_PROGUSEFUL: RichColor.GOLD,
 	SpecialColor.LOCATION: RichColor.GREEN,
 	SpecialColor.UI_MESSAGE: RichColor.GOLD,
 	SpecialColor.DEBUG: RichColor.MAGENTA,
@@ -1082,7 +1087,10 @@ enum ItemClassification {
 static func get_item_class_color(flags: int) -> RichColor:
 	var spec := SpecialColor.ITEM
 	if flags & ItemClassification.PROG:
-		spec = SpecialColor.ITEM_PROG
+		if Archipelago.AP_ENABLE_PROGUSEFUL and (flags & ItemClassification.USEFUL):
+			spec = SpecialColor.ITEM_PROGUSEFUL
+		else:
+			spec = SpecialColor.ITEM_PROG
 	elif flags & ItemClassification.TRAP:
 		spec = SpecialColor.ITEM_TRAP
 	elif flags & ItemClassification.USEFUL:
