@@ -475,6 +475,7 @@ func _handle_command(json: Dictionary) -> void:
 
 			connected.emit(conn, json)
 		"PrintJSON":
+			preparse_json(json)
 			var s: String = (output_console.printjson_command(json) if output_console
 				else BaseConsole.printjson_str(json["data"]))
 			AP.log("[PRINT] %s" % s)
@@ -1228,3 +1229,11 @@ func find_hint_status(loc_id: int, default := NetworkHint.Status.UNSPECIFIED) ->
 			hint.item.loc_id == loc_id:
 			return hint.status
 	return default
+
+func preparse_json(json: Dictionary) -> void:
+	var data: Array = json.get("data")
+	if not data: return
+	if data.size() != 1: return # Optimize, don't check if we know we don't care
+
+	if data[0]["text"] == "Warning: your client does not support compressed websocket connections! It may stop working in the future. If you are a player, please report this to the client\'s developer.":
+		data[0]["text"] = "Warning: your client does not support compressed websocket connections! The GodotAP dev is already aware of this issue, but there is currently no available way to fix this (as of Godot 4.4), until the Godot engine updates to support compressed websockets."
