@@ -14,6 +14,8 @@
 			return spacing
 		return parts_cont.get_theme_constant(&"separation")
 
+static var console_label_fonts: FontStorage
+
 func pop_dropdown(target: Control) -> VBoxContainer:
 	var parent_window := get_window()
 	var window := Window.new()
@@ -78,11 +80,10 @@ static func make_spacing(space: Vector2) -> Control:
 func get_line_height() -> float:
 	var font_size: int = get_theme_font_size(&"font_size", "ConsoleLabel")
 	var fonts: Array[Font]
-	var base_font := get_theme_font(&"font", "ConsoleLabel")
-	fonts.append(base_font)
-	fonts.append(Util.font_mod(base_font.duplicate(), true, false))
-	fonts.append(Util.font_mod(base_font.duplicate(), false, true))
-	fonts.append(Util.font_mod(base_font.duplicate(), true, true))
+	fonts.append(console_label_fonts.base_font)
+	fonts.append(console_label_fonts.bold_font)
+	fonts.append(console_label_fonts.italic_font)
+	fonts.append(console_label_fonts.bold_italic_font)
 	var h := 0.0
 	for f in fonts:
 		h = maxf(h,f.get_height(font_size))
@@ -157,6 +158,13 @@ func _ready():
 		v.bold = true
 		v.italic = true
 		return
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_THEME_CHANGED:
+		if not console_label_fonts:
+			console_label_fonts = FontStorage.new(get_theme_font(&"font", "ConsoleLabel"))
+		else:
+			console_label_fonts.populate(get_theme_font(&"font", "ConsoleLabel"))
 
 func _get_mouse_pos() -> Vector2:
 	return get_viewport().get_mouse_position() - global_position + Util.MOUSE_OFFSET
