@@ -142,4 +142,5 @@ func handle_sizing(parent: Control) -> void:
 func make_dupe() -> ConsoleLabel:
 	var dupe: ConsoleLabel = duplicate()
 	dupe.text = ""
+	dupe.rich_color = rich_color
 	return dupe
