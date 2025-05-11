@@ -138,11 +138,7 @@ static func make_player(id: int, own_id: int) -> ConsoleLabel:
 	var ttip = "Game: %s" % Archipelago.conn.get_slot(id).game
 	if not player.alias.is_empty():
 		ttip += "\nSlot: %s" % player.name
-	var color: AP.SpecialColor
-	if id == own_id:
-		color = AP.SpecialColor.OWN_PLAYER
-	else:
-		color = AP.SpecialColor.ANY_PLAYER
+	var color := AP.SpecialColor.OWN_PLAYER if id == own_id else AP.SpecialColor.ANY_PLAYER
 	return make_text(player.name, ttip, AP.ComplexColor.as_special(color))
 
 static func make_foldable(text: String, ttip := "", color := AP.ComplexColor.NIL) -> ConsoleFoldableContainer:
