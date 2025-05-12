@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://cgq7n1figlpu3" path="res://godot_ap/ui/base_client.tscn" id="1_i5jgm"]
 [ext_resource type="PackedScene" uid="uid://dp2yir3r1061y" path="res://godot_ap/ui/settings_tab.tscn" id="3_4k5ff"]
 
-[node name="ConsoleContainer" instance=ExtResource("1_i5jgm")]
+[node name="CommonClient" instance=ExtResource("1_i5jgm")]
 
 [node name="Settings" parent="Tabs" index="3" instance=ExtResource("3_4k5ff")]
 visible = false

@@ -7,5 +7,6 @@
 gui_embed_subwindows = true
 title = "Archipelago Console"
 size = Vector2i(1152, 648)
+min_size = Vector2i(750, 400)
 
 [node name="ConsoleContainer" parent="." index="0" instance=ExtResource("2_nqm1h")]
