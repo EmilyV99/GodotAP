@@ -685,6 +685,7 @@ func collect_location(loc_id: int) -> void:
 ## Call when multiple locations are collected and need to be sent to the server at once.
 func collect_locations(locs: Array[int]) -> void:
 	if is_tracker_textclient: return
+	if locs.is_empty(): return
 	_printout_recieved_items = false
 	send_command("LocationChecks", {"locations":locs})
 	for loc_id in locs:
@@ -1061,9 +1062,9 @@ func _autofill_track(msg: String) -> Array[String]:
 	return []
 func _init():
 	init_command_manager(true)
-	_update_tags()
 	_poll.call_deferred()
 func _ready():
+	_update_tags()
 	if AP_AUTO_OPEN_CONSOLE:
 		# Delayed to prevent some warnings
 		get_tree().create_timer(2.0).timeout.connect(open_console)
@@ -1172,7 +1173,7 @@ func _update_tags() -> void:
 		send_command("ConnectUpdate", {"tags":AP_GAME_TAGS})
 	is_tracker_textclient = false
 	for tag in AP_GAME_TAGS:
-		if tag == "TextOnly" or tag == "Tracker":
+		if tag == "TextOnly" or tag == "Tracker" or tag == "HintGame":
 			is_tracker_textclient = true
 			break
 	on_tag_change.emit()
