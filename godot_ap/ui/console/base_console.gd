@@ -280,13 +280,13 @@ func printjson_command(json: Dictionary) -> String:
 		add_header_spacing()
 	return s
 
+
 func printjson_out(elems: Array, flowbox: ConsoleHFlow) -> String:
 	var s := ""
 	for elem in elems:
 		var txt: String = elem["text"]
 		if txt.is_empty():
 			continue
-		s += txt
 		var part: ConsoleLabel
 		match elem.get("type", "text"):
 			"hint_status":
@@ -331,7 +331,32 @@ func printjson_out(elems: Array, flowbox: ConsoleHFlow) -> String:
 						pass #part.underline = true
 					_:
 						part.color = AP.color_from_name(part, col_str, part.color)
+		s += part.text
 		flowbox.add_text_split(part)
+	return s
+
+static func printjson_out_str(elems: Array) -> String:
+	var s := ""
+	for elem in elems:
+		var txt: String = elem["text"]
+		if txt.is_empty():
+			continue
+		match elem.get("type", "text"):
+			"player_id":
+				var plyr_id = int(txt)
+				txt = Archipelago.conn.get_player(plyr_id).output().text
+			"item_id":
+				var item_id = int(txt)
+				var plyr_id = int(elem["player"])
+				var data: DataCache = Archipelago.conn.get_gamedata_for_player(plyr_id)
+				var flags := int(elem["flags"])
+				txt = make_item(item_id, flags, data).text
+			"location_id":
+				var loc_id = int(txt)
+				var plyr_id = int(elem["player"])
+				var data: DataCache = Archipelago.conn.get_gamedata_for_player(plyr_id)
+				txt = make_location(loc_id, data).text
+		s += txt
 	return s
 
 static func printjson_str(elems: Array) -> String:
