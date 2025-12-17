@@ -2,7 +2,7 @@ class_name APConfigManager extends Node
 
 @warning_ignore("unused_signal")
 signal config_changed
-const CFG_VERSION: int = 0
+const CFG_VERSION: int = 1
 const CONFIG_HEADER := "GodotAP Settings File"
 
 var _pause_saving := false
@@ -30,9 +30,37 @@ var window_theme_path: String :
 			window_theme_path = val
 			save_cfg()
 			config_changed.emit()
+var uuid: String :
+	set(val):
+		if val != uuid:
+			uuid = val
+			save_cfg()
+			config_changed.emit()
+
+static func generate_uuid() -> String:
+	var ret := ""
+	for q in 8:
+		ret += String.num_int64(randi_range(0, 16), 16, true)
+	ret += "-"
+	for q in 4:
+		ret += String.num_int64(randi_range(0, 16), 16, true)
+	ret += "-"
+	ret += "4" # '4' for uuid v4
+	for q in 3:
+		ret += String.num_int64(randi_range(0, 16), 16, true)
+	ret += "-"
+	ret += String.num_int64(randi_range(8, 12), 16, true) # 8, 9, A, B only
+	for q in 3:
+		ret += String.num_int64(randi_range(0, 16), 16, true)
+	ret += "-"
+	for q in 12:
+		ret += String.num_int64(randi_range(0, 16), 16, true)
+	return ret
 
 func _ready():
 	load_cfg()
+	if not uuid:
+		uuid = generate_uuid()
 
 func load_cfg() -> bool:
 	DirAccess.make_dir_recursive_absolute("user://ap/")
@@ -54,12 +82,15 @@ func save_cfg() -> void:
 func _load_cfg(file: FileAccess) -> bool:
 	if file.get_pascal_string() != CONFIG_HEADER:
 		return false
-	var _vers := file.get_32() # futureproofing
+	var vers := file.get_32()
+	# all versions
 	var byte := file.get_8()
 	is_tracking = (byte & 0b00000001) != 0
 	verbose_trackerpack = (byte & 0b00000010) != 0
 	hide_finished_map_squares = (byte & 0b00000100) != 0
 	window_theme_path = file.get_pascal_string()
+	if vers >= 1:
+		uuid = file.get_pascal_string()
 	return true
 func _save_cfg(file: FileAccess):
 	file.store_pascal_string(CONFIG_HEADER)
@@ -70,3 +101,5 @@ func _save_cfg(file: FileAccess):
 	if hide_finished_map_squares: byte |= 0b00000100
 	file.store_8(byte)
 	file.store_pascal_string(window_theme_path)
+	# CFG_VERSION >= 1
+	file.store_pascal_string(uuid)

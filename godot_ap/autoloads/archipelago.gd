@@ -399,7 +399,7 @@ func _handle_command(json: Dictionary) -> void:
 			conn.gen_version = Version.from(json["generator_version"])
 			conn.seed_name = json["seed_name"]
 			handle_datapackage_checksums(json["datapackage_checksums"])
-			var args: Dictionary = {"name":creds.slot,"password":creds.pwd,"uuid":conn.uid,
+			var args: Dictionary = {"name":creds.slot,"password":creds.pwd,"uuid":config.uuid,
 				"version":AP_VERSION._as_ap_dict(),"slot_data":true}
 			args["game"] = AP_GAME_NAME
 			args["tags"] = AP_GAME_TAGS

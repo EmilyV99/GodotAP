@@ -5,7 +5,6 @@ class_name ConnectionInfo
 var serv_version: Version
 var gen_version: Version
 var seed_name: String
-var uid: int
 
 var player_id: int
 var team_id: int
@@ -26,9 +25,6 @@ var locs_by_name: Dictionary[String, APLocation] = {}
 
 func received_index(index: int) -> bool:
 	return received_items.size() > index and received_items[index] != null
-
-func _init():
-	uid = randi()
 
 func _to_string():
 	return "AP_CONN(SERV_%s, GEN_%s, SEED:%s, PLYR %d, TEAM %d, SLOT_DATA %s)" % [serv_version,gen_version,seed_name,player_id,team_id,slot_data]
