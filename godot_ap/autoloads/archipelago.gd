@@ -1208,6 +1208,12 @@ func set_deathlink(state: bool) -> void:
 func is_deathlink() -> bool:
 	return "DeathLink" in Archipelago.AP_GAME_TAGS
 
+func set_traplink(state: bool) -> void:
+	set_tag("TrapLink", state)
+
+func is_traplink() -> bool:
+	return "TrapLink" in Archipelago.AP_GAME_TAGS
+
 enum ClientStatus {
 	CLIENT_UNKNOWN = 0,
 	CLIENT_CONNECTED = 5,
