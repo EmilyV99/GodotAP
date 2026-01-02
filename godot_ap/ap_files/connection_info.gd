@@ -193,7 +193,7 @@ func send_deathlink(cause: String = ""):
 	send_bounce(cmd, [], [], ["DeathLink"])
 
 ## Sends a `Bounce` packet designed for the `TrapLink` feature
-## Requires the client be connected with the `TraphLink` tag
+## Requires the client be connected with the `TrapLink` tag
 func send_traplink(trap_name: String = ""):
 	if not Archipelago.is_traplink():
 		AP.log("Tried to send TrapLink while TrapLink is not enabled!")
