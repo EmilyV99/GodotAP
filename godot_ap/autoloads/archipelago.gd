@@ -164,6 +164,7 @@ enum ItemHandling {
 }
 
 var last_sent_deathlink_time: float
+var last_sent_traplink_time: float
 
 ## The current connection credentials to be used
 var creds: APCredentials = APCredentials.new()
@@ -526,6 +527,13 @@ func _handle_command(json: Dictionary) -> void:
 				var source: String = json["data"].get("source", "")
 				var cause: String = json["data"].get("cause", "")
 				conn.deathlink.emit(source, cause, json)
+			if tags.has("TrapLink"):
+				var tstamp: float = json["data"].get("time", 0.0)
+				if is_equal_approx(tstamp, last_sent_traplink_time):
+					return # Skip deaths from self
+				var source: String = json["data"].get("source", "")
+				var trap_name: String = json["data"].get("trap_name", "")
+				conn.traplink.emit(source, trap_name, json)
 		"LocationInfo":
 			conn._on_locinfo(json)
 		"Retrieved":
