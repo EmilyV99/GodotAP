@@ -10,6 +10,9 @@ class_name AP extends Node
 @export var AP_VERSION := Version.val(0,5,0)
 ## The ItemHandling to use when connecting.
 @export var AP_ITEM_HANDLING := ItemHandling.ALL
+@export_group("Extra Options")
+## Aliases for Traps in TrapLink. When the key is received, the value will be used instead.
+@export var TRAP_LINK_ALIASES: Dictionary[String, String]
 @export_group("Client Settings")
 ## Prints what items have been previously collected when reconnecting to a slot.
 @export var AP_PRINT_ITEMS_ON_CONNECT := false
@@ -533,6 +536,7 @@ func _handle_command(json: Dictionary) -> void:
 					return # Skip traps from self
 				var source: String = json["data"].get("source", "")
 				var trap_name: String = json["data"].get("trap_name", "")
+				trap_name = TRAP_LINK_ALIASES.get(trap_name, trap_name)
 				conn.traplink.emit(source, trap_name, json)
 		"LocationInfo":
 			conn._on_locinfo(json)

@@ -71,13 +71,16 @@ func load_locations() -> void:
 @warning_ignore_start("unused_signal")
 signal bounce(json: Dictionary) ## Emitted when a `Bounce` packet is received.
 signal deathlink(source: String, cause: String, json: Dictionary) ## Emitted when a `Bounce` packet of type `DeathLink` is received, after the `bounce` signal.
-signal traplink(source: String, trap_name: String, json: Dictionary) ## Emitted when a `Bounce` packet of type `TrapLink` is received, after the `bounce` signal.
 signal setreply(json: Dictionary) ## Emitted when a `SetReply` packet is received
 signal roomupdate(json: Dictionary) ## Emitted when a `RoomUpdate` packet is received
 signal obtained_item(item: NetworkItem) ## Emitted for each item received
 signal obtained_items(items: Array[NetworkItem]) ## Emitted for each item *packet* received
 signal refresh_items(items: Array[NetworkItem]) ## Emitted when the server re-sends ALL obtained items
 signal on_hint_update(hints: Array[NetworkHint]) ## Emitted when hints relevant to this client change
+
+## Emitted when a `Bounce` packet of type `TrapLink` is received, after the `bounce` signal.
+## 'trap_name' will be the trap name AFTER resolving the received name through `TRAP_LINK_ALIASES`.
+signal traplink(source: String, trap_name: String, json: Dictionary)
 
 signal all_scout_cached ## Emitted when a scout packet containing ALL locations is received (see `force_scout_all`)
 @warning_ignore_restore("unused_signal")
