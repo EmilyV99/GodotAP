@@ -643,7 +643,7 @@ func handle_datapackage_checksums(checksums: Dictionary) -> void:
 
 # Caches and stores to disk `data` as the DataCache file for `game`
 func _handle_datapack(game: String, data: Dictionary) -> void:
-	var data_file := FileAccess.open("user://ap/datapacks/%s.json" % game, FileAccess.WRITE)
+	var data_file := FileAccess.open("user://ap/datapacks/%s.json" % game.validate_filename(), FileAccess.WRITE)
 	_datapack_cache[game] = {"checksum":data["checksum"],"fields":datapack_cached_fields.duplicate()}
 	for key in data.keys():
 		if not key in datapack_cached_fields:
@@ -672,7 +672,7 @@ static var _data_caches: Dictionary[String, DataCache] = {} # DataPackage object
 static func get_datacache(game: String) -> DataCache:
 	var ret: DataCache = _data_caches.get(game)
 	if ret: return ret
-	var data_file := FileAccess.open("user://ap/datapacks/%s.json" % game, FileAccess.READ)
+	var data_file := FileAccess.open("user://ap/datapacks/%s.json" % game.validate_filename(), FileAccess.READ)
 	if not data_file:
 		return DataCache.new()
 	ret = DataCache.from_file(data_file)
