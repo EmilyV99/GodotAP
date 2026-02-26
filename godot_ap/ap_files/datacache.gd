@@ -27,8 +27,8 @@ func get_loc_id(name: String) -> int:
 	var id: int = location_name_to_id.get(name, -1)
 	return id
 func get_item_name(id: int) -> String:
-	var v: String = item_name_to_id.find_key(id)
-	return v if v else str(id)
+	var v: Variant = item_name_to_id.find_key(id)
+	return str(v) if v else str(id)
 func get_loc_name(id: int) -> String:
 	if id < 0:
 		if id == -1:
@@ -36,8 +36,8 @@ func get_loc_name(id: int) -> String:
 		if id == -2:
 			return "Starting Inventory"
 		return "??? #%d" % id
-	var v: String = location_name_to_id.find_key(id)
-	return v if v else str(id)
+	var v: Variant = location_name_to_id.find_key(id)
+	return str(v) if v else str(id)
 
 func is_valid() -> bool:
 	return not checksum.is_empty()
