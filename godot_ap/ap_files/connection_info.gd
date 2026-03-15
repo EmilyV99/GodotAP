@@ -209,7 +209,8 @@ func send_bounce(data: Dictionary, target_games: Array[String], target_slots: Ar
 	Archipelago.send_command("Bounce", cmd)
 
 ## Sends a `Bounce` packet designed for the `DeathLink` feature
-## Requires the client be connected with the `DeathLink` tag
+## Requires `DeathLink` being enabled (see 'Archipelago.set_deathlink()')
+## Only players in the same DeathLink group will be killed.
 func send_deathlink(cause: String = ""):
 	if not Archipelago.is_deathlink():
 		AP.log("Tried to send DeathLink while DeathLink is not enabled!")
@@ -220,7 +221,7 @@ func send_deathlink(cause: String = ""):
 	cmd["data"]["source"] = get_player_name(-1, false)
 	Archipelago.last_sent_deathlink_time = Time.get_unix_time_from_system()
 	cmd["data"]["time"] = Archipelago.last_sent_deathlink_time
-	send_bounce(cmd, [], [], ["DeathLink"])
+	send_bounce(cmd, [], [], [Archipelago.get_deathlink_tag()])
 
 ## Sends a `Bounce` packet designed for the `TrapLink` feature
 ## Requires the client be connected with the `TrapLink` tag
