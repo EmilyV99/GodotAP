@@ -1310,8 +1310,7 @@ func get_deathlink_group() -> String:
 func get_deathlink_tag() -> String:
 	return "DeathLink" + deathlink_group
 ## Turn 'DeathLink' on or off
-func set_deathlink(state: bool, group: String = "") -> void:
-	deathlink_group = group
+func set_deathlink(state: bool) -> void:
 	set_tag(get_deathlink_tag(), state)
 ## Check if 'DeathLink' is on
 func is_deathlink() -> bool:
