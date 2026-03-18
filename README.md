@@ -1,5 +1,5 @@
 ## The Project
-GodotAP is a Godot project designed to be re-used in other Godot projects for [Archipelago Randomizer](archipelago.gg). It contains a basic implementation to handle the various network communications used by Archipelago, and a custom console that can be used for command input and to display messages from the server (in rich-text format, with tooltips)
+GodotAP is a Godot project designed to be re-used in other Godot projects for [Archipelago Randomizer](archipelago.gg). It contains a basic implementation to handle the various network communications used by Archipelago, and a custom console that can be used for command input and to display messages from the server (in rich-text format, with tooltips). See also the project's [Archipelago Wiki Page](https://archipelago.miraheze.org/wiki/GodotAP).
 
 ## As a CommonClient
 Running the project itself will produce just the basic console, designed as an alternative to the Archipelago Text Client (and a base for custom clients to be built from).
@@ -18,8 +18,7 @@ Running the project itself will produce just the basic console, designed as an a
     - LClick the currently sorted-by column to invert its sort direction
     - RClick a column header that supports filtering (currently only `Status`) to open the filtering menu
       - `Found` hints are filtered out by default
-    - Supports [New Hint Statuses](https://github.com/ArchipelagoMW/Archipelago/pull/3506), if connecting to a server that has those changes.
-      - Clicking on a new status (of a hint that you are the `Receiving Player` for) will popup a dropdown of buttons, allowing you to select a new status to use.
+    - Clicking on a Hint Status (of a hint that you are the `Receiving Player` for) will popup a dropdown of buttons, allowing you to select a new status to use.
 
 ## In a Project
 
