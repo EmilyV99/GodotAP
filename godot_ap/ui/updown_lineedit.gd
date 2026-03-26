@@ -5,10 +5,10 @@ func _gui_input(event):
 		var n: Control
 		match event.keycode:
 			KEY_UP:
-				n = get_node(focus_neighbor_top) as Control
+				n = get_node_or_null(focus_neighbor_top)
 			KEY_DOWN:
-				n = get_node(focus_neighbor_bottom) as Control
-		if n:
+				n = get_node_or_null(focus_neighbor_bottom)
+		if n is Control:
 			accept_event()
 			if event.pressed and not event.is_echo():
 				release_focus()
