@@ -200,6 +200,9 @@ func _gui_input(event):
 					scroll_by_abs(-size.y)
 				KEY_PAGEDOWN:
 					scroll_by_abs(size.y)
+				_:
+					return
+			accept_event()
 
 func queue_locked_redraw() -> void:
 	is_max_scroll = false
