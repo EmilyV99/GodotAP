@@ -74,7 +74,7 @@ func _gui_input(event):
 				KEY_TAB:
 					if _tab_completions:
 						update_text(_tab_completions[0])
-					accept_event()
+						accept_event()
 				KEY_UP:
 					history_step(-1)
 					accept_event()
