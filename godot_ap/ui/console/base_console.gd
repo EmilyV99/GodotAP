@@ -54,7 +54,7 @@ func pop_dropdown(target: Control) -> VBoxContainer:
 	target.resized.connect(resize_window)
 	window.add_child(vbox)
 	window.ready.connect(resize_window)
-	#window.tree_exiting.connect(func(): resized.disconnect(resize_window))
+	window.tree_exiting.connect(target.resized.disconnect.bind(resize_window))
 	add_child.call_deferred(window) # Defer adding it, to allow caller to add things to the vbox
 	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
 	return vbox
@@ -162,7 +162,7 @@ func _ready():
 	if parts_cont:
 		parts_cont.child_entered_tree.connect(_on_new_message)
 
-func _on_new_message(node: Node) -> void:
+func _on_new_message(_node: Node) -> void:
 	if scroll_to_bottom_on_new_message:
 		scroll_bottom()
 
@@ -200,6 +200,9 @@ func _gui_input(event):
 					scroll_by_abs(-size.y)
 				KEY_PAGEDOWN:
 					scroll_by_abs(size.y)
+				_:
+					return
+			accept_event()
 
 func queue_locked_redraw() -> void:
 	is_max_scroll = false
