@@ -47,12 +47,12 @@ func debug_disabled() -> bool:
 	return debug_hidden
 
 
-## Autofill the arguments to a command message, up to the number of arguments specified in
+## Get the autofilled parameters for a command message, up to the number of arguments specified in
 ## [param capacity].
 func autofill(msg: String, capacity := 5) -> Array[String]:
 	if msg.is_empty():
 		return []
-	var split_msg := msg.split(" ",true,1)
+	var split_msg := msg.split(" ", true, 1)
 	var cmd: ConsoleCommand = _commands_by_name.get(split_msg[0])
 	var ret: Array[String] = []
 

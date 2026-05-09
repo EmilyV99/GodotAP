@@ -1,7 +1,8 @@
 class_name NetworkHint
-## A hint for an item's location.
-
-
+## A hint for an item.
+##
+## @tutorial(Archipelago Documentation): https://github.com/ArchipelagoMW/Archipelago/blob/main/docs/network%20protocol.md#hint
+ 
 ## Priority information for the hint.
 enum Status {
 	## No priority specified
@@ -30,7 +31,7 @@ static var status_names: Dictionary[Status, String] = {
 }
 
 
-## A mapping of [enum Status] to [AP.RichColor] for display purposes.
+## A mapping of [enum Status] to [enum AP.RichColor] for display purposes.
 static var status_colors: Dictionary[Status, AP.RichColor] = {
 	Status.FOUND: AP.RichColor.GREEN,
 	Status.UNSPECIFIED: AP.RichColor.NIL,
@@ -41,13 +42,15 @@ static var status_colors: Dictionary[Status, AP.RichColor] = {
 }
 
 
-## The item that has been hinted
+## The item that has been hinted.
 var item: NetworkItem
+## The entrance the item's location is behind.
 var entrance: String
+## The priority of the hinted item.
 var status: Status = Status.NOT_FOUND
 
 
-## Deserialize a received hint field.
+## Deserialize a received hint.
 static func from(json: Dictionary) -> NetworkHint:
 	if json["class"] != "Hint":
 		return null
@@ -67,7 +70,7 @@ func is_local() -> bool:
 	return item.is_local()
 
 
-## Create a label displaying this object's [member status]
+## Create a label displaying this object's [member status].
 func make_status() -> ConsoleLabel:
 	return NetworkHint.make_hint_status(status)
 

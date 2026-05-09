@@ -1,34 +1,38 @@
 class_name ConnectionInfo
 ## Data representing a connection to the Archipelago server.
 ##
-## Each new connection will be sent via the 'Archipelago.connected' signal.
-## As each connection is a new object, any connections to signals of this class will automatically be cleaned up upon disconnecting.
-
+## Each new connection will be sent via the [signal Archipelago.connected] signal.
+## As each connection is a new object, any connections to signals of this class will automatically 
+## be cleaned up upon disconnecting.
 
 # Variables / data
-## The server's Archipelago version
+## The server's Archipelago version.
 var serv_version: Version 
-## The generator's Archipelago version
+
+## The generator's Archipelago version.
 var gen_version: Version 
 
-## The seed_name received from the server
+## The seed name received from the server.
 var seed_name: String 
 
-## The ID of your player
+## The ID of your player.
 var player_id: int 
-## The ID of your team (unimplemented)
+
+## The ID of your team (unimplemented).
 var team_id: int 
 
-## The slot_data from the server
+## The slot data from the server.
 var slot_data: Dictionary 
 
-## The players in this Multiworld
+## The players in this Multiworld.
 var players: Array[NetworkPlayer] 
-## The slots in this Multiworld
+
+## The slots in this Multiworld.
 var slots: Array[NetworkSlot] 
 
 ## The checked status of the locations for this slot, by location ID.
 var slot_locations: Dictionary[int, bool] = {}
+
 ## The NetworkItems received from the server, in index order.
 var received_items: Array[NetworkItem] = []
 
@@ -40,12 +44,12 @@ var hints: Array[NetworkHint] = [] :
 			Call 'set_hint_notify()' or 'install_hint_listenter()' first!""")
 		return hints
 
-## All locations, by ID
+## All locations, by ID.
 var locations: Dictionary[int, APLocation] = {}
-## All locations, by name
+
+## All locations, by name.
 var locs_by_name: Dictionary[String, APLocation] = {}
 
-# Init / Getters
 
 func _received_index(index: int) -> bool:
 	return received_items.size() > index and received_items[index] != null
@@ -54,45 +58,46 @@ func _received_index(index: int) -> bool:
 func _to_string():
 	return "AP_CONN(SERV_%s, GEN_%s, SEED:%s, PLYR %d, TEAM %d, SLOT_DATA %s)" % [serv_version,gen_version,seed_name,player_id,team_id,slot_data]
 
-
-## Returns a NetworkPlayer for the given ID (or the current slot)
-## TODO: Handle teams
+# TODO: Handle teams
+## Returns the player for the given ID (or the current slot).
 func get_player(id: int = -1) -> NetworkPlayer:
-	if id < 0: return players[player_id-1]
+	if id < 0:
+		return players[player_id-1]
 	return players[id-1]
 	
-	
-## Returns a NetworkSlot for the given ID (or the current slot)
-## TODO: Handle teams
+# TODO: Handle teams
+## Returns the slot for the given ID (or the current slot).
 func get_slot(id: int = -1) -> NetworkSlot:
-	if id < 0: return slots[player_id-1]
+	if id < 0:
+		return slots[player_id-1]
 	return slots[id-1]
 	
 	
-## Returns a player's name for the given ID (or the current slot)
-## If [param alias] is [code]false[/code], will return the slot name regardless of alias
+## Returns a player's name for the given ID (or the current slot).
+## If [param alias] is [code]false[/code], will return the slot name regardless of alias.
 func get_player_name(plyr_id: int = -1, alias := true) -> String:
 	var name = get_player(plyr_id).get_name(alias)
-	if not name: name = "Player %d" % plyr_id
+	if not name:
+		name = "Player %d" % plyr_id
 	return name
 	
 	
-## Returns the game name for the given player ID (or the current slot)
+## Returns the game name for the given player ID (or the current slot).
 func get_game_for_player(plyr_id: int = -1) -> String:
 	return get_slot(plyr_id).game
 	
 	
-## Returns the DataCache for the given player ID (or the current slot)
+## Returns the DataCache for the given player ID (or the current slot).
 func get_gamedata_for_player(plyr_id: int = -1) -> DataCache:
 	return AP.get_datacache(get_game_for_player(plyr_id))
 
 
-## Returns the APLocation (name + id + current hint status) for the given location ID
+## Returns the APLocation (name + id + current hint status) for the given location ID.
 func get_location(locid: int) -> APLocation:
 	return locations.get(locid, APLocation.nil())
 	
 	
-## Returns the APLocation (name + id + current hint status) for the given location name
+## Returns the APLocation (name + id + current hint status) for the given location name.
 func get_loc_by_name(loc_name: String) -> APLocation:
 	return locs_by_name.get(loc_name, APLocation.nil())
 
@@ -112,30 +117,37 @@ func _load_locations() -> void:
 @warning_ignore_start("unused_signal")
 ## Emitted when a [code]Bounce[/code] packet is received.
 signal bounce(json: Dictionary)
+
 ## Emitted when a [code]Bounce[/code] packet of type [code]DeathLink[/code] is received.
 ## Sent after [signal bounce].
 signal deathlink(source: String, cause: String, json: Dictionary)
+
 ## Emitted when a [code]Bounce[/code] packet of type [code]TrapLink[/code] is received. Sent after 
 ## [signal bounce].
 ## [param trap_name] will be the trap name AFTER resolving the received name through 
 ## [member AP.TRAP_LINK_ALIASES].
 signal traplink(source: String, trap_name: String, json: Dictionary)
 
-## Emitted when a [code]SetReply[/code] packet is received
+## Emitted when a [code]SetReply[/code] packet is received.
 signal setreply(json: Dictionary)
-## Emitted when a [code]RoomUpdate[/code] packet is received
+
+## Emitted when a [code]RoomUpdate[/code] packet is received.
 signal roomupdate(json: Dictionary)
-## Emitted for each item received
+
+## Emitted for each item received.
 signal obtained_item(item: NetworkItem)
-## Emitted for each item *packet* received
+
+## Emitted for each item [i]packet[/i] received.
 signal obtained_items(items: Array[NetworkItem])
-## Emitted when the server re-sends ALL obtained items
+
+## Emitted when the server re-sends ALL obtained items.
 signal refresh_items(items: Array[NetworkItem])
+
 ## Used as part of the [method set_hint_notify] / [method install_hint_listener] functions.
 ## Use [method set_hint_notify] instead of connecting to this signal directly.
 signal _on_hint_update(hints: Array[NetworkHint])
 
-## Emitted when a scout packet containing ALL locations is received (see [method force_scout_all])
+## Emitted when a scout packet containing ALL locations is received (see [method force_scout_all]).
 signal all_scout_cached
 @warning_ignore_restore("unused_signal")
 
@@ -147,7 +159,8 @@ var _hint_listening: bool = false
 
 ## Tell the server to send us information about the hints for this slot.
 func install_hint_listener() -> void:
-	if _hint_listening: return
+	if _hint_listening:
+		return
 	_hint_listening = true
 	var hint_str := "_read_hints_%d_%d" % [team_id, player_id]
 	set_notify(hint_str, _load_hints_from_json)
@@ -161,10 +174,10 @@ func _load_hints_from_json(new_hints: Array) -> void:
 	hints.make_read_only()
 	_on_hint_update.emit(hints)
 
-# TODO: Wording in the second section could flow more naturally
+
 ## Connects the [Callable] [param proc] to be called every time hints are updated for this client.
 ## [br][br]
-## Calls [param proc] if hints are already loaded, otherwise requests all hints
+## Calls [param proc] if hints are already loaded. Otherwise requests all hints
 ## from the server, which will trigger an update.
 ## [br][br]
 ## [param proc] must accept an [Array] of [NetworkHint]s as its first parameter, and
@@ -233,7 +246,8 @@ func scout(location: int, create_as_hint: int, proc: Callable) -> void:
 	var item: NetworkItem = _scout_cache.get(location)
 	if create_as_hint or not item: # Always send if `create_as_hint`!
 		Archipelago.send_command("LocationScouts", {"locations": [location], "create_as_hint": create_as_hint})
-	if not proc: return
+	if not proc:
+		return
 	if item:
 		proc.call(item)
 	else:
@@ -254,7 +268,7 @@ func _on_locinfo(json: Dictionary) -> void:
 		all_scout_cached.emit()
 		
 		
-## Scouts every location into the local cache
+## Scouts every location into the local cache.
 func force_scout_all() -> void: 
 	Archipelago.send_command("LocationScouts", {"locations": slot_locations.keys(), "create_as_hint": 0})
 
@@ -268,7 +282,8 @@ func send_bounce(data: Dictionary, target_games: Array[String], target_slots: Ar
 		cmd["slots"] = target_slots
 	if target_tags:
 		cmd["tags"] = target_tags
-	if not cmd: return
+	if not cmd:
+		return
 	cmd.merge(data)
 	Archipelago.send_command("Bounce", cmd)
 

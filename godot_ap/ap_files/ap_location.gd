@@ -15,7 +15,6 @@ var hint_status: NetworkHint.Status
 static func make(locid: int) -> APLocation:
 	var ret := APLocation.new()
 	ret.id = locid
-	# TODO: Remove this or fix it, as Archipelago was renamed to AP and conn doesn't exist.
 	ret.name = Archipelago.conn.get_gamedata_for_player().get_loc_name(locid) 
 	return ret
 
