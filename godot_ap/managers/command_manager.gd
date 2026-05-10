@@ -23,7 +23,7 @@ var debug_hidden := true :
 
 ## Contains an array of [Callable]s to be called when no [ConsoleCommand] is registered for a
 ## submitted command message.
-## [br]
+## [br][br]
 ## Elements should take a [CommandManager] for the first parameter and a [String] for the second.
 ## Returned values will be ignored.
 var default_procs: Array[Callable] 
@@ -84,8 +84,8 @@ func register_command(cmd: ConsoleCommand) -> void:
 
 ## Register a [Callable] to be used when no [ConsoleCommand] is found for a given command.
 ## See also [member default_procs].
-## [br]
-## [param proc] should take [CommandManager] for the first parameter and a [String] for the second.
+## [br][br]
+## [param proc] should take a [CommandManager] for the first parameter and a [String] for the second.
 ## The second parameter will contain the message to be handled.
 func register_default(proc: Callable) -> void:
 	default_procs.append(proc)
@@ -111,7 +111,7 @@ func call_cmd(msg: String) -> void:
 
 
 ## Get the registered [ConsoleCommand]s.
-## [br]
+## [br][br]
 ## [b]Do not mutate the returned array[/b]
 func get_commands() -> Array[ConsoleCommand]: # don't mutate the return
 	return _commands
@@ -143,7 +143,7 @@ func get_debug_commands() -> Array[ConsoleCommand]:
 
 
 ## Set up the basic [ConsoleCommand]s that will always be available.
-## [br]
+## [br][br]
 ## Currently this sets up [code]/help[/code] for displaying available commands, [code]/cls[/code] 
 ## for clearing the console, and [code]/clr_hist[/code] for clearing the command history.
 func setup_basic_commands() -> void:
@@ -175,7 +175,7 @@ func setup_basic_commands() -> void:
 
 
 ## Set up the [ConsoleCommand]s that will only be available when debug mode is enabled.
-## [br]
+## [br][br]
 ## If [method OS.is_debug_build] returns false, no commands will be set up.
 func setup_debug_commands() -> void:
 	if not OS.is_debug_build():

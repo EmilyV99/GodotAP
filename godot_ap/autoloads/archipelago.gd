@@ -312,7 +312,7 @@ var creds: APCredentials = APCredentials.new()
 ## [member save_manager] can handle the lock for you, along with handling local save files.
 var aplock: APLock = null
 
-## The websocket connection to the server.
+# The websocket connection to the server.
 var _socket: WebSocketPeer
 
 ## A config manager, designed to handle configs not tied to a specific save file.
