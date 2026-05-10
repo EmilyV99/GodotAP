@@ -227,8 +227,8 @@ func _on_retrieve(json: Dictionary) -> void:
 		_retrieve_queue[key] = []
 
 ## Sends an [code]UpdateHint[/code] packet, updating the status of an existing hint
-## The hint is identified by [param loc], [param plyr], the location it is for and the player who
-## needs to find it.
+## The hint is identified by [param loc], [param plyr], which are the ids for the location it is for
+## and the player who needs to find it respectively.
 func update_hint(loc: int, plyr: int, status: NetworkHint.Status) -> void:
 	Archipelago.send_command("UpdateHint", {"location": loc, "player": plyr, "status": status})
 

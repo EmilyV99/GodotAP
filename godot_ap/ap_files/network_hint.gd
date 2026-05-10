@@ -13,9 +13,9 @@ enum Status {
 	AVOID = 20,
 	## Item is important and should be prioritized
 	PRIORITY = 30,
-
 	## The location has been found.
 	FOUND = -2, # Special case, not actually a status value but used for the same GUI column
+	## Exists only for compatability, may be removed soon.
 	NOT_FOUND = -1, # Compat, can probaly remove soon
 }
 

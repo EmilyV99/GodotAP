@@ -553,15 +553,16 @@ func _poll() -> void:
 				WebSocketPeer.STATE_CLOSED: # Start a new connection
 					var err: Error = _socket.connect_to_url(get_url())
 					if err:
-						AP.log("Connection to '%s' failed! Retrying (%d)" % \
-								[get_url(),_connect_attempts])
+						AP.log(
+								"Connection to '%s' failed! Retrying (%d)" % \
+								[get_url(), _connect_attempts])
 						_wss = not _wss
 						if _wss:
 							_connect_attempts += 1
 					elif output_console and not _connecting_part:
 						_connecting_part = output_console.add(
 								BaseConsole.make_text("Connecting...",
-										"%s:%s %s" % [creds.ip,creds.port,creds.slot],
+										"%s:%s %s" % [creds.ip, creds.port, creds.slot],
 										ComplexColor.as_special(SpecialColor.UI_MESSAGE)))
 					_socket_state = _socket.get_ready_state()
 					
@@ -578,11 +579,13 @@ func _poll() -> void:
 							AP.log("Connection to '%s' failed too much! Giving up!" % get_url())
 							if output_console and _connecting_part:
 								_connecting_part.text = "Connection Failed!"
-								_connecting_part.tooltip_text += "\nFailed connecting too many times. Check your connection details, or '/reconnect' to try again."
+								_connecting_part.tooltip_text += "\nFailed connecting too many " + \
+										"times. Check your connection details, " + \
+										"or '/reconnect' to try again."
 								_connecting_part = null
 						else:
 							AP.log("Connection to '%s' failed! Retrying (%d)" % \
-									[get_url(),_connect_attempts])
+									[get_url(), _connect_attempts])
 							_wss = not _wss
 							if _wss:
 								_connect_attempts += 1
@@ -897,7 +900,8 @@ static func get_datacache(game: String) -> DataCache:
 	if ret:
 		return ret
 	
-	var data_file := FileAccess.open("user://ap/datapacks/%s.json" % game.validate_filename(), FileAccess.READ)
+	var data_file := FileAccess.open("user://ap/datapacks/%s.json" % game.validate_filename(),
+			FileAccess.READ)
 	if not data_file:
 		return DataCache.new()
 	ret = DataCache.from_file(data_file)
