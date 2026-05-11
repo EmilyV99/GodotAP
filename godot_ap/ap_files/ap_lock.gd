@@ -4,9 +4,9 @@ extends Node
 
 ## Whether or not the lock is valid.
 var valid: bool = false
-## The id of the player.
+## The ID of the player.
 var player_id: int = 0
-## The id of the team.
+## The ID of the team.
 var team_id: int = 0
 ## The name of the slot the player connects to.
 var slot_name: String = ""
@@ -28,13 +28,13 @@ func lock(conn: ConnectionInfo) -> Array[String]:
 		return []
 	var ret: Array[String] = []
 	if player_id != conn.player_id:
-		ret.append("Wrong player_id: %d != %d" % [player_id,conn.player_id])
+		ret.append("Wrong player_id: %d != %d" % [player_id, conn.player_id])
 	if team_id != conn.team_id:
-		ret.append("Wrong team_id: %d != %d" % [team_id,conn.team_id])
+		ret.append("Wrong team_id: %d != %d" % [team_id, conn.team_id])
 	if slot_name != conn.get_slot(player_id).name:
-		ret.append("Wrong slot_name: %s != %s" % [slot_name,conn.get_slot(player_id).name])
+		ret.append("Wrong slot_name: %s != %s" % [slot_name, conn.get_slot(player_id).name])
 	if seed_name != conn.seed_name:
-		ret.append("Wrong seed_name: %s != %s" % [seed_name,conn.seed_name])
+		ret.append("Wrong seed_name: %s != %s" % [seed_name, conn.seed_name])
 	return ret
 
 
@@ -73,4 +73,4 @@ func write(file: FileAccess) -> bool:
 func _to_string():
 	if not valid:
 		return "APLOCK()"
-	return "APLOCK(%d,%d,%s,%s)" % [player_id,team_id,slot_name,seed_name]
+	return "APLOCK(%d,%d,%s,%s)" % [player_id, team_id, slot_name, seed_name]

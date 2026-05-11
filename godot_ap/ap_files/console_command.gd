@@ -4,6 +4,7 @@ class_name ConsoleCommand
 ## How deep the indentation is for help text display on the console.
 const HELPTEXT_INDENT = 20
 
+
 ## Contains the help text for the usage of a command.
 class CmdHelpText:
 	## The arguments the command takes, to be displayed to the user.
@@ -15,6 +16,7 @@ class CmdHelpText:
 	## [br][br]
 	## Should require no parameters and return a [bool].
 	var cond: Callable # Callable() -> bool
+
 
 ## The command in question (including preceding [code]/[/code] or [code]![/code]).
 var text: String = ""
@@ -39,6 +41,7 @@ var autofill_proc: Variant = null # Callable(String)->Array[String] | null
 ## [br][br]
 ## Entries should require no parameters and return a [bool].
 var disabled_procs: Array[Callable] = [] # Callable()->bool
+
 var _debug: bool = false
 
 #region Constructor and builder-pattern funcs
@@ -104,7 +107,8 @@ func is_debug() -> bool:
 func get_helptext() -> String:
 	var s := ""
 	for ht in help_text:
-		if ht.cond and not ht.cond.call(): continue
+		if ht.cond and not ht.cond.call():
+			continue
 		s += "%s %s\n    %s\n" % [text, ht.args, ht.text.replace("\n","\n    ")]
 	return s
 
@@ -122,21 +126,18 @@ func output_helptext(console: BaseConsole, target = null) -> void:
 		
 	if not target:
 		for ht in texts:
-			console.add(BaseConsole.make_text(
-					"%s %s" % [text, ht.args],
+			console.add(BaseConsole.make_text("%s %s" % [text, ht.args],
 					"",
 					AP.ComplexColor.as_special(AP.SpecialColor.UI_MESSAGE)))
 			var indent := BaseConsole.make_indent(HELPTEXT_INDENT)
 			console.add(indent)
-			indent.add_child(BaseConsole.make_text(
-					ht.text,
+			indent.add_child(BaseConsole.make_text(ht.text,
 					"",
 					AP.ComplexColor.as_special(AP.SpecialColor.UI_MESSAGE)))
 			
 	elif target is ConsoleFoldableContainer:
 		for ht in texts:
-			target.add(BaseConsole.make_text(
-					"%s %s" % [text, ht.args],
+			target.add(BaseConsole.make_text("%s %s" % [text, ht.args],
 					"",
 					AP.ComplexColor.as_special(AP.SpecialColor.UI_MESSAGE)))
 			target.add(console.make_header_spacing(0))
@@ -144,22 +145,19 @@ func output_helptext(console: BaseConsole, target = null) -> void:
 			target.add(indent)
 			var vbox := VBoxContainer.new()
 			indent.add_child(vbox)
-			vbox.add_child(BaseConsole.make_text(
-					ht.text,
+			vbox.add_child(BaseConsole.make_text(ht.text,
 					"",
 					AP.ComplexColor.as_special(AP.SpecialColor.UI_MESSAGE)))
 			vbox.add_child(console.make_header_spacing(0))
 
 	elif target is Container:
 		for ht in texts:
-			target.add_child(BaseConsole.make_text(
-					"%s %s" % [text, ht.args],
+			target.add_child(BaseConsole.make_text("%s %s" % [text, ht.args],
 					"",
 					AP.ComplexColor.as_special(AP.SpecialColor.UI_MESSAGE)))
 			target.add_child(console.make_header_spacing(0))
 			target.add_child(BaseConsole.make_indent(HELPTEXT_INDENT))
-			target.add_child(BaseConsole.make_text(
-					ht.text,
+			target.add_child(BaseConsole.make_text(ht.text,
 					"",
 					AP.ComplexColor.as_special(AP.SpecialColor.UI_MESSAGE)))
 			target.add_child(console.make_header_spacing(0))
@@ -168,8 +166,7 @@ func output_helptext(console: BaseConsole, target = null) -> void:
 
 ## Output usage instructions to [param console].
 func output_usage(console: BaseConsole) -> void:
-	console.add(BaseConsole.make_text(
-			"Usage:\n%s" % get_helptext(),
+	console.add(BaseConsole.make_text("Usage:\n%s" % get_helptext(),
 			"",
 			AP.ComplexColor.as_special(AP.SpecialColor.UI_MESSAGE)))
 

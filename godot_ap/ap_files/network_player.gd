@@ -3,7 +3,7 @@ class_name NetworkPlayer
 ##
 ## @tutorial(Archipelago Documentation): https://github.com/ArchipelagoMW/Archipelago/blob/main/docs/network%20protocol.md#networkplayer
 
-## The id of the team that the player is on.
+## The ID of the team that the player is on.
 var team: int
 ## The player's slot number.
 var slot: int
@@ -45,7 +45,7 @@ static func from(json: Dictionary) -> NetworkPlayer:
 
 
 func _to_string():
-	return "PLAYER(%s[%s],team %d,slot %d)" % [name,alias,team,slot]
+	return "PLAYER(%s[%s],team %d,slot %d)" % [name, alias, team, slot]
 
 
 ## Create a label to display on a console.

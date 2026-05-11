@@ -33,7 +33,7 @@ static func val(v1:int, v2:int, v3:int) -> Version:
 
 
 func _to_string():
-	return "VER(%d.%d.%d)" % [major,minor,build]
+	return "VER(%d.%d.%d)" % [major, minor, build]
 
 
 ## Compare two version numbers. Returns a value less than [code]0[/code] if [param other] is
@@ -48,8 +48,8 @@ func compare(other: Version) -> int:
 
 
 func _as_ap_dict() -> Dictionary:
-	return {"major":major,"minor":minor,"build":build,"class":"Version"}
+	return { "major": major, "minor": minor, "build": build, "class": "Version" }
 
 
 func _as_semver_dict() -> Dictionary:
-	return {"major":major,"minor":minor,"patch":build}
+	return { "major": major, "minor": minor, "patch": build }

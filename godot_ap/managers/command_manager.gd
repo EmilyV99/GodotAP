@@ -99,9 +99,7 @@ func call_cmd(msg: String) -> void:
 	var cmd := get_command(msg.split(" ", true, 1)[0])
 	if cmd and cmd.call_proc:
 		if cmd.is_disabled():
-			console.add(BaseConsole.make_text(
-					"Command '%s' is disabled!" % cmd.text,
-					"",
+			console.add(BaseConsole.make_text("Command '%s' is disabled!" % cmd.text, "",
 					AP.ComplexColor.as_special(AP.SpecialColor.UI_MESSAGE)))
 		else:
 			cmd.call_proc.call(self, cmd, msg)
@@ -158,8 +156,9 @@ func setup_basic_commands() -> void:
 			mgr.console.add(folder)
 			folder.add(mgr.console.make_header_spacing())
 			for cmd in mgr.get_commands().filter(func(cmd):
-				return not (cmd.is_disabled() or cmd.is_debug())):
+					return not (cmd.is_disabled() or cmd.is_debug())):
 				cmd.output_helptext(mgr.console, folder)
+			
 			mgr.console.add_header_spacing()
 			folder.fold(false)))
 	
@@ -185,9 +184,7 @@ func setup_debug_commands() -> void:
 		.add_help("", "Displays this message")
 		.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, _msg: String):
 			mgr.console.add_header_spacing()
-			mgr.console.add(BaseConsole.make_text(
-					"Debug Help:",
-					"",
+			mgr.console.add(BaseConsole.make_text("Debug Help:", "",
 					AP.ComplexColor.as_special(AP.SpecialColor.UI_MESSAGE)))
 			for cmd in mgr.get_commands().filter(func(cmd):
 				return not cmd.is_disabled() and cmd.is_debug()):
@@ -199,9 +196,7 @@ func setup_debug_commands() -> void:
 			debug_hidden = not debug_hidden
 			mgr.console.add_header_spacing()
 			if debug_hidden:
-				mgr.console.add(BaseConsole.make_text(
-						"Debug mode disabled",
-						"",
+				mgr.console.add(BaseConsole.make_text("Debug mode disabled", "",
 						AP.ComplexColor.as_special(AP.SpecialColor.UI_MESSAGE)))
 			else:
 				mgr.console.add(BaseConsole.make_text(

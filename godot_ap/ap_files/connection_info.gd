@@ -8,34 +8,24 @@ class_name ConnectionInfo
 # Variables / data
 ## The server's Archipelago version.
 var serv_version: Version 
-
 ## The generator's Archipelago version.
 var gen_version: Version 
-
 ## The seed name received from the server.
 var seed_name: String 
-
 ## The ID of your player.
 var player_id: int 
-
 ## The ID of your team (unimplemented).
 var team_id: int 
-
 ## The slot data from the server.
 var slot_data: Dictionary 
-
 ## The players in this Multiworld.
 var players: Array[NetworkPlayer] 
-
 ## The slots in this Multiworld.
 var slots: Array[NetworkSlot] 
-
 ## The checked status of the locations for this slot, by location ID.
 var slot_locations: Dictionary[int, bool] = {}
-
 ## The NetworkItems received from the server, in index order.
 var received_items: Array[NetworkItem] = []
-
 ## The hints for this slot.
 var hints: Array[NetworkHint] = [] :
 	get:
@@ -43,10 +33,8 @@ var hints: Array[NetworkHint] = [] :
 			AP.warn("""Tried to access hint information, but the client isn't listening for hints from the server!
 			Call 'set_hint_notify()' or 'install_hint_listenter()' first!""")
 		return hints
-
 ## All locations, by ID.
 var locations: Dictionary[int, APLocation] = {}
-
 ## All locations, by name.
 var locs_by_name: Dictionary[String, APLocation] = {}
 
@@ -56,21 +44,24 @@ func _received_index(index: int) -> bool:
 
 
 func _to_string():
-	return "AP_CONN(SERV_%s, GEN_%s, SEED:%s, PLYR %d, TEAM %d, SLOT_DATA %s)" % [serv_version,gen_version,seed_name,player_id,team_id,slot_data]
+	return "AP_CONN(SERV_%s, GEN_%s, SEED:%s, PLYR %d, TEAM %d, SLOT_DATA %s)" % \
+			[serv_version, gen_version, seed_name, player_id, team_id, slot_data]
+
 
 # TODO: Handle teams
 ## Returns the player for the given ID (or the current slot).
 func get_player(id: int = -1) -> NetworkPlayer:
 	if id < 0:
-		return players[player_id-1]
-	return players[id-1]
-	
+		return players[player_id - 1]
+	return players[id - 1]
+
+
 # TODO: Handle teams
 ## Returns the slot for the given ID (or the current slot).
 func get_slot(id: int = -1) -> NetworkSlot:
 	if id < 0:
-		return slots[player_id-1]
-	return slots[id-1]
+		return slots[player_id - 1]
+	return slots[id - 1]
 	
 	
 ## Returns a player's name for the given ID (or the current slot).
@@ -92,12 +83,12 @@ func get_gamedata_for_player(plyr_id: int = -1) -> DataCache:
 	return AP.get_datacache(get_game_for_player(plyr_id))
 
 
-## Returns the APLocation (name + id + current hint status) for the given location ID.
+## Returns the APLocation (name + ID + current hint status) for the given location ID.
 func get_location(locid: int) -> APLocation:
 	return locations.get(locid, APLocation.nil())
 	
 	
-## Returns the APLocation (name + id + current hint status) for the given location name.
+## Returns the APLocation (name + ID + current hint status) for the given location name.
 func get_loc_by_name(loc_name: String) -> APLocation:
 	return locs_by_name.get(loc_name, APLocation.nil())
 
@@ -117,40 +108,30 @@ func _load_locations() -> void:
 @warning_ignore_start("unused_signal")
 ## Emitted when a [code]Bounce[/code] packet is received.
 signal bounce(json: Dictionary)
-
 ## Emitted when a [code]Bounce[/code] packet of type [code]DeathLink[/code] is received.
 ## Sent after [signal bounce].
 signal deathlink(source: String, cause: String, json: Dictionary)
-
 ## Emitted when a [code]Bounce[/code] packet of type [code]TrapLink[/code] is received. Sent after 
 ## [signal bounce].
 ## [param trap_name] will be the trap name AFTER resolving the received name through 
 ## [member AP.TRAP_LINK_ALIASES].
 signal traplink(source: String, trap_name: String, json: Dictionary)
-
 ## Emitted when a [code]SetReply[/code] packet is received.
 signal setreply(json: Dictionary)
-
 ## Emitted when a [code]RoomUpdate[/code] packet is received.
 signal roomupdate(json: Dictionary)
-
 ## Emitted for each item received.
 signal obtained_item(item: NetworkItem)
-
 ## Emitted for each item [i]packet[/i] received.
 signal obtained_items(items: Array[NetworkItem])
-
 ## Emitted when the server re-sends ALL obtained items.
 signal refresh_items(items: Array[NetworkItem])
-
 ## Used as part of the [method set_hint_notify] / [method install_hint_listener] functions.
 ## Use [method set_hint_notify] instead of connecting to this signal directly.
 signal _on_hint_update(hints: Array[NetworkHint])
-
 ## Emitted when a scout packet containing ALL locations is received (see [method force_scout_all]).
 signal all_scout_cached
 @warning_ignore_restore("unused_signal")
-
 
 # Outgoing server packets
 var _notified_keys: Dictionary[String, bool] = {}
@@ -197,7 +178,7 @@ func set_hint_notify(proc: Callable) -> void:
 ## parameters. Any returned values will be ignored.
 func set_notify(key: String, proc: Callable) -> void:
 	if not _notified_keys.has(key):
-		Archipelago.send_command("SetNotify", {"keys": [key]})
+		Archipelago.send_command("SetNotify", { "keys": [key] })
 		_notified_keys[key] = true
 	setreply.connect(func(json):
 		if json["key"] == key:
@@ -213,7 +194,7 @@ var _retrieve_queue: Dictionary[String, Array]
 ## [param proc] must accept a value of type [Variant] as its first paremeter, and need no other
 ## parameters. Any returned values will be ignored.
 func retrieve(key: String, proc: Callable) -> void:
-	Archipelago.send_command("Get", {"keys": [key]})
+	Archipelago.send_command("Get", { "keys": [key] })
 	if not _retrieve_queue.has(key):
 		_retrieve_queue[key] = [proc]
 	else: _retrieve_queue[key].append(proc)
@@ -226,11 +207,13 @@ func _on_retrieve(json: Dictionary) -> void:
 			proc.call(vals[key])
 		_retrieve_queue[key] = []
 
+
 ## Sends an [code]UpdateHint[/code] packet, updating the status of an existing hint
-## The hint is identified by [param loc], [param plyr], which are the ids for the location it is for
+## The hint is identified by [param loc], [param plyr], which are the IDs for the location it is for
 ## and the player who needs to find it respectively.
 func update_hint(loc: int, plyr: int, status: NetworkHint.Status) -> void:
-	Archipelago.send_command("UpdateHint", {"location": loc, "player": plyr, "status": status})
+	Archipelago.send_command("UpdateHint", { "location": loc, "player": plyr, "status": status })
+
 
 var _scout_cache: Dictionary[int, NetworkItem]
 var _scout_queue: Dictionary[int, Array]
@@ -245,7 +228,8 @@ var _scout_queue: Dictionary[int, Array]
 func scout(location: int, create_as_hint: int, proc: Callable) -> void:
 	var item: NetworkItem = _scout_cache.get(location)
 	if create_as_hint or not item: # Always send if `create_as_hint`!
-		Archipelago.send_command("LocationScouts", {"locations": [location], "create_as_hint": create_as_hint})
+		Archipelago.send_command("LocationScouts",
+				{ "locations": [location], "create_as_hint": create_as_hint })
 	if not proc:
 		return
 	if item:
@@ -270,11 +254,17 @@ func _on_locinfo(json: Dictionary) -> void:
 		
 ## Scouts every location into the local cache.
 func force_scout_all() -> void: 
-	Archipelago.send_command("LocationScouts", {"locations": slot_locations.keys(), "create_as_hint": 0})
+	Archipelago.send_command("LocationScouts",
+			{ "locations": slot_locations.keys(), "create_as_hint": 0 })
 
 
 ## Sends a [code]Bounce[/code] packet with the provided parameters.
-func send_bounce(data: Dictionary, target_games: Array[String], target_slots: Array[String], target_tags: Array[String]) -> void:
+func send_bounce(
+	data: Dictionary,
+	target_games: Array[String],
+	target_slots: Array[String],
+	target_tags: Array[String]
+) -> void:
 	var cmd: Dictionary = {}
 	if target_games:
 		cmd["games"] = target_games

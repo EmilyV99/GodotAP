@@ -1,9 +1,9 @@
 class_name DataCache
 ## Item and location names for a game.
 
-## A [Dictionary] mapping item names to their numerical ids.
+## A [Dictionary] mapping item names to their numerical IDs.
 var item_name_to_id: Dictionary[String, int] = {}
-## A [Dictionary] mapping location names to their numerical ids.
+## A [Dictionary] mapping location names to their numerical IDs.
 var location_name_to_id: Dictionary[String, int] = {}
 ## Checksum for the data.
 var checksum: String = ""
@@ -35,13 +35,13 @@ static func from_file(file: FileAccess) -> DataCache:
 	return null
 
 
-## Get the id for the [param name] of an item.
+## Get the ID for the [param name] of an item.
 func get_item_id(name: String) -> int:
 	var id: int = item_name_to_id.get(name, -1)
 	return id
 
 
-## Get the id for the [param name] of a location.
+## Get the ID for the [param name] of a location.
 func get_loc_id(name: String) -> int:
 	var id: int = location_name_to_id.get(name, -1)
 	return id

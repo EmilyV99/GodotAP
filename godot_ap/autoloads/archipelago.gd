@@ -10,16 +10,12 @@ extends Node
 ## The game name to connect to. Empty string for [code]TextOnly[/code] / [code]Tracker[/code] /
 ## [code]HintGame[/code] clients.
 @export var AP_GAME_NAME := ""
-
 ## The tags for your game.
 @export var AP_GAME_TAGS: Array[String] = []
-
 ## The version of your client. Arbitrary number for you to manage.
 @export var AP_CLIENT_VERSION := Version.val(0,0,0)
-
 ## The target AP version. Not arbitrary - used in [code]Connect[/code] packet.
 @export var AP_VERSION := Version.val(0,5,0)
-
 ## The [enum ItemHandling] to use when connecting.
 @export var AP_ITEM_HANDLING := ItemHandling.ALL
 
@@ -30,35 +26,28 @@ extends Node
 @export_group("Client Settings")
 ## Prints what items have been previously collected when reconnecting to a slot.
 @export var AP_PRINT_ITEMS_ON_CONNECT := false
-
 ## Hide item send messages that don't involve the client.
 @export var AP_HIDE_NONLOCAL_ITEMSENDS := true
-
 ## Automatically opens a default AP text console.
 @export var AP_AUTO_OPEN_CONSOLE := false
-
 ## Show items that are both progression and useful with their own color.
 @export var AP_ENABLE_PROGUSEFUL := false
 
 @export_subgroup("UI")
 ## Automatically open the Connection box when the console opens.
 @export var AP_CONSOLE_CONNECTION_OPEN := false
-
 ## Automatically open/close the Connection box based on connected status.
 @export var AP_CONSOLE_CONNECTION_AUTO := true
 
 @export_subgroup("Logging")
 ## Enables additional logging.
 @export var AP_LOG_COMMUNICATION := false
-
 ## Enables additional logging.
 @export var AP_LOG_RECIEVED := false
-
 
 @export_subgroup("Data Packs")
 ## If true, datapackage local files will be stringified in a readable mode.
 @export var READABLE_DATAPACK_FILES := true
-
 ## Which fields should be saved from received DataPacks.
 @export var datapack_cached_fields: Array[String] = [
 	"item_name_to_id",
@@ -81,19 +70,14 @@ extends Node
 # See `ConnectionInfo` (Archipelago.conn) for more signals
 ## Emitted before connection is attempted.
 signal preconnect
-
 ## Emitted when [code]RoomInfo[/code] is received.
 signal roominfo(conn: ConnectionInfo, json: Dictionary)
-
 ## Emitted when [code]ConnectionRefused[/code] is received.
 signal connectionrefused(conn: ConnectionInfo, json: Dictionary)
-
 ## Emitted when [code]Connected[/code] is received.
 signal connected(conn: ConnectionInfo, json: Dictionary)
-
 ## Emitted when [code]PrintJSON[/code] is received.
 signal printjson(json: Dictionary, plaintext: String)
-
 ## Emitted when the connection is lost.
 signal disconnected
 #endregion
@@ -101,24 +85,20 @@ signal disconnected
 #region Other signals
 ## Signals when [member AP.status] changes.
 signal status_updated
-
 ## Signals when all required datapacks have finished loading.
 signal all_datapacks_loaded
-
 ## Emitted when a location should be cleared/deleted from the world,
 ## as it has already been collected.
 signal remove_location(loc_id: int)
-
 ## Emitted when [member AP.AP_GAME_TAGS] is updated.
 signal on_tag_change
-
 ## Emitted when an output console is attached.
 signal on_attach_console
-
 # Debug purposes
 @warning_ignore("unused_signal")
 signal _logged_message(msg: String)
 #endregion
+
 
 #region COLORS
 ## Represents a color in one of multiple formats.
@@ -131,8 +111,6 @@ class ComplexColor:
 				special = null
 				plain = null
 			else: rich = null
-	
-	
 	## The [enum AP.SpecialColor] or [code]null[/code].
 	var special :
 		set(val):
@@ -142,8 +120,6 @@ class ComplexColor:
 				plain = null
 			else:
 				special = null
-	
-	
 	## A [String] or [Color] plain value, or [code]null[/code].
 	var plain :
 		set(val):
@@ -187,13 +163,16 @@ class ComplexColor:
 	## Get the color represented by this complex color for the proviced [param node].
 	## [param node] is needed, as the representation can depend on the node's [Theme].
 	func calculate(node: Control) -> Color:
-		if rich: return AP.get_rich_color(node, rich)
-		if special: return AP.get_special_color(node, special)
+		if rich:
+			return AP.get_rich_color(node, rich)
+		if special:
+			return AP.get_special_color(node, special)
 		return AP.color_from_name(node, plain)
 		
 		
 	## A default value.
 	static var NIL := as_rich(AP.RichColor.NIL)
+
 
 ## Constants representing colors used by the AP console (as color names)
 ## Used with [AP.ComplexColor] or [method AP.get_rich_color].
@@ -202,7 +181,6 @@ enum RichColor {
 	MAGENTA, CYAN, WHITE, BLACK, SLATEBLUE,
 	PLUM, SALMON, ORANGE, GOLD,
 }
-
 ## Constants representing colors used by the AP console (as use purposes)
 ## Each of these translates to a [enum RichColor] via the [member AP.special_colors] dictionary.
 ## Used with [AP.ComplexColor] or [method AP.get_special_color].
@@ -228,14 +206,16 @@ static var special_colors: Dictionary[SpecialColor, RichColor] = {
 
 ## Checks if [param s] matches a [enum RichColor].
 static func is_rich_color_name(s: String) -> bool:
-	if s == "nil": return false
+	if s == "nil":
+		return false
 	return RichColor.keys().map(func(c): return str(c).to_lower()).has(s)
 
 
 ## Gets a [enum RichColor] from [param s]. [code]NIL[/code] is returned if the string is invalid.
 static func rich_color_from_name(s: String) -> RichColor:
 	var ind: int = RichColor.keys().map(func(c): return str(c).to_lower()).find(s)
-	if ind > -1: return RichColor.values()[ind]
+	if ind > -1:
+		return RichColor.values()[ind]
 	return RichColor.NIL
 
 
@@ -289,17 +269,13 @@ enum ItemHandling {
 ## Timestamp of the last sent DeathLink packet. Automatically updated by 
 ## [method ConnectionInfo.send_deathlink]
 var last_sent_deathlink_time: float
-
 ## Timestamp of the last sent TrapLink packet. Automatically updated by 
 ## [method ConnectionInfo.send_traplink]
 var last_sent_traplink_time: float
-
 ## The group that is used for DeathLink for this connection
 var deathlink_group: String : set = set_deathlink_group, get = get_deathlink_group
-
 ## The current connection credentials to be used.
 var creds: APCredentials = APCredentials.new()
-
 ## The current APLock object. Saving an APLock object in a save file allows you to lock it to a 
 ## particular room.
 ## [br][br]
@@ -320,7 +296,6 @@ var _socket: WebSocketPeer
 ## Can be customized by adding a node inheriting from [APConfigManager] to 
 ## [code]godot_ap/autoloads/archipelago.tscn[/code].
 var config : APConfigManager
-
 ## A save manager, designed to handle local save files tied to a specific room/slot.
 ## Null unless a node inheriting from [APSaveManager] is added to to 
 ## [code]godot_ap/autoloads/archipelago.tscn[/code].
@@ -379,17 +354,15 @@ func is_not_connected() -> bool:
 
 # Label in the [member AP.output_console] displaying the messages from [signal connect_step]
 var _connecting_part: Label 
-
 # Connection attempt counter
 var _connect_attempts := 1
-
 # If current connection attempt is using secure sockets. Alternates each attempt.
 var _wss := true 
 
 
 ## Returns the URL currently being targeted for connection.
 func get_url() -> String:
-	return "%s://%s:%s" % ["wss" if _wss else "ws",creds.ip,creds.port]
+	return "%s://%s:%s" % ["wss" if _wss else "ws", creds.ip, creds.port]
 
 
 ## Reconnect to an Archipelago room using the same information as before.
@@ -428,7 +401,7 @@ func ap_disconnect() -> void:
 	AP.close_logger()
 	if output_console:
 		var part := BaseConsole.make_text("Disconnecting...",
-				"%s:%s %s" % [creds.ip,creds.port,creds.slot],
+				"%s:%s %s" % [creds.ip, creds.port, creds.slot],
 				ComplexColor.as_special(SpecialColor.UI_MESSAGE))
 		output_console.add(part)
 		while status != APStatus.DISCONNECTED:
@@ -454,11 +427,12 @@ func force_disconnect() -> void:
 				):
 					all_datapacks_loaded.disconnect(caller)
 
+
 # Create a websocket and assign it to [member AP._socket]
 func _create_socket() -> void:
 	const BYTE_PER_MB := 1000000
 	_socket = WebSocketPeer.new()
-	_socket.inbound_buffer_size = websocket_inbuffer_mb*BYTE_PER_MB
+	_socket.inbound_buffer_size = websocket_inbuffer_mb * BYTE_PER_MB
 #endregion CONNECTION
 
 
@@ -470,7 +444,7 @@ static var logging_file: FileAccess = null
 ## Opens the GodotAP logging file, if it isn't already open.
 static func open_logger() -> void:
 	if not logging_file:
-		logging_file = FileAccess.open("user://ap/ap_log.log",FileAccess.WRITE)
+		logging_file = FileAccess.open("user://ap/ap_log.log", FileAccess.WRITE)
 
 
 ## Closes the GodotAP logging file, if its open.
@@ -511,27 +485,32 @@ static func error(s: Variant) -> void:
 
 ## Logs a message to the GodotAP log, but only if [member AP_LOG_COMMUNICATION] is true.
 func comm_log(pref: String, s: Variant) -> void:
-	if not AP_LOG_COMMUNICATION: return
+	if not AP_LOG_COMMUNICATION:
+		return
 	AP.log("[%s] %s" % [pref,str(s)])
 
 
 ## Logs a message to the GodotAP log, but only in a Debug build.
 static func dblog(s: Variant) -> void:
-	if not OS.is_debug_build(): return
+	if not OS.is_debug_build():
+		return
 	AP.log(s)
 
 
 ## Logs a warning to the GodotAP log and Godot warning console, but only in a Debug build.
 static func dbwarn(s: Variant) -> void:
-	if not OS.is_debug_build(): return
+	if not OS.is_debug_build():
+		return
 	AP.warn(s)
 
 
 ## Logs an error to the GodotAP log and Godot error console, but only in a Debug build.
 static func dberror(s: Variant) -> void:
-	if not OS.is_debug_build(): return
+	if not OS.is_debug_build():
+		return
 	AP.error(s)
 #endregion
+
 
 # Current state of the websocket connection
 var _socket_state: WebSocketPeer.State = WebSocketPeer.STATE_CLOSED
@@ -553,8 +532,7 @@ func _poll() -> void:
 				WebSocketPeer.STATE_CLOSED: # Start a new connection
 					var err: Error = _socket.connect_to_url(get_url())
 					if err:
-						AP.log(
-								"Connection to '%s' failed! Retrying (%d)" % \
+						AP.log("Connection to '%s' failed! Retrying (%d)" % \
 								[get_url(), _connect_attempts])
 						_wss = not _wss
 						if _wss:
@@ -671,7 +649,7 @@ func _handle_command(json: Dictionary) -> void:
 			var err_str := str(json["errors"])
 			if output_console and _connecting_part:
 				_connecting_part.text = "Connection Refused!"
-				_connecting_part.tooltip_text += "\nERROR(S): "+err_str
+				_connecting_part.tooltip_text += "\nERROR(S): " + err_str
 				_connecting_part = null
 			AP.log("Connection errors: %s" % err_str)
 			connect_step.emit("ERR: %s" % err_str)
@@ -811,9 +789,11 @@ func _handle_command(json: Dictionary) -> void:
 			conn.setreply.emit(json)
 			
 		"InvalidPacket":
-			AP.log("[INVALID PACKET] Error with %s of command '%s' (%s)" % [json["type"],
-					json.get("original_cmd", "?"),
-					json["text"]])
+			AP.log("[INVALID PACKET] Error with %s of command '%s' (%s)" % [
+						json["type"],
+						json.get("original_cmd", "?"),
+						json["text"],
+					])
 			
 		_:
 			AP.log("[UNHANDLED PACKET TYPE] %s" % str(json))
@@ -822,7 +802,6 @@ func _handle_command(json: Dictionary) -> void:
 #region DATAPACKS
 # Local cache of DataPackages used when connecting
 var _datapack_cache: Dictionary 
-
 # List of DataPackages that are still being waited for
 var _datapack_pending: Array[String] = [] 
 
@@ -872,7 +851,7 @@ func _send_datapack_request() -> void:
 	if _datapack_pending:
 		var game = _datapack_pending.pop_front()
 		connect_step.emit("Fetching DataPackage for '%s'..." % game)
-		var req = [{"cmd":"GetDataPackage","games":[game]}]
+		var req = [{ "cmd": "GetDataPackage", "games": [game] }]
 		send_packet(req)
 		_cache_datapacks()
 	else:
@@ -929,8 +908,13 @@ func _receive_item(index: int, item: NetworkItem) -> bool:
 			flowbox.add_text_split(BaseConsole.make_location(item.loc_id, data))
 			flowbox.add_text_split(BaseConsole.make_text(")"))
 			output_console.add(flowbox)
-		msg = "You found your %s at %s!" % [data.get_item_name(item.id),data.get_loc_name(item.loc_id)]
+		
+		msg = "You found your %s at %s!" % [
+				data.get_item_name(item.id),
+				data.get_loc_name(item.loc_id),
+		]
 		_remove_loc(item.loc_id)
+		
 	elif item.dest_player_id == item.src_player_id:
 		if output_console and _printout_recieved_items:
 			var flowbox := ConsoleHFlow.new()
@@ -941,8 +925,13 @@ func _receive_item(index: int, item: NetworkItem) -> bool:
 			flowbox.add_text_split(BaseConsole.make_location(item.loc_id, data))
 			flowbox.add_text_split(BaseConsole.make_text(")"))
 			output_console.add(flowbox)
-		msg = "You found your %s at %s!" % [data.get_item_name(item.id),data.get_loc_name(item.loc_id)]
+		
+		msg = "You found your %s at %s!" % [
+				data.get_item_name(item.id),
+				data.get_loc_name(item.loc_id)
+		]
 		_remove_loc(item.loc_id)
+		
 	else:
 		var src_data: DataCache = conn.get_gamedata_for_player(item.src_player_id)
 		if output_console and _printout_recieved_items:
@@ -957,7 +946,11 @@ func _receive_item(index: int, item: NetworkItem) -> bool:
 			flowbox.add_text_split(BaseConsole.make_text(")"))
 			output_console.add(flowbox)
 
-		msg = "%s found your %s at their %s!" % [conn.get_player_name(item.src_player_id), data.get_item_name(item.id), src_data.get_loc_name(item.loc_id)]
+		msg = "%s found your %s at their %s!" % [
+			conn.get_player_name(item.src_player_id),
+			data.get_item_name(item.id),
+			src_data.get_loc_name(item.loc_id)
+		]
 
 	conn.obtained_item.emit(item)
 
@@ -967,8 +960,8 @@ func _receive_item(index: int, item: NetworkItem) -> bool:
 	if conn.received_items.size() == index:
 		conn.received_items.append(item)
 	else:
-		if conn.received_items.size() < index+1:
-			conn.received_items.resize(index+1)
+		if conn.received_items.size() < index + 1:
+			conn.received_items.resize(index + 1)
 		conn.received_items[index] = item
 
 	return true
@@ -1006,7 +999,7 @@ func on_removed(loc_name: String, proc: Callable) -> void:
 func collect_location(loc_id: int) -> void:
 	if _is_nongame_client: return
 	_printout_recieved_items = false
-	send_command("LocationChecks", {"locations":[loc_id]})
+	send_command("LocationChecks", { "locations": [loc_id] })
 	_remove_loc(loc_id)
 
 
@@ -1015,7 +1008,7 @@ func collect_locations(locs: Array[int]) -> void:
 	if _is_nongame_client: return
 	if locs.is_empty(): return
 	_printout_recieved_items = false
-	send_command("LocationChecks", {"locations":locs})
+	send_command("LocationChecks", { "locations": locs })
 	for loc_id in locs:
 		_remove_loc(loc_id)
 
@@ -1031,7 +1024,7 @@ func location_checked(loc_id: int, def := false) -> bool:
 	return conn.slot_locations.get(loc_id, def)
 
 
-## Returns a list of all location ids.
+## Returns a list of all location IDs.
 func location_list() -> Array[int]:
 	var arr: Array[int] = []
 	arr.assign(conn.slot_locations.keys())
@@ -1049,9 +1042,7 @@ func ap_reconnect_to_save() -> void:
 				s += "Please reconnect to the room previously used by this save file!"
 			else:
 				s += "Connect to a room when ready."
-			output_console.add(BaseConsole.make_text(
-					s,
-					"",
+			output_console.add(BaseConsole.make_text(s, "",
 					ComplexColor.as_special(SpecialColor.UI_MESSAGE)))
 	else:
 		ap_reconnect()
@@ -1070,12 +1061,12 @@ func _notification(what):
 #region CONSOLE
 ## Container for the current output console.
 var output_console_container: ConsoleContainer = null 
-
-
 ## The currently attached GodotAP console, if one exists.
 var output_console: BaseConsole :
-	get: return cmd_manager.console
-	set(val): cmd_manager.console = val
+	get:
+		return cmd_manager.console
+	set(val):
+		cmd_manager.console = val
 
 
 ## Loads [param console] as the active console and makes it the active scene in [param tree].
@@ -1094,15 +1085,19 @@ func load_packed_console_as_scene(tree: SceneTree, console: PackedScene) -> bool
 ## Loads [param console_scene] as the active console.
 ## The window this node is in will be considered the console window.
 func load_console(console_scene: Node, as_child := true) -> bool:
-	if output_console: return false
+	if output_console:
+		return false
+	
 	if console_scene is ConsoleContainer:
 		output_console_container = console_scene
+	
 	elif console_scene is Node:
 		output_console_container = Util.for_all_nodes(console_scene,
 			func(node):
 				return node is ConsoleContainer)
 		if not output_console_container:
 			return false
+	
 	if as_child: add_child.call_deferred(console_scene)
 	console_scene.ready.connect(func():
 		output_console = output_console_container.console
@@ -1113,12 +1108,14 @@ func load_console(console_scene: Node, as_child := true) -> bool:
 		output_console.tree_exiting.connect(close_console)
 		output_console_container.typing_bar.cmd_manager = cmd_manager
 		on_attach_console.emit())
+	
 	return true
 
 
 ## Opens a default Archipelago text console popup.
 func open_console() -> void:
-	if output_console: return
+	if output_console:
+		return
 	load_console(load("res://godot_ap/ui/ap_console_window.tscn").instantiate())
 
 
@@ -1145,7 +1142,7 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 					ComplexColor.as_special(SpecialColor.UI_MESSAGE)))
 		else:
 			if _ensure_connected(mgr.console):
-				send_command("Say", {"text":msg}))
+				send_command("Say", { "text": msg }))
 	
 	if can_connect:
 		cmd_manager.register_command(ConsoleCommand.new("/connect")
@@ -1166,14 +1163,14 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 				if command_args.size() != 4:
 					cmd.output_usage(mgr.console)
 				else:
-					var ipport = command_args[1].split(":",1)
+					var ipport = command_args[1].split(":", 1)
 					if ipport.is_empty():
 						cmd.output_usage(mgr.console)
 					if ipport.size() == 1 and ipport[0].length() == 5:
-						ipport = [creds.ip,ipport[0]]
+						ipport = [creds.ip, ipport[0]]
 					elif ipport.size() == 1:
 						ipport.append("38281")
-					ap_connect(ipport[0],ipport[1],command_args[2],command_args[3])))
+					ap_connect(ipport[0], ipport[1], command_args[2], command_args[3])))
 		
 		cmd_manager.register_command(ConsoleCommand.new("/reconnect")
 			.add_help("", "Refreshes the connection to the Archipelago server")
@@ -1192,12 +1189,12 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 						ap_disconnect()))
 	
 	cmd_manager.register_command(ConsoleCommand.new("/locations")
-		.add_help_cond(
-				"[filter]",
+		.add_help_cond("[filter]",
 				"Lists all locations (optionally matching a filter) for the current slot's game.",
 				is_ap_connected)
 		.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, msg: String):
-			if not _ensure_connected(mgr.console): return
+			if not _ensure_connected(mgr.console):
+				return
 			var filt := msg.substr(11)
 			var data: DataCache = conn.get_gamedata_for_player()
 			
@@ -1207,9 +1204,7 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 			
 			var title := "LOCATIONS"
 			if filt: title += " (%s)" % filt
-			var folder := BaseConsole.make_foldable(
-					"[ %s ]" % title,
-					msg,
+			var folder := BaseConsole.make_foldable("[ %s ]" % title, msg,
 					ComplexColor.as_special(SpecialColor.UI_MESSAGE))
 			mgr.console.add(folder)
 			folder.add(grid)
@@ -1241,9 +1236,12 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 			))
 	
 	cmd_manager.register_command(ConsoleCommand.new("/items")
-		.add_help_cond("[filter]", "Lists all items (optionally matching a filter) for the current slot's game.", is_ap_connected)
+		.add_help_cond("[filter]",
+				"Lists all items (optionally matching a filter) for the current slot's game.",
+				is_ap_connected)
 		.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, msg: String):
-			if not _ensure_connected(mgr.console): return
+			if not _ensure_connected(mgr.console):
+				return
 			var filt := msg.substr(7)
 			var data: DataCache = conn.get_gamedata_for_player()
 
@@ -1253,7 +1251,8 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 
 			var title := "ITEMS"
 			if filt: title += " (%s)" % filt
-			var folder := BaseConsole.make_foldable("[ %s ]" % title, msg, ComplexColor.as_special(SpecialColor.UI_MESSAGE))
+			var folder := BaseConsole.make_foldable("[ %s ]" % title, msg,
+					ComplexColor.as_special(SpecialColor.UI_MESSAGE))
 			mgr.console.add(folder)
 			folder.add(grid)
 			folder.fold(false)
@@ -1264,7 +1263,7 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 				if dict:
 					dict[item.flags] = dict.get(item.flags, 0) + 1
 				else:
-					item_dict[item.id] = {item.flags: 1}
+					item_dict[item.id] = { item.flags: 1 }
 
 			var ids: Array = data.item_name_to_id.values()
 			var _index_dict := {}
@@ -1307,9 +1306,7 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 								var c1 := BaseConsole.make_item(iid, flags, data)
 								grid.add_child(c1)
 								grid.add_child(
-										BaseConsole.make_text(
-												"x%d" % flag_options[flags],
-												"",
+										BaseConsole.make_text("x%d" % flag_options[flags], "",
 												ComplexColor.as_rich(c1.rich_color)))
 						else:
 							grid.add_child(BaseConsole.make_text(itm_name, "Item %d" % iid))
@@ -1317,8 +1314,8 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 								grid.add_child(Control.new())
 			elif filt:
 				grid.add_child(BaseConsole.make_text(
-					"No%s items found!" % (" matching" if filt else ""),
-					filt_ttip, ComplexColor.as_rich(AP.RichColor.SALMON)))
+					"No%s items found!" % (" matching" if filt else ""), filt_ttip, 
+					ComplexColor.as_rich(AP.RichColor.SALMON)))
 			mgr.console.add_header_spacing()
 			))
 			
@@ -1352,7 +1349,8 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 			.add_disable(func(): return _is_nongame_client)
 			.set_autofill(_autofill_locs)
 			.set_call(func(mgr: CommandManager, cmd: ConsoleCommand, msg: String):
-				if not _ensure_connected(mgr.console): return
+				if not _ensure_connected(mgr.console):
+					return
 				var command_args = msg.split(" ", true, 1)
 				if command_args.size() > 1 and command_args[1]:
 					var data = conn.get_gamedata_for_player(conn.player_id)
@@ -1360,9 +1358,7 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 						var loc_name := data.get_loc_name(loc)
 						if loc_name.strip_edges().to_lower() == command_args[1].strip_edges().to_lower():
 							if conn.slot_locations[loc]:
-								mgr.console.add(BaseConsole.make_text(
-										"Location already sent!",
-										"",
+								mgr.console.add(BaseConsole.make_text("Location already sent!", "",
 										ComplexColor.as_special(SpecialColor.UI_MESSAGE)))
 							else:
 								mgr.console.add(BaseConsole.make_text(
@@ -1375,7 +1371,8 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 							"Location '%s' not found! Check spelling?" % command_args[1].strip_edges(),
 							"",
 							ComplexColor.as_special(SpecialColor.UI_MESSAGE)))
-				else: cmd.output_usage(mgr.console)))
+				else:
+					cmd.output_usage(mgr.console)))
 		
 		cmd_manager.register_command(ConsoleCommand.new("/lock_info").debug()
 			.add_help("", "Prints the connection lock info")
@@ -1396,25 +1393,26 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 			.set_autofill(func(msg: String):
 				var args = msg.split(" ", 2)
 				var arg_count := args.size()
-				while args.size() < 3: args.append("")
+				while args.size() < 3:
+					args.append("")
 				var ret: Array[String] = []
 				var opts: Array[String] = []
 				if arg_count < 3:
-					opts.assign(["TextOnly","HintGame","Tracker",get_deathlink_tag()])
+					opts.assign(["TextOnly", "HintGame", "Tracker", get_deathlink_tag()])
 					var matched := false
 					for opt in opts:
 						if args[1] == opt:
 							matched = true
 							break
 						if opt.to_lower().begins_with(args[1].to_lower()):
-							ret.append("%s %s" % [args[0],opt])
+							ret.append("%s %s" % [args[0], opt])
 					if not matched:
 						return ret
 					ret.clear()
-				opts.assign(["true","false"])
+				opts.assign(["true", "false"])
 				for opt in opts:
 					if arg_count < 3 or opt.to_lower().begins_with(args[2].to_lower()):
-						ret.append("%s %s %s" % [args[0],args[1],opt])
+						ret.append("%s %s %s" % [args[0], args[1], opt])
 				return ret)
 			.set_call(func(mgr: CommandManager, cmd: ConsoleCommand, msg: String):
 				var args = msg.split(" ", true, 2)
@@ -1425,36 +1423,33 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 					return
 				if args.size() > 2:
 					var s = args[2].to_lower()
-					if s == "false": state = false
+					if s == "false":
+						state = false
 					elif s != "true":
 						cmd.output_usage(mgr.console)
 						return
 				set_tag(tag, state)
-				mgr.console.add(BaseConsole.make_text(
-						"Set tag '%s' to %s" % [args[1],state],
-						"",
+				mgr.console.add(BaseConsole.make_text("Set tag '%s' to %s" % [args[1], state], "",
 						ComplexColor.as_special(SpecialColor.UI_MESSAGE)))))
 				
 		cmd_manager.register_command(ConsoleCommand.new("/tags").debug()
 			.add_help("", "Prints out your connection tags")
 			.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, _msg: String):
-					mgr.console.add(BaseConsole.make_text(str(AP_GAME_TAGS),
-					"",
+					mgr.console.add(BaseConsole.make_text(str(AP_GAME_TAGS), "",
 					ComplexColor.as_special(SpecialColor.UI_MESSAGE)))))
 				
 		cmd_manager.register_command(ConsoleCommand.new("/slot_data").debug()
 			.add_help("", "Prints slot_data")
 			.add_disable(is_not_connected)
 			.set_call(func(mgr: CommandManager, _cmd: ConsoleCommand, _msg: String):
-					var folder := BaseConsole.make_foldable(
-							"[ SLOT_DATA ]", "/slot_data",
+					var folder := BaseConsole.make_foldable("[ SLOT_DATA ]", "/slot_data",
 							ComplexColor.as_special(SpecialColor.UI_MESSAGE))
 					mgr.console.add(folder)
 					folder.add(BaseConsole.make_indented_block(
-							JSON.stringify(Archipelago.conn.slot_data, "\t"), 
-							25))
+							JSON.stringify(Archipelago.conn.slot_data, "\t"), 25))
 					folder.fold(false)
 					))
+		
 		cmd_manager.setup_debug_commands()
 
 
@@ -1521,19 +1516,21 @@ static func get_item_classification(flags: int) -> String:
 		_: # If multiple bits are combined, make a comma-delimited list.
 			var s := ""
 			for q in 3:
-				if flags & (1<<q):
+				if flags & (1 << q):
 					if s:
 						s += ","
-					s += get_item_classification(1<<q)
+					s += get_item_classification(1 << q)
 			return s
 
 
 # no-op
-func _cmd_nil(_msg: String): pass
+func _cmd_nil(_msg: String):
+	pass
 
 
 func _autofill_locs(msg: String) -> Array[String]:
-	if not conn: return []
+	if not conn:
+		return []
 	var args = msg.split(" ", true, 1)
 	var data: DataCache = conn.get_gamedata_for_player(conn.player_id)
 	var locs: Array[String] = []
@@ -1543,13 +1540,14 @@ func _autofill_locs(msg: String) -> Array[String]:
 		var id: int = data.location_name_to_id[locs[ind]]
 		if location_checked(id, true):
 			locs.pop_at(ind)
-		else: ind += 1
+		else:
+			ind += 1
 	if args.size() > 1 and args[1]:
 		var arg_str = args[1].strip_edges().to_lower()
 		if arg_str.begins_with("\""):
 			arg_str = arg_str.substr(1)
 		if arg_str.ends_with("\""):
-			arg_str = arg_str.substr(0,arg_str.length()-1)
+			arg_str = arg_str.substr(0, arg_str.length() - 1)
 		var q := 0
 		while q < locs.size():
 			if not locs[q].strip_edges().to_lower().begins_with(arg_str):
@@ -1557,7 +1555,7 @@ func _autofill_locs(msg: String) -> Array[String]:
 			else:
 				q += 1
 	for q in locs.size():
-		locs[q] = "%s %s" % [args[0],locs[q]]
+		locs[q] = "%s %s" % [args[0], locs[q]]
 	return locs
 
 
@@ -1572,7 +1570,7 @@ func _autofill_items(msg: String) -> Array[String]:
 		if arg_str.begins_with("\""):
 			arg_str = arg_str.substr(1)
 		if arg_str.ends_with("\""):
-			arg_str = arg_str.substr(0,arg_str.length()-1)
+			arg_str = arg_str.substr(0, arg_str.length() - 1)
 		var q := 0
 		while q < itms.size():
 			if not itms[q].strip_edges().to_lower().begins_with(arg_str):
@@ -1580,7 +1578,7 @@ func _autofill_items(msg: String) -> Array[String]:
 			else:
 				q += 1
 	for q in itms.size():
-		itms[q] = "%s %s" % [args[0],itms[q]]
+		itms[q] = "%s %s" % [args[0], itms[q]]
 	return itms
 
 
@@ -1590,7 +1588,7 @@ var _is_nongame_client := false
 
 func _update_tags() -> void:
 	if status == APStatus.PLAYING:
-		send_command("ConnectUpdate", {"tags":AP_GAME_TAGS})
+		send_command("ConnectUpdate", { "tags": AP_GAME_TAGS })
 	_is_nongame_client = false
 	for tag in AP_GAME_TAGS:
 		if tag == "TextOnly" or tag == "Tracker" or tag == "HintGame":
@@ -1642,14 +1640,16 @@ func set_misc_tags(tags: Array[String]) -> void:
 func _ensure_connected(console: BaseConsole) -> bool:
 	if status == APStatus.PLAYING:
 		return true
-	console.add(BaseConsole.make_text("Not connected to Archipelago! Please connect first!", "", ComplexColor.as_special(SpecialColor.UI_MESSAGE)))
+	console.add(BaseConsole.make_text("Not connected to Archipelago! Please connect first!", "",
+			ComplexColor.as_special(SpecialColor.UI_MESSAGE)))
 	return false
 
 
 ## Changes this connection's DeathLink group.
 ## Will only send/receive deaths with other clients in the same group.
 func set_deathlink_group(group: String) -> void:
-	if group == deathlink_group: return
+	if group == deathlink_group:
+		return
 	var deathlink := is_deathlink()
 	if deathlink:
 		set_deathlink(false)
@@ -1707,7 +1707,7 @@ enum ClientStatus {
 ## Set the current Archipelago status.
 ## Set to [code]CLIENT_GOAL[/code] when the player has won.
 func set_client_status(stat: ClientStatus) -> void:
-	send_command("StatusUpdate", {"status": stat})
+	send_command("StatusUpdate", { "status": stat })
 
 
 ## Gets the status of the specified hint.
@@ -1715,8 +1715,10 @@ func find_hint_status(loc_id: int, default := NetworkHint.Status.UNSPECIFIED) ->
 	if location_checked(loc_id):
 		return NetworkHint.Status.FOUND
 	for hint in conn.hints:
-		if hint.item.src_player_id == conn.player_id and \
-			hint.item.loc_id == loc_id:
+		if (
+			hint.item.src_player_id == conn.player_id
+			and hint.item.loc_id == loc_id
+		):
 			return hint.status
 	return default
 
@@ -1724,8 +1726,10 @@ func find_hint_status(loc_id: int, default := NetworkHint.Status.UNSPECIFIED) ->
 # Used to override incoming packets from the Archipelago server.
 func _preparse_json(json: Dictionary) -> void:
 	var data: Array = json.get("data")
-	if not data: return
-	if data.size() != 1: return # Optimize, don't check if we know we don't care
+	if not data:
+		return
+	if data.size() != 1:
+		return # Optimize, don't check if we know we don't care
 
 	# Alter the 'compressed websocket' warning, to remove the part telling players to inform the developer, as it is a known issue.
 	if data[0]["text"] == "Warning: your client does not support compressed websocket connections! It may stop working in the future. If you are a player, please report this to the client\'s developer.":

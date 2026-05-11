@@ -3,13 +3,13 @@ class_name NetworkItem
 ##
 ## @tutorial(Archipelago Documentation): https://github.com/ArchipelagoMW/Archipelago/blob/main/docs/network%20protocol.md#networkitem
 
-## The item's id.
+## The item's ID.
 var id: int
-## The id of this item's location.
+## The ID of this item's location.
 var loc_id: int
-## The id of the player whose world this item is in.
+## The ID of the player whose world this item is in.
 var src_player_id: int
-## The id of the player who will receive this item.
+## The ID of the player who will receive this item.
 var dest_player_id: int
 ## Combination of bit flags with information about the item. See [enum AP.ItemClassification] for
 ## more information.
@@ -67,9 +67,16 @@ func get_name() -> String:
 
 
 func _to_string():
-	return "ITEM(%d at %d,player %d->%d,flags %d)" % [id,loc_id,src_player_id,dest_player_id,flags]
+	return "ITEM(%d at %d,player %d->%d,flags %d)" % [
+		id,
+		loc_id,
+		src_player_id,
+		dest_player_id,
+		flags
+	]
 
 
 ## Creates a label describing this item for outputting to a console.
 func output() -> ConsoleLabel:
-	return BaseConsole.make_item(id, flags, Archipelago.conn.get_gamedata_for_player(dest_player_id))
+	return BaseConsole.make_item(id, flags,
+			Archipelago.conn.get_gamedata_for_player(dest_player_id))

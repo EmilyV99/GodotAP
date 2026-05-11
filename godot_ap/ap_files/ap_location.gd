@@ -1,12 +1,10 @@
 class_name APLocation
 ## A multiworld location.
 
-## The location's id.
+## The location's ID.
 var id: int
-
 ## The location's name.
 var name: String
-
 ## Priority of the location as given by a hint.
 var hint_status: NetworkHint.Status
 

@@ -19,7 +19,6 @@ enum Status {
 	NOT_FOUND = -1, # Compat, can probaly remove soon
 }
 
-
 ## A mapping of [enum Status] to [String]s for display purposes.
 static var status_names: Dictionary[Status, String] = {
 	Status.FOUND: "Found",
@@ -29,8 +28,6 @@ static var status_names: Dictionary[Status, String] = {
 	Status.PRIORITY: "Priority",
 	Status.NOT_FOUND: "Not Found",
 }
-
-
 ## A mapping of [enum Status] to [enum AP.RichColor] for display purposes.
 static var status_colors: Dictionary[Status, AP.RichColor] = {
 	Status.FOUND: AP.RichColor.GREEN,
@@ -40,7 +37,6 @@ static var status_colors: Dictionary[Status, AP.RichColor] = {
 	Status.PRIORITY: AP.RichColor.PLUM,
 	Status.NOT_FOUND: AP.RichColor.RED,
 }
-
 
 ## The item that has been hinted.
 var item: NetworkItem
@@ -99,4 +95,10 @@ func as_plain_string() -> String:
 	]
 
 func _to_string():
-	return "HINT(%d %d %d %d %d)" % [item.src_player_id,item.id,item.dest_player_id,item.loc_id,status]
+	return "HINT(%d %d %d %d %d)" % [
+		item.src_player_id,
+		item.id,
+		item.dest_player_id,
+		item.loc_id,
+		status
+	]

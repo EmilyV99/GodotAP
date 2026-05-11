@@ -10,7 +10,7 @@ var game: String
 ## The type of the slot. [code]0x00[/code] if the slot is for a spectator, [code]0x01[/code] if it's
 ## for a player, and [code]0x02[/code] if it's for a group.
 var type: int #spectator = 0x00, player = 0x01, group = 0x02
-## If the slot is for a group, the ids of the players in the group.
+## If the slot is for a group, the IDs of the players in the group.
 var group_members: Array[int] = []
 
 
@@ -27,4 +27,4 @@ static func from(json: Dictionary) -> NetworkSlot:
 
 
 func _to_string():
-	return "SLOT(%s[%s],type %d,members %s)" % [name,game,type,group_members]
+	return "SLOT(%s[%s],type %d,members %s)" % [name, game, type, group_members]
