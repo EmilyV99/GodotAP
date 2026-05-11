@@ -73,7 +73,7 @@ func _ready() -> void:
 						Archipelago.ap_reconnect_to_save()))
 
 
-## Write save data to [SaveFile] on disk at index [member open_save_ind]
+## Write save data to [SaveFile] on disk at index [member open_save_ind].
 func save() -> void:
 	write_save(open_save_ind)
 
