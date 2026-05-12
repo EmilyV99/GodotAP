@@ -21,7 +21,7 @@ func get_classification() -> String:
 	return AP.get_item_classification(flags)
 
 
-## Create an item from a received [Dictionary]. If [param recv] is [code]true[/code], the 
+## Deserialize item information. If [param recv] is [code]true[/code], the 
 ## information is interpreted as an item found in another world. Otherwise the item is
 ## assumed to be found in the client's world.
 static func from(json: Dictionary, recv: bool) -> NetworkItem:
@@ -36,7 +36,7 @@ static func from(json: Dictionary, recv: bool) -> NetworkItem:
 	return v
 
 
-## Create an item from a [Dictionary] describing a hint.
+## Deserialize item information from a [Dictionary] describing a hint.
 static func from_hint(json: Dictionary) -> NetworkItem:
 	if json["class"] != "Hint":
 		return null
@@ -61,7 +61,7 @@ func is_prog() -> bool:
 	return flags & AP.ItemClassification.PROG
 
 
-## Returns the name of the item.
+## Get the name of the item.
 func get_name() -> String:
 	return Archipelago.conn.get_gamedata_for_player(dest_player_id).get_item_name(id)
 
@@ -76,7 +76,7 @@ func _to_string():
 	]
 
 
-## Creates a label describing this item for outputting to a console.
+## Create a label describing this item for outputting to a console.
 func output() -> ConsoleLabel:
 	return BaseConsole.make_item(id, flags,
 			Archipelago.conn.get_gamedata_for_player(dest_player_id))

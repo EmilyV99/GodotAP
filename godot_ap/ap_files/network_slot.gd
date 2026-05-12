@@ -14,7 +14,7 @@ var type: int
 var group_members: Array[int] = []
 
 
-## Create a slot from a [Dictionary].
+## Deserialize slot information from a [Dictionary].
 static func from(json: Dictionary) -> NetworkSlot:
 	if json["class"] != "NetworkSlot":
 		return null

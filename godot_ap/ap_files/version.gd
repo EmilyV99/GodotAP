@@ -12,7 +12,7 @@ extends Resource
 @export var build := 0
 
 
-## Create a version object from a [Dictionary].
+## Deserialize a version object from a [Dictionary].
 static func from(json: Dictionary) -> Version:
 	if json["class"] != "Version":
 		return null

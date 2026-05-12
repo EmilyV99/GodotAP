@@ -29,7 +29,7 @@ func get_name(use_alias := true) -> String:
 	return ret
 
 
-## Create a player from a [Dictionary].
+## Deserialize player information from a [Dictionary].
 static func from(json: Dictionary) -> NetworkPlayer:
 	if json["class"] != "NetworkPlayer":
 		return null
