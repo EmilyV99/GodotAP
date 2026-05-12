@@ -1,6 +1,10 @@
 class_name APSaveManager 
 extends Node
 ## Save file manager.
+##
+## Manages saving information stored in [SaveFile] instances to disk. If more information should be
+## saved to disk, extend this class and override [method make_save_file] to return a subclass of
+## [SaveFile] with the desired extra information.
 
 ## Header for save files.
 @export var SAVE_HEADER: String = "GodotAP_Save_File"
