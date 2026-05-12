@@ -1,7 +1,7 @@
 class_name SaveFile
 ## GodotAP connection & session save file.
 
-## Information that's locked to a room.
+## A room lock, preventing the save from connecting to the wrong room once locked.
 var aplock: APLock = APLock.new()
 ## Room connection information.
 var creds: APCredentials = APCredentials.new()

@@ -9,7 +9,7 @@ var name : String
 var game: String
 ## The type of the slot. [code]0x00[/code] if the slot is for a spectator, [code]0x01[/code] if it's
 ## for a player, and [code]0x02[/code] if it's for a group.
-var type: int #spectator = 0x00, player = 0x01, group = 0x02
+var type: int
 ## If the slot is for a group, the IDs of the players in the group.
 var group_members: Array[int] = []
 

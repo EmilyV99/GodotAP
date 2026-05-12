@@ -78,7 +78,7 @@ func save() -> void:
 	write_save(open_save_ind)
 
 
-## Read save file at index [param ind] from disk. [param ind] must be greater than 0.
+## Read save file at index [param ind] from disk. [param ind] must be nonnegative.
 ## Returns [code]true[/code] if read is successful. Save will be assigned to [member open_save] if
 ## successful.
 func read_save(ind: int) -> bool:
@@ -101,7 +101,7 @@ func read_save(ind: int) -> bool:
 	return true
 
 
-## Write save file to save at index [param ind] on disk. [param ind] must be greater than 0.
+## Write save file to save at index [param ind] on disk. [param ind] must be nonnegative.
 ## Returns [code]true[/code] if successful.
 func write_save(ind: int) -> bool:
 	if ind < 0:
