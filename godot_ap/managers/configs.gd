@@ -7,41 +7,13 @@ extends Node
 signal config_changed
 
 ## Configuration file format version.
-const CFG_VERSION: int = 1
+const CFG_VERSION: int = 2
 
 ## Configuration file header.
 const CONFIG_HEADER := "GodotAP Settings File"
 
 var _pause_saving := false
 
-# NOTE: Is currently unused. Consequently, I (the person writing the documentation) can't write
-# documentation for this, as I don't know what it's meant to do. 
-var is_tracking := false :
-	set(val):
-		if val != is_tracking:
-			is_tracking = val
-			save_cfg()
-			config_changed.emit()
-
-# NOTE: Is currently unused. Consequently, I (the person writing the documentation) can't write
-# documentation for this, as I don't know what it's meant to do.
-var verbose_trackerpack := false :
-	set(val):
-		if val != verbose_trackerpack:
-			verbose_trackerpack = val
-			save_cfg()
-			config_changed.emit()
-
-# NOTE: Is currently unused. Consequently, I (the person writing the documentation) can't write
-# documentation for this, as I don't know what it's meant to do.
-var hide_finished_map_squares := false :
-	set(val):
-		if val != hide_finished_map_squares:
-			hide_finished_map_squares = val
-			save_cfg()
-			config_changed.emit()
-
-## Path to the [Theme] to use for the console.
 var window_theme_path: String :
 	set(val):
 		if val != window_theme_path:
@@ -113,11 +85,8 @@ func _load_cfg(file: FileAccess) -> bool:
 	if file.get_pascal_string() != CONFIG_HEADER:
 		return false
 	var vers := file.get_32()
-	# all versions
-	var byte := file.get_8()
-	is_tracking = (byte & 0b00000001) != 0
-	verbose_trackerpack = (byte & 0b00000010) != 0
-	hide_finished_map_squares = (byte & 0b00000100) != 0
+	if vers < 2:
+		file.get_8() # old trackerpack vars
 	window_theme_path = file.get_pascal_string()
 	if vers >= 1:
 		uuid = file.get_pascal_string()
@@ -127,14 +96,6 @@ func _load_cfg(file: FileAccess) -> bool:
 func _save_cfg(file: FileAccess):
 	file.store_pascal_string(CONFIG_HEADER)
 	file.store_32(CFG_VERSION)
-	var byte = 0
-	if is_tracking:
-		byte |= 0b00000001
-	if verbose_trackerpack:
-		byte |= 0b00000010
-	if hide_finished_map_squares:
-		byte |= 0b00000100
-	file.store_8(byte)
 	file.store_pascal_string(window_theme_path)
 	# CFG_VERSION >= 1
 	file.store_pascal_string(uuid)
