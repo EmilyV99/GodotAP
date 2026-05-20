@@ -1,17 +1,27 @@
-class_name APConfigManager extends Node
+class_name APConfigManager
+extends Node
+## Configuration management for GodotAP.
 
+## Emits when configuration is changed.
 @warning_ignore("unused_signal")
 signal config_changed
+
+## Configuration file format version.
 const CFG_VERSION: int = 2
+
+## Configuration file header.
 const CONFIG_HEADER := "GodotAP Settings File"
 
 var _pause_saving := false
+
 var window_theme_path: String :
 	set(val):
 		if val != window_theme_path:
 			window_theme_path = val
 			save_cfg()
 			config_changed.emit()
+
+## Client UUID.
 var uuid: String :
 	set(val):
 		if val != uuid:
@@ -19,6 +29,8 @@ var uuid: String :
 			save_cfg()
 			config_changed.emit()
 
+
+## Generate a version 4 UUID.
 static func generate_uuid() -> String:
 	var ret := ""
 	for q in 8:
@@ -39,11 +51,14 @@ static func generate_uuid() -> String:
 		ret += String.num_int64(randi_range(0, 16), 16, true)
 	return ret
 
+
 func _ready():
 	load_cfg()
 	if not uuid:
 		uuid = generate_uuid()
 
+
+## Load config from persistent user data. Returns [code]true[/code] if successful.
 func load_cfg() -> bool:
 	DirAccess.make_dir_recursive_absolute("user://ap/")
 	var file: FileAccess = FileAccess.open("user://ap/settings.dat", FileAccess.READ)
@@ -54,12 +69,17 @@ func load_cfg() -> bool:
 	file.close()
 	_pause_saving = false
 	return ret
+
+
+## Save config to persistent user data.
 func save_cfg() -> void:
-	if _pause_saving: return
+	if _pause_saving:
+		return
 	DirAccess.make_dir_recursive_absolute("user://ap/")
 	var file: FileAccess = FileAccess.open("user://ap/settings.dat", FileAccess.WRITE)
 	_save_cfg(file)
 	file.close()
+
 
 func _load_cfg(file: FileAccess) -> bool:
 	if file.get_pascal_string() != CONFIG_HEADER:
@@ -71,6 +91,8 @@ func _load_cfg(file: FileAccess) -> bool:
 	if vers >= 1:
 		uuid = file.get_pascal_string()
 	return true
+
+
 func _save_cfg(file: FileAccess):
 	file.store_pascal_string(CONFIG_HEADER)
 	file.store_32(CFG_VERSION)

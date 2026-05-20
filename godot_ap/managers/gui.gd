@@ -1,5 +1,6 @@
 class_name GUI
 
+## Create a checkbox with a label and a callback.
 static func make_cbox_row(s: String, initial_state: bool, proc: Callable) -> HBoxContainer:
 	var hbox := HBoxContainer.new()
 	hbox.set_anchors_preset(Control.PRESET_CENTER)
