@@ -552,7 +552,7 @@ func _handle_command(json: Dictionary) -> void: # Handle an incoming packet from
 		"PrintJSON":
 			_preparse_json(json)
 			var s: String = (output_console.printjson_command(json) if output_console
-				else BaseConsole.printjson_str(json["data"]))
+				else BaseConsole.printjson_out_str(json["data"]))
 			AP.log("[PRINT] %s" % s)
 			printjson.emit(json, s)
 		"DataPackage":
