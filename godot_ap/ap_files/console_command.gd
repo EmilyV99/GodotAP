@@ -57,7 +57,7 @@ func set_call(caller: Callable) -> ConsoleCommand:
 
 ## Set [member autofill_proc].
 func set_autofill(caller: Variant) -> ConsoleCommand:
-	assert(caller is bool or caller is Callable)
+	assert(caller is Callable)
 	autofill_proc = caller
 	return self
 

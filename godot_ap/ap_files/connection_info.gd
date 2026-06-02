@@ -14,7 +14,7 @@ var gen_version: Version
 var seed_name: String 
 ## The ID of your player.
 var player_id: int 
-## The ID of your team (unimplemented).
+## The ID of your team.
 var team_id: int 
 ## The slot data from the server.
 var slot_data: Dictionary 
@@ -33,6 +33,7 @@ var hints: Array[NetworkHint] = [] :
 			AP.warn("""Tried to access hint information, but the client isn't listening for hints from the server!
 			Call 'set_hint_notify()' or 'install_hint_listenter()' first!""")
 		return hints
+
 ## All locations, by ID.
 var locations: Dictionary[int, APLocation] = {}
 ## All locations, by name.
@@ -122,9 +123,11 @@ signal setreply(json: Dictionary)
 signal roomupdate(json: Dictionary)
 ## Emitted for each item received.
 signal obtained_item(item: NetworkItem)
-## Emitted for each item [i]packet[/i] received.
+## Emitted for each item [i]packet[/i] received, after [signal obtained_item]
+## is emitted for each individual item.
 signal obtained_items(items: Array[NetworkItem])
-## Emitted when the server re-sends ALL obtained items.
+## Emitted when the server re-sends ALL obtained items, after
+## [signal obtained_items] fires.
 signal refresh_items(items: Array[NetworkItem])
 ## Used as part of the [method set_hint_notify] / [method install_hint_listener] functions.
 ## Use [method set_hint_notify] instead of connecting to this signal directly.

@@ -12,6 +12,7 @@ var _commands: Array[ConsoleCommand]
 var _commands_by_name: Dictionary[String, ConsoleCommand]
 
 ## Controls if debug commands should be hidden.
+## Cannot be modified in non-debug builds.
 var debug_hidden := true :
 	set(val):
 		if not OS.is_debug_build():
@@ -98,7 +99,7 @@ func call_cmd(msg: String) -> void:
 		return
 	var cmd := get_command(msg.split(" ", true, 1)[0])
 	if cmd and cmd.call_proc:
-		if cmd.is_disabled():
+		if cmd.is_disabled() or (cmd.is_debug() and debug_disabled()):
 			console.add(BaseConsole.make_text("Command '%s' is disabled!" % cmd.text, "",
 					AP.ComplexColor.as_special(AP.SpecialColor.UI_MESSAGE)))
 		else:
@@ -122,7 +123,7 @@ func get_command(cmdname: String) -> ConsoleCommand:
 
 # Check if [param cmd] is enabled.
 static func _cmd_is_enabled(cmd: ConsoleCommand) -> bool:
-	return not cmd.is_disabled()
+	return not (cmd.is_disabled() or (cmd.is_debug() and debug_disabled()))
 
 
 # Check if [param cmd] is debug-only.
