@@ -48,8 +48,9 @@ func debug_disabled() -> bool:
 	return debug_hidden
 
 
-## Get the autofilled parameters for a command message, up to the number of arguments specified in
-## [param capacity].
+## Get the autofilled arguments for a command message, up to the number of arguments specified in
+## [param capacity]. If [param capacity] is [code]0[/code], all available autofilled arguments will
+## be returned.
 func autofill(msg: String, capacity := 5) -> Array[String]:
 	if msg.is_empty():
 		return []

@@ -211,7 +211,8 @@ static func is_rich_color_name(s: String) -> bool:
 	return RichColor.keys().map(func(c): return str(c).to_lower()).has(s)
 
 
-## Gets a [enum RichColor] from [param s]. [code]NIL[/code] is returned if the string is invalid.
+## Gets a [enum RichColor] from [param s]. [member AP.ComplexColor.NIL] is returned if the string is
+## invalid.
 static func rich_color_from_name(s: String) -> RichColor:
 	var ind: int = RichColor.keys().map(func(c): return str(c).to_lower()).find(s)
 	if ind > -1:
@@ -297,10 +298,9 @@ var _socket: WebSocketPeer
 ## [code]godot_ap/autoloads/archipelago.tscn[/code].
 var config : APConfigManager
 ## A save manager, designed to handle local save files tied to a specific room/slot.
-## Null unless a node inheriting from [APSaveManager] is added to to 
-## [code]godot_ap/autoloads/archipelago.tscn[/code].
 ## [br][br]
-## Can be [code]null[/code] if not provided in [code]godot_ap/autoloads/archipelago.tscn[/code].
+## Is [code]null[/code] unless a node inheriting from [APSaveManager] is added to
+## [code]godot_ap/autoloads/archipelago.tscn[/code].
 var save_manager : APSaveManager
 
 #region CONNECTION

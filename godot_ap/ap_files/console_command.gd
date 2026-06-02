@@ -34,7 +34,7 @@ var call_proc: Variant = null # Callable(ConsoleCommand,String)->void | null
 ## [br][br]
 ## Should take a [String] as its first parameter and return an [Array] of [String]s. The parameter
 ## contains the current input by the user, and the returned value contains an array of possible
-## completions
+## completions.
 var autofill_proc: Variant = null # Callable(String)->Array[String] | null
 ## An [Array] of [Callable]s that determine whether or not this command is disabled. If any return
 ## [code]true[/code], this command is considered disabled.
