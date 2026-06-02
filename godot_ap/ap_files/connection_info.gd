@@ -10,13 +10,13 @@ class_name ConnectionInfo
 var serv_version: Version 
 ## The generator's Archipelago version.
 var gen_version: Version 
-## The seed name received from the server.
+## The [code]seed_name[/code] received from the server.
 var seed_name: String 
 ## The ID of your player.
 var player_id: int 
 ## The ID of your team.
 var team_id: int 
-## The slot data from the server.
+## The [code]slot_data[/code] from the server.
 var slot_data: Dictionary 
 ## The players in this Multiworld.
 var players: Array[NetworkPlayer] 
