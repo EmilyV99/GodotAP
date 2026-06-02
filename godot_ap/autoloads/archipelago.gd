@@ -160,7 +160,7 @@ class ComplexColor:
 		return ret
 
 
-	## Get the color represented by this complex color for the proviced [param node].
+	## Get the color represented by this complex color for the provided [param node].
 	## [param node] is needed, as the representation can depend on the node's [Theme].
 	func calculate(node: Control) -> Color:
 		if rich:
@@ -1645,7 +1645,7 @@ func _ensure_connected(console: BaseConsole) -> bool:
 	return false
 
 
-## Changes this connection's DeathLink group.
+## Changes this connection's DeathLink group name.
 ## Will only send/receive deaths with other clients in the same group.
 func set_deathlink_group(group: String) -> void:
 	if group == deathlink_group:
