@@ -544,8 +544,7 @@ func _handle_command(json: Dictionary) -> void: # Handle an incoming packet from
 			connect_step.emit("Connected!")
 			if AP_PRINT_ITEMS_ON_CONNECT:
 				_printout_recieved_items = true
-				await get_tree().create_timer(3).timeout
-				_printout_recieved_items = false
+				get_tree().create_timer(3).timeout.connect(func(): _printout_recieved_items = false)
 
 			conn._load_locations()
 			connected.emit(conn, json)
