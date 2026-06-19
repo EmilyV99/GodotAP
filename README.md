@@ -25,6 +25,6 @@ Running the project itself will produce just the basic console, designed as an a
 ### How to Use
 The intended use is to include `godotap/autoloads/archipelago.tscn` as an AutoLoad for your own Godot project (along with including the entire `godotap` folder). This should enable you to connect to and interact with an Archipelago server via gdscript.
 
-The CommonClient can be popped up as a separate window attached to your game, and can be extended with whatever new tabs and features you care to implement. Simply setting the `Ap Auto Open Console` checkbox on the `archipelago.tscn` root node will cause a default console window to open; or you can open a custom client by following steps similar to `godotap/ui/commonclient_main.gd`.
+The CommonClient can be popped up as a separate window attached to your game, and can be extended with whatever new tabs and features you care to implement. Simply setting the `Ap Auto Open Console` checkbox on the `archipelago.tscn` root node will cause a default console window to open; or you can open a custom client by following steps similar to `godotap/ui/godotap_main.gd`.
 
 By listening to the appropriate signals in the `archipelago.gd` script and the `conn: ConnectionInfo` member inside it (which resets each time you reconnect), you can handle incoming messages from the server; and various functions are available to call for outgoing messages to the server.
