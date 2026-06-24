@@ -283,7 +283,8 @@ func send_bounce(
 
 ## Sends a [code]Bounce[/code] packet designed for the DeathLink feature
 ## Requires DeathLink being enabled, see [method AP.set_deathlink]
-## Only players in the same DeathLink group will be killed.
+## Only players in the same DeathLink group will be killed, see
+## [member AP.deathlink_group].
 func send_deathlink(cause: String = ""):
 	if not Archipelago.is_deathlink():
 		AP.log("Tried to send DeathLink while DeathLink is not enabled!")
@@ -298,7 +299,7 @@ func send_deathlink(cause: String = ""):
 
 
 ## Sends a [code]Bounce[/code] packet designed for the TrapLink feature
-## Requires the client be connected with the [code]TrapLink[/code] tag
+## Requires TrapLink being enabled, see [method AP.set_traplink].
 func send_traplink(trap_name: String):
 	if not Archipelago.is_traplink():
 		AP.log("Tried to send TrapLink while TrapLink is not enabled!")
