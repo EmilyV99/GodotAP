@@ -866,7 +866,7 @@ func load_console(console_scene: Node, as_child := true) -> bool:
 ## Opens a default Archipelago text console popup
 func open_console() -> void:
 	if output_console: return
-	load_console(load("res://godot_ap/ui/ap_console_window.tscn").instantiate())
+	load_console(load("%s/ui/ap_console_window.tscn" % get_folder_base()).instantiate())
 ## Closes the currently attached console
 func close_console() -> void:
 	if output_console:
@@ -1197,6 +1197,12 @@ static func get_item_classification(flags: int) -> String:
 						s += ","
 					s += get_item_classification(1<<q)
 			return s
+
+## Gets the path to the godot_ap folder, usually just [code]"res://godot_ap"[/code] [br]
+## This way, the folder can be inside another folder, such as addons 
+## (would then return [code]"res://addons/godot_ap"[/code])
+static func get_folder_base() -> String:
+	return (AP as GDScript).resource_path.get_base_dir().get_base_dir()
 
 func _cmd_nil(_msg: String): pass
 func _autofill_locs(msg: String) -> Array[String]:

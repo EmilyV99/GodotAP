@@ -68,6 +68,8 @@ func _load_cfg(file: FileAccess) -> bool:
 	if vers < 2:
 		file.get_8() # old trackerpack vars
 	window_theme_path = file.get_pascal_string()
+	if window_theme_path.contains("godot_ap/"):
+		window_theme_path = AP.get_folder_base() + window_theme_path.get_slice("godot_ap", 1)
 	if vers >= 1:
 		uuid = file.get_pascal_string()
 	return true
