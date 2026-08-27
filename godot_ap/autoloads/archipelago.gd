@@ -215,6 +215,8 @@ var last_sent_traplink_time: float
 
 ## The group that is used for DeathLink for this connection
 var deathlink_group: String : set = set_deathlink_group, get = get_deathlink_group
+## The group that is used for TrapLink for this connection
+var traplink_group: String : set = set_traplink_group, get = get_traplink_group
 
 ## The current connection credentials to be used
 var creds: APCredentials = APCredentials.new()
@@ -604,7 +606,7 @@ func _handle_command(json: Dictionary) -> void: # Handle an incoming packet from
 				var source: String = json["data"].get("source", "")
 				var cause: String = json["data"].get("cause", "")
 				conn.deathlink.emit(source, cause, json)
-			if tags.has("TrapLink"):
+			if tags.has(get_traplink_tag()):
 				var tstamp: float = json["data"].get("time", 0.0)
 				if absf(tstamp - last_sent_traplink_time) < 0.5:
 					return # Skip traps from self
@@ -1280,7 +1282,7 @@ func set_tags(tags: Array[String]) -> void:
 		_update_tags()
 ## Sets the Archipelago connection tags (overwrites tags except supported tags 'DeathLink' / 'TrapLink')
 func set_misc_tags(tags: Array[String]) -> void:
-	var supported_tags: Array[String] = [get_deathlink_tag(), "TrapLink"]
+	var supported_tags: Array[String] = [get_deathlink_tag(), get_traplink_tag()]
 	tags = tags.duplicate()
 	for tag in supported_tags:
 		if tag in AP_GAME_TAGS:
@@ -1319,12 +1321,29 @@ func set_deathlink(state: bool) -> void:
 func is_deathlink() -> bool:
 	return has_tag(get_deathlink_tag())
 
+## Changes this connection's TrapLink group
+## Will only send/receive traps with other clients in the same group
+func set_traplink_group(group: String) -> void:
+	if group == traplink_group: return
+	var traplink := is_traplink()
+	if traplink:
+		set_traplink(false)
+	traplink_group = group
+	if traplink:
+		set_traplink(true)
+## Returns the current TrapLink group name
+## Will only send/receive traps with other clients in the same group
+func get_traplink_group() -> String:
+	return traplink_group
+## Returns the tag being used for TrapLink (including TrapLink group support)
+func get_traplink_tag() -> String:
+	return "TrapLink" + traplink_group
 ## Turn 'TrapLink' on or off
 func set_traplink(state: bool) -> void:
-	set_tag("TrapLink", state)
+	set_tag(get_traplink_tag(), state)
 ## Check if 'TrapLink' is on
 func is_traplink() -> bool:
-	return has_tag("TrapLink")
+	return has_tag(get_traplink_tag())
 
 ## Archipelago client statuses
 enum ClientStatus {

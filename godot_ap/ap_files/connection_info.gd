@@ -237,4 +237,4 @@ func send_traplink(trap_name: String):
 	cmd["data"]["source"] = get_player_name(-1, false)
 	Archipelago.last_sent_traplink_time = Time.get_unix_time_from_system()
 	cmd["data"]["time"] = Archipelago.last_sent_traplink_time
-	send_bounce(cmd, [], [], ["TrapLink"])
+	send_bounce(cmd, [], [], [Archipelago.get_traplink_tag()])
