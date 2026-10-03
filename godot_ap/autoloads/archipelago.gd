@@ -275,6 +275,10 @@ var last_sent_deathlink_time: float
 var last_sent_traplink_time: float
 ## The group that is used for DeathLink for this connection
 var deathlink_group: String : set = set_deathlink_group, get = get_deathlink_group
+
+## The group that is used for TrapLink for this connection
+var traplink_group: String : set = set_traplink_group, get = get_traplink_group
+
 ## The current connection credentials to be used.
 var creds: APCredentials = APCredentials.new()
 ## The current APLock object. Saving an APLock object in a save file allows you to lock it to a 
@@ -769,7 +773,7 @@ func _handle_command(json: Dictionary) -> void:
 				var source: String = json["data"].get("source", "")
 				var cause: String = json["data"].get("cause", "")
 				conn.deathlink.emit(source, cause, json)
-			if tags.has("TrapLink"):
+			if tags.has(get_traplink_tag()):
 				var tstamp: float = json["data"].get("time", 0.0)
 				if absf(tstamp - last_sent_traplink_time) < 0.5:
 					return # Skip traps from self
@@ -1120,7 +1124,7 @@ func load_console(console_scene: Node, as_child := true) -> bool:
 func open_console() -> void:
 	if output_console:
 		return
-	load_console(load("res://godot_ap/ui/ap_console_window.tscn").instantiate())
+	load_console(load("%s/ui/ap_console_window.tscn" % get_folder_base()).instantiate())
 
 
 ## Closes the currently attached console.
@@ -1526,12 +1530,16 @@ static func get_item_classification(flags: int) -> String:
 					s += get_item_classification(1 << q)
 			return s
 
+## Gets the path to the godot_ap folder, usually just [code]"res://godot_ap"[/code] [br]
+## This way, the folder can be inside another folder, such as addons 
+## (would then return [code]"res://addons/godot_ap"[/code])
+static func get_folder_base() -> String:
+	return (AP as GDScript).resource_path.get_base_dir().get_base_dir()
 
 # no-op
 func _cmd_nil(_msg: String):
 	pass
-
-
+  
 func _autofill_locs(msg: String) -> Array[String]:
 	if not conn:
 		return []
@@ -1631,7 +1639,7 @@ func set_tags(tags: Array[String]) -> void:
 ## Sets the Archipelago connection tags.
 ## Overwrites tags except supported tags [code]DeathLink[/code] / [code]TrapLink[/code].
 func set_misc_tags(tags: Array[String]) -> void:
-	var supported_tags: Array[String] = [get_deathlink_tag(), "TrapLink"]
+	var supported_tags: Array[String] = [get_deathlink_tag(), get_traplink_tag()]
 	tags = tags.duplicate()
 	for tag in supported_tags:
 		if tag in AP_GAME_TAGS:
@@ -1682,15 +1690,29 @@ func set_deathlink(state: bool) -> void:
 func is_deathlink() -> bool:
 	return has_tag(get_deathlink_tag())
 
-
+## Changes this connection's TrapLink group
+## Will only send/receive traps with other clients in the same group
+func set_traplink_group(group: String) -> void:
+	if group == traplink_group: return
+	var traplink := is_traplink()
+	if traplink:
+		set_traplink(false)
+	traplink_group = group
+	if traplink:
+		set_traplink(true)
+## Returns the current TrapLink group name
+## Will only send/receive traps with other clients in the same group
+func get_traplink_group() -> String:
+	return traplink_group
+## Returns the tag being used for TrapLink (including TrapLink group support)
+func get_traplink_tag() -> String:
+	return "TrapLink" + traplink_group
 ## Turn TrapLink on or off.
 func set_traplink(state: bool) -> void:
-	set_tag("TrapLink", state)
-
-
+	set_tag(get_traplink_tag(), state)
 ## Check if TrapLink is on.
 func is_traplink() -> bool:
-	return has_tag("TrapLink")
+	return has_tag(get_traplink_tag())
 
 
 ## Archipelago client statuses.

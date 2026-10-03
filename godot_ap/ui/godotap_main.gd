@@ -17,7 +17,7 @@ func _ready():
 		Archipelago.close_console()
 	get_window().min_size = Vector2(750,400)
 	get_window().title = "AP Text Client"
-	Archipelago.load_packed_console_as_scene(get_tree(), load("res://godot_ap/ui/common_client.tscn"))
+	Archipelago.load_packed_console_as_scene(get_tree(), load("%s/ui/common_client.tscn" % AP.get_folder_base()))
 
 static func load_connection():
 	var conn_info_file: FileAccess = FileAccess.open("user://ap/connection.dat", FileAccess.READ)

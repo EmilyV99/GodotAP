@@ -1,6 +1,10 @@
 @tool class_name ConsoleLabel extends Label
 
-static var _scene := preload("res://godot_ap/ui/console/console_label.tscn") as PackedScene
+static var _scene: PackedScene = null:
+	get():
+		if _scene == null:
+			_scene = load((ConsoleLabel as GDScript).resource_path.replace(".gd", ".tscn"))
+		return _scene
 
 signal clicked(index: MouseButton)
 signal changed_rich_color(color: AP.RichColor)
