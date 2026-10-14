@@ -196,7 +196,7 @@ func force_scout_all() -> void: ## Scouts every location into the local cache
 	Archipelago.send_command("LocationScouts", {"locations": slot_locations.keys(), "create_as_hint": 0})
 
 ## Sends a `Bounce` packet with whatever information you like
-func send_bounce(data: Dictionary, target_games: Array[String], target_slots: Array[String], target_tags: Array[String]) -> void:
+func send_bounce(data: Dictionary, target_games: Array[String], target_slots: Array[int], target_tags: Array[String]) -> void:
 	var cmd: Dictionary = {}
 	if target_games:
 		cmd["games"] = target_games
