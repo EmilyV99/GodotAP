@@ -4,6 +4,7 @@ extends GridContainer
 @onready var portbox: LineEdit = $Port_Box
 @onready var slotbox: LineEdit = $Slot_Box
 @onready var pwdbox: LineEdit = $Pwd_Box
+@onready var showpwd = $HBox/ShowPwd
 @onready var errlbl: Label = $ErrorLabel
 
 func _ready() -> void:
@@ -11,6 +12,8 @@ func _ready() -> void:
 	refresh_creds(Archipelago.creds)
 	Archipelago.connected.connect(func(_conn,_json): update_connection(true))
 	Archipelago.disconnected.connect(func(): update_connection(false))
+	pwdbox.secret = true
+	showpwd.toggled.connect(_on_showpwd_toggled)
 func refresh_creds(creds: APCredentials) -> void:
 	ipbox.text = creds.ip
 	portbox.text = creds.port
@@ -44,3 +47,5 @@ func _on_connect_success(_conn: ConnectionInfo, _json: Dictionary) -> void:
 func _on_connect_refused(_conn: ConnectionInfo, json: Dictionary) -> void:
 	_disconnect_signals()
 	errlbl.text = "ERROR: " + (", ".join(json.get("errors", ["Unknown"])))
+func _on_showpwd_toggled(button_pressed):
+	pwdbox.secret = not button_pressed
