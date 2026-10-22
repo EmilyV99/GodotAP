@@ -266,7 +266,8 @@ func send_bounce(
 	data: Dictionary,
 	target_games: Array[String],
 	target_slots: Array[String],
-	target_tags: Array[String]
+	target_tags: Array[String],
+	operator: String = "legacy"
 ) -> void:
 	var cmd: Dictionary = {}
 	if target_games:
@@ -275,6 +276,10 @@ func send_bounce(
 		cmd["slots"] = target_slots
 	if target_tags:
 		cmd["tags"] = target_tags
+	if operator:
+		if operator not in ["or", "and", "legacy"]:
+			operator = "legacy"
+		cmd["operator"] = operator
 	if not cmd:
 		return
 	cmd.merge(data)
