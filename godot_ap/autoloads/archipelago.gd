@@ -815,7 +815,7 @@ func handle_datapackage_checksums(checksums: Dictionary) -> void:
 	DirAccess.make_dir_recursive_absolute("user://ap/datapacks/") # Ensure the directory exists, for later
 	var cachefile: FileAccess = FileAccess.open("user://ap/datapacks/cache.dat", FileAccess.READ)
 	if cachefile:
-		_datapack_cache = cachefile.get_var(true)
+		_datapack_cache = cachefile.get_var(false)
 		cachefile.close()
 	_datapack_pending = []
 	for game: String in checksums.keys():
