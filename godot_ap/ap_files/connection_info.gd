@@ -278,6 +278,7 @@ func send_bounce(
 		cmd["tags"] = target_tags
 	if operator:
 		if operator not in ["or", "and", "legacy"]:
+			AP.warn("Invalid operator '%s' - correcting to default 'legacy'" % operator)
 			operator = "legacy"
 		cmd["operator"] = operator
 	if not cmd:
