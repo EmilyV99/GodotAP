@@ -14,6 +14,8 @@
 			return spacing
 		return parts_cont.get_theme_constant(&"separation")
 @export var scroll_to_bottom_on_new_message: bool = false
+## Maximum number of elements that can be in the parts container. Setting to 0 disables this.
+@export var max_parts: int = 1000
 
 static var console_label_fonts: FontStorage
 
@@ -62,6 +64,12 @@ func pop_dropdown(target: Control) -> VBoxContainer:
 func add(part: Control) -> Control:
 	if not part: return
 	parts_cont.add_child(part)
+	if max_parts > 0:
+		# Remove excess elements
+		var num_to_queue_free: int = parts_cont.get_child_count() - max_parts
+		if num_to_queue_free > 0:
+			for i: int in range(num_to_queue_free):
+				parts_cont.get_child(i).queue_free()
 	queue_redraw()
 	return part
 
