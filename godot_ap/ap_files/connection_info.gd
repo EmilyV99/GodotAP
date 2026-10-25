@@ -265,7 +265,7 @@ func force_scout_all() -> void:
 func send_bounce(
 	data: Dictionary,
 	target_games: Array[String],
-	target_slots: Array[String],
+	target_slots: Array[int],
 	target_tags: Array[String]
 ) -> void:
 	var cmd: Dictionary = {}
