@@ -262,23 +262,62 @@ func force_scout_all() -> void:
 
 
 ## Sends a [code]Bounce[/code] packet with the provided parameters.
+## [br][br]
+## Target parameters expect an [Array] or [code]null[/code]. Passing [code]null[/code]
+## omits that condition, while passing an empty array sends an explicit empty condition,
+## which never matches. This distinction matters for the [code]"and"[/code] operator.
+## [br][br]
+## [param target_teams] is omitted by default, which lets the server target the sender's
+## own team. [param target_games] and [param target_tags] should be [Array]s of [String];
+## [param target_slots] and [param target_teams] should be [Array]s of [int].
+## [br][br]
+## [param operator] must be [code]"or"[/code], [code]"and"[/code], or [code]"legacy"[/code].
 func send_bounce(
 	data: Dictionary,
-	target_games: Array[String],
-	target_slots: Array[int],
-	target_tags: Array[String]
+	target_games: Variant = null,
+	target_slots: Variant = null,
+	target_tags: Variant = null,
+	target_teams: Variant = null,
+	operator: String = "legacy"
 ) -> void:
 	var cmd: Dictionary = {}
-	if target_games:
-		cmd["games"] = target_games
-	if target_slots:
-		cmd["slots"] = target_slots
-	if target_tags:
-		cmd["tags"] = target_tags
-	if not cmd:
-		return
+	_add_bounce_target(cmd, "games", target_games)
+	_add_bounce_target(cmd, "slots", target_slots)
+	_add_bounce_target(cmd, "tags", target_tags)
+	_add_bounce_target(cmd, "teams", target_teams)
+	if operator not in ["or", "and", "legacy"]:
+		AP.warn("Invalid operator '%s' - correcting to default 'legacy'" % operator)
+		operator = "legacy"
+	cmd["operator"] = operator
 	cmd.merge(data)
 	Archipelago.send_command("Bounce", cmd)
+
+
+## Resolves targets for [code]Bounce[/code] packets.
+## [param key] must be [code]"slots"[/code], [code]"teams"[/code],
+## [code]"games"[/code], or [code]"tags"[/code].
+func _add_bounce_target(cmd: Dictionary, key: String, target: Variant) -> void:
+	if target == null:
+		return
+	if typeof(target) != TYPE_ARRAY:
+		AP.warn("Bounce target '%s' must be an Array or null - ignoring" % key)
+		return
+	# Validate element types (untyped/empty arrays are accepted)
+	var expected_type := 0
+	match key:
+		"slots", "teams":
+			expected_type = TYPE_INT
+		"games", "tags":
+			expected_type = TYPE_STRING
+		# Just focus on documented args. Worst case: update or custom cummand?
+		_:
+			AP.warn("Bounce target '%s' unrecognized - ignoring" % key)
+			return
+	for value in target:
+		if typeof(value) != expected_type:
+			AP.warn("Bounce target '%s' must be an Array of %s - ignoring" % [key, type_string(expected_type)])
+			return
+	cmd[key] = target
 
 
 ## Sends a [code]Bounce[/code] packet designed for the DeathLink feature
@@ -295,7 +334,7 @@ func send_deathlink(cause: String = ""):
 	cmd["data"]["source"] = get_player_name(-1, false)
 	Archipelago.last_sent_deathlink_time = Time.get_unix_time_from_system()
 	cmd["data"]["time"] = Archipelago.last_sent_deathlink_time
-	send_bounce(cmd, [], [], [Archipelago.get_deathlink_tag()])
+	send_bounce(cmd, null, null, [Archipelago.get_deathlink_tag()])
 
 
 ## Sends a [code]Bounce[/code] packet designed for the TrapLink feature
@@ -312,4 +351,4 @@ func send_traplink(trap_name: String):
 	cmd["data"]["source"] = get_player_name(-1, false)
 	Archipelago.last_sent_traplink_time = Time.get_unix_time_from_system()
 	cmd["data"]["time"] = Archipelago.last_sent_traplink_time
-	send_bounce(cmd, [], [], [Archipelago.get_traplink_tag()])
+	send_bounce(cmd, null, null, [Archipelago.get_traplink_tag()])
