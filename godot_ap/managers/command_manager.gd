@@ -80,7 +80,7 @@ func register_command(cmd: ConsoleCommand) -> void:
 	cmd.text = cmd.text.to_lower() # Enforce all-lower for insensitive comparisons
 	_commands.append(cmd)
 	_commands_by_name[cmd.text] = cmd
-	if cmd.is_debug() and debug_hidden and not cmd.text == "/debug":
+	if cmd.is_debug() and not cmd.text == "/debug":
 		cmd.disabled_procs.append(debug_disabled)
 
 
@@ -100,7 +100,7 @@ func call_cmd(msg: String) -> void:
 		return
 	var cmd := get_command(msg.split(" ", true, 1)[0])
 	if cmd and cmd.call_proc:
-		if cmd.is_disabled() or (cmd.is_debug() and cmd.debug_disabled()):
+		if cmd.is_disabled():
 			console.add(BaseConsole.make_text("Command '%s' is disabled!" % cmd.text, "",
 					AP.ComplexColor.as_special(AP.SpecialColor.UI_MESSAGE)))
 		else:
@@ -124,8 +124,7 @@ func get_command(cmdname: String) -> ConsoleCommand:
 
 # Check if [param cmd] is enabled.
 static func _cmd_is_enabled(cmd: ConsoleCommand) -> bool:
-	return not (cmd.is_disabled() or (cmd.is_debug() and cmd.debug_disabled()))
-
+	return not cmd.is_disabled()
 
 # Check if [param cmd] is debug-only.
 static func _cmd_is_debug(cmd: ConsoleCommand) -> bool:
