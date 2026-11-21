@@ -1,5 +1,4 @@
 class_name APCredentials
-extends Node
 ## Credentials for connecting to an Archipelago room
 
 ## Emits updated credentials when credentials are changed.

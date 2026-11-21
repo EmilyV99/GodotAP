@@ -1075,8 +1075,10 @@ var output_console: BaseConsole :
 ## Loads [param console] as the active console and makes it the active scene in [param tree].
 func load_packed_console_as_scene(tree: SceneTree, console: PackedScene) -> bool:
 	if output_console: return false
-	if not Util.for_all_nodes(console.instantiate(), func(node): return node is ConsoleContainer):
-		return false
+	var dummy_console = console.instantiate()
+	var found_node := Util.for_all_nodes(dummy_console, func(node): return node is ConsoleContainer)
+	dummy_console.queue_free()
+	if not found_node: return false
 	await tree.process_frame
 	tree.change_scene_to_packed(console)
 	await tree.node_added

@@ -1,5 +1,4 @@
-class_name APLock 
-extends Node
+class_name APLock
 ## Data unique to a room connection, locking a save to only connect to the same room.
 
 ## Whether or not the lock is valid.
