@@ -288,6 +288,8 @@ func printjson_command(json: Dictionary) -> String:
 			output_data = true
 	if flowbox.get_child_count() > 0:
 		add(flowbox)
+	else:
+		flowbox.queue_free()
 		flowbox = null
 	if pre_space and output_data:
 		add_header_spacing()
@@ -363,18 +365,24 @@ static func printjson_out_str(elems: Array) -> String:
 		match elem.get("type", "text"):
 			"player_id":
 				var plyr_id = int(txt)
-				txt = Archipelago.conn.get_player(plyr_id).output().text
+				var label: ConsoleLabel = Archipelago.conn.get_player(plyr_id).output()
+				txt = label.text
+				label.queue_free()
 			"item_id":
 				var item_id = int(txt)
 				var plyr_id = int(elem["player"])
 				var data: DataCache = Archipelago.conn.get_gamedata_for_player(plyr_id)
 				var flags := int(elem["flags"])
-				txt = make_item(item_id, flags, data).text
+				var label: ConsoleLabel = make_item(item_id, flags, data)
+				txt = label.text
+				label.queue_free()
 			"location_id":
 				var loc_id = int(txt)
 				var plyr_id = int(elem["player"])
 				var data: DataCache = Archipelago.conn.get_gamedata_for_player(plyr_id)
-				txt = make_location(loc_id, data).text
+				var label: ConsoleLabel = make_location(loc_id, data)
+				txt = label.text
+				label.queue_free()
 		s += txt
 	return s
 

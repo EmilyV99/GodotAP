@@ -25,7 +25,8 @@ func add_text_split(main_label: ConsoleLabel) -> void:
 		labels.append(d)
 		var spacing := Spacing.new(self, hspace)
 		labels.append(spacing)
+	main_label.queue_free()
 	if labels.is_empty(): return
-	labels.pop_back()
+	labels.pop_back().queue_free()
 	for lbl in labels:
 		add_child(lbl)
