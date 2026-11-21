@@ -1,5 +1,4 @@
 class_name CommandManager 
-extends Node
 ## Manages available commands for an archipelago session
 
 ## Emits a signal when [member debug_hidden] is changed.
