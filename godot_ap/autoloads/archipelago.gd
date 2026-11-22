@@ -94,6 +94,8 @@ signal remove_location(loc_id: int)
 signal on_tag_change
 ## Emitted when an output console is attached.
 signal on_attach_console
+## Signals when [member Archipelago.creds] changes. 
+signal creds_updated(creds: APCredentials)
 # Debug purposes
 @warning_ignore("unused_signal")
 signal _logged_message(msg: String)
@@ -280,7 +282,17 @@ var deathlink_group: String : set = set_deathlink_group, get = get_deathlink_gro
 var traplink_group: String : set = set_traplink_group, get = get_traplink_group
 
 ## The current connection credentials to be used.
-var creds: APCredentials = APCredentials.new()
+var creds: APCredentials = APCredentials.new() :
+	set(val):
+		if creds != val:
+			if val is APCredentials:
+				if val.updated.is_connected(creds_updated.emit):
+					val.updated.disconnect(creds_updated.emit)
+			creds = val
+			if creds:
+				creds_updated.emit(creds)
+				if not creds.updated.is_connected(creds_updated.emit):
+					creds.updated.connect(creds_updated.emit)
 ## The current APLock object. Saving an APLock object in a save file allows you to lock it to a 
 ## particular room.
 ## [br][br]
@@ -1466,6 +1478,7 @@ func init_command_manager(can_connect: bool, server_autofills: bool = true):
 func _init():
 	init_command_manager(true)
 	_poll.call_deferred()
+	creds.updated.connect(creds_updated.emit)
 
 
 func _ready():
