@@ -10,7 +10,7 @@ func _ready():
 	AP.log(Archipelago.AP_CLIENT_VERSION)
 	Archipelago.set_tags(["TextOnly"])
 	Archipelago.AP_ITEM_HANDLING = Archipelago.ItemHandling.ALL
-	Archipelago.creds.updated.connect(GodotAPMain.save_connection)
+	Archipelago.creds_updated.connect(GodotAPMain.save_connection)
 	GodotAPMain.load_connection()
 
 	if Archipelago.output_console:
