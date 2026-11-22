@@ -8,7 +8,7 @@ extends GridContainer
 @onready var errlbl: Label = $ErrorLabel
 
 func _ready() -> void:
-	Archipelago.creds.updated.connect(refresh_creds)
+	Archipelago.creds_updated.connect(refresh_creds)
 	refresh_creds(Archipelago.creds)
 	Archipelago.connected.connect(func(_conn,_json): update_connection(true))
 	Archipelago.disconnected.connect(func(): update_connection(false))
